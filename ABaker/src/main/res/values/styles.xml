@@ -1,0 +1,42 @@
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- the theme applied to the application or activity -->
+    <style name="custom_actionbar" parent="@style/Theme.AppCompat.Light">
+        <item name="android:actionBarStyle">@style/action_bar_style</item>
+        <item name="android:windowActionBarOverlay">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="colorPrimary">#FFFFFF</item>
+    </style>
+
+    <!-- ActionBar styles -->
+    <style name="action_bar_style" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="android:background"  tools:ignore="NewApi">#FFFFFF</item>
+        <!--<item name="background">#FFFFFF</item>-->
+    </style>
+
+    <style name="abaker_default_button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:layout_margin">20dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
+        <item name="android:background">@drawable/abaker_button</item>
+    </style>
+
+    <!-- ViewPagerIndicator styles -->
+    <style name="StyledIndicators" parent="@android:style/Theme.Light">
+        <item name="vpiLinePageIndicatorStyle">@style/CustomLinePageIndicator</item>
+    </style>
+
+    <style name="CustomLinePageIndicator">
+        <item name="strokeWidth">4dp</item>
+        <item name="lineWidth">30dp</item>
+        <item name="unselectedColor">#FFFFFFFF</item>
+        <item name="selectedColor">#FFAF160E</item>
+    </style>
+</resources>

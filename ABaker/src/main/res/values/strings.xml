@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Categories -->
+    <string-array name="categories_array">
+        <item>Sports</item>
+        <item>Music</item>
+        <item>Events</item>
+        <item>Culture</item>
+        <item>Science</item>
+    </string-array>
+    <string name="drawer_open">Open categories</string>
+    <string name="drawer_close">Close categories</string>
+
+    <!-- Project Number of the Google API console identifying the notifications sender -->
+    <string name="sender_id"></string>
+
+    <!-- The application id that will be send to the server when retrieving the shelf -->
+    <string name="exit">Exit</string>
+    <string name="closing_app">If you exit now, all downloads will be cancelled, are you sure you want to exit ?</string>
+    <string name="no_shelf_no_internet">You need internet connection the first time you start this application.</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <!-- Shelf URL -->
+    <string name="app_id">baker-android</string>
+    <string name="newstand_manifest_url">http://bakerframework.com/demo/shelf.json</string>
+    <string name="purchase_confirmation_url">http://bakerframework.com/demo/shelf.json</string>
+    <string name="purchases_url">http://bakerframework.com/demo/shelf.json</string>
+    <string name="post_apns_token_url">http://bakerframework.com/demo/shelf.json</string>
+    <string name="download_report_url">http://bakerframework.com/demo/shelf.json</string>
+
+    <!--
+         Referrer strings to use with links to open them in the device's internet browser or in the same view from gindpubs
+        For more information about links: https://github.com/bakerframework/baker/wiki/Managing-links-and-urls
+    -->
+    <string name="url_gindpubs_referrer">Baker</string>
+    <string name="url_external_referrer">Safari</string>
+
+    <!-- Path to store the cache for the thumbnails inside the system's cache directory. -->
+    <string name="thumbnails">thumbnails</string>
+
+    <!-- Path in the device storage where to save the magazine files. -->
+    <string name="magazines">magazines</string>
+
+    <!-- Filename of the cached json file. The file will be updated if the user has internet access. -->
+    <string name="shelf">shelf.json</string>
+
+    <!-- Name of the json that describes the magazine. -->
+    <string name="book">book.json</string>
+
+    <!-- Name of the magazine's index file. -->
+    <string name="index">index.html</string>
+    <string name="package_extension">.zip</string>
+
+    <!-- General strings for the UI -->
+    <string name="app_name">Baker Android</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_info">Info</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="headerUrl">file:///android_asset/header.html</string>
+    <string name="loadingUrl">file:///android_asset/loading.html</string>
+    <string name="backgroundUrl">file:///android_asset/background.html</string>
+    <string name="infoUrl">file:///android_asset/info.html</string>
+    <string name="inputDateFormat">yyyy-MM-dd</string>
+    <string name="outputDateFormat">dd MMM yyyy</string>
+    <string name="download">Download</string>
+    <string name="preview">Preview</string>
+    <string name="loadingPreview">Loading Preview</string>
+    <string name="read">Read</string>
+    <string name="archive">Archive</string>
+    <string name="downloading">Starting download</string>
+    <string name="unzipping">Preparing...</string>
+    <string name="deleting">Now Deleting</string>
+    <string name="thumbImageDescription">Thumbnail</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="archiveConfirm">Are you sure you want to archive this issue?</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="finish">Finish</string>
+
+    <!-- Hostname to try to reach to test the internet connection on the device, e.g. when downloading the shelf, check if your server is reachable. -->
+    <string name="check_internet_with_host">http://google.com</string>
+    <!-- The time in milliseconds before considering the host is unreachable and no internet access. -->
+    <integer name="check_internet_timeout">15000</integer>
+
+    <!-- Strings for the preferences -->
+    <string name="pref_notifications_title">Notifications</string>
+    <string name="pref_receive_notifications">Enable notifications</string>
+    <string name="pref_receive_notifications_summary">Enable to receive content and messages from the cloud</string>
+    <string name="pref_receive_notifications_download">Enable automatic downloads</string>
+    <string name="pref_receive_notifications_download_summary">Automatically download new content when available</string>
+    <string name="pref_receive_notifications_download_only_wifi">Only Wi-Fi</string>
+    <string name="pref_receive_notifications_download_only_wifi_summary">Download the new content only when a Wi-Fi network is available</string>
+
+    <string name="pref_google_analytics_title">Google Analytics</string>
+    <string name="pref_enable_analytics">Enable Google Analytics</string>
+    <string name="pref_enable_analytics_summary">Send usage data to Google Analytics</string>
+    
+    <!--Strings for the Google Analytics events-->
+    <string name="issues_category">Issues</string>
+    <string name="issue_open">Issue Open</string>
+    <string name="issue_download">Issue Download</string>
+    <string name="issue_delete">Issue Delete</string>
+    <string name="issue_page_view">Issue Page View</string>
+
+    <string name="application_category">Application</string>
+    <string name="application_open">Application Open</string>
+    <string name="application_open_label">Application Opened</string>
+
+    <!-- Strings for the standalone mode -->
+    <string name="sa_books_directory">books</string>
+    <string name="sa_no_issues">No issues found.</string>
+
+    <!-- Strings for the usage tutorial -->
+    <string name="ut_directory">abaker_usage</string>
+    <!-- The names of the pages, separated by ">", that will be included in the tutorial for showing the users
+     how to use ABaker. These must be present in the "ut_directory" directory.
+     You can customize those pages as you wish with HTML code, or add more if you want. -->
+    <string name="ut_pages">download.html > read.html > archive.html</string>
+</resources>
