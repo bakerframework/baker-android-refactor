@@ -40,7 +40,7 @@ public class BakerApp extends Application implements AnalyticsEvents {
         GLOBAL_TRACKER
     }
 
-    private HashMap<TrackerName, Tracker> mTrackers = new HashMap<TrackerName, Tracker>();
+    private HashMap<TrackerName, Tracker> mTrackers = new HashMap<>();
 
     public BakerApp() {
         super();
@@ -107,19 +107,19 @@ public class BakerApp extends Application implements AnalyticsEvents {
     public static void setPreferenceInt(String field, int value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt(field, value);
-        editor.commit();
+        editor.apply();
     }
 
     public static void setPreferenceString(String field, String value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(field, value);
-        editor.commit();
+        editor.apply();
     }
 
     public static void setPreferenceBoolean(String field, boolean value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(field, value);
-        editor.commit();
+        editor.apply();
     }
 
     // Event handling
@@ -167,12 +167,9 @@ public class BakerApp extends Application implements AnalyticsEvents {
      */
     synchronized Tracker getTracker(TrackerName trackerId) {
         if (!mTrackers.containsKey(trackerId)) {
-
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
-            Tracker tracker = (trackerId == TrackerName.GLOBAL_TRACKER) ? analytics.newTracker(R.xml.global_tracker)
-                    : null;
+            Tracker tracker = (trackerId == TrackerName.GLOBAL_TRACKER) ? analytics.newTracker(R.xml.global_tracker) : null;
             mTrackers.put(trackerId, tracker);
-
         }
         return mTrackers.get(trackerId);
     }

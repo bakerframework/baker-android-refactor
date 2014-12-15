@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -53,22 +54,18 @@ public class InfoActivity extends Activity {
         // Click on the CLOSE button.
         findViewById(R.id.btnCloseInfo).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                InfoActivity.this.finish();
+            InfoActivity.this.finish();
             }
         });
 
         WebView webView = (WebView) this.findViewById(R.id.infoWebView);
-        webView.getSettings().setJavaScriptEnabled(true);
-        //Set zoom enabled/disabled
-        webView.getSettings().setSupportZoom(true);
-        //Support zoom like normal browsers
-        webView.getSettings().setUseWideViewPort(true);
-        //Disable zoom buttons
-        webView.getSettings().setDisplayZoomControls(false);
-        //Add zoom controls
-        webView.getSettings().setBuiltInZoomControls(true);
-        //Load the page on the maximum zoom out available.
-        webView.getSettings().setLoadWithOverviewMode(true);
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setSupportZoom(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setDisplayZoomControls(false);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setLoadWithOverviewMode(true);
         webView.setWebViewClient(new WebViewClient() {
 
             @Override

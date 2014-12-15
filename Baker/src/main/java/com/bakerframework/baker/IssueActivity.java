@@ -27,14 +27,12 @@
  **/
 package com.bakerframework.baker;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.GestureDetectorCompat;
@@ -238,12 +236,16 @@ public class IssueActivity extends FragmentActivity {
 
         final String PORTRAIT = "PORTRAIT";
         final String LANDSCAPE = "LANDSCAPE";
-        if (PORTRAIT.equals(_orientation)) {
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else if (LANDSCAPE.equals(_orientation)) {
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+        switch (_orientation) {
+            case PORTRAIT:
+                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                break;
+            case LANDSCAPE:
+                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                break;
+            default:
+                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+                break;
         }
     }
 
@@ -289,17 +291,7 @@ public class IssueActivity extends FragmentActivity {
         }
     }
 
-    /**
-	 * Set up the {@link android.app.ActionBar}, if the API is available.
-	 */
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	private void setupActionBar() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-		}
-	}
-
-	@Override
+    @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.magazine, menu);
@@ -324,7 +316,7 @@ public class IssueActivity extends FragmentActivity {
 	}
 
     private Map<String, String> getBakerMetaTags(final String htmlPath) {
-        Map<String, String> values = new HashMap<String, String>();
+        Map<String, String> values = new HashMap<>();
 
         Log.d(this.getClass().getName(), "Trying to parse: " + htmlPath);
         try {
@@ -354,7 +346,6 @@ public class IssueActivity extends FragmentActivity {
         return values;
     }
 
-	@SuppressLint("SetJavaScriptEnabled")
 	private void setPagerView(final BookJson book) {
 
         String path = "file://" + Configuration.getMagazinesDirectory() + File.separator;
@@ -519,7 +510,7 @@ public class IssueActivity extends FragmentActivity {
                         }
                     } catch (MalformedURLException ex) {
                         Log.d(">>>URL_DATA", ex.getMessage());
-                    } catch (UnsupportedEncodingException ex) {
+                    } catch (UnsupportedEncodingException ignored) {
                     }
                 }
 
@@ -548,7 +539,7 @@ public class IssueActivity extends FragmentActivity {
 	}
 
 	@Override
-	public boolean dispatchTouchEvent(MotionEvent event) {
+	public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
 		// Intercept the touch events.
 		this.gestureDetector.onTouchEvent(event);
 

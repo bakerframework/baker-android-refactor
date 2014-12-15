@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/* @TODO: Provide some meaning to the loading screen */
+
 public class SplashActivity extends Activity {
 
 	@Override
@@ -36,7 +38,6 @@ public class SplashActivity extends Activity {
 			super.onPreExecute();
 			// before making http calls
 			Log.e("JSON", "Pre execute");
-
 		}
 
 		@Override
@@ -78,13 +79,8 @@ public class SplashActivity extends Activity {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			// After completing http call
-			// will close this activity and lauch main activity
 			Intent i = new Intent(SplashActivity.this, ShelfActivity.class);
-			i.putExtra("foo", "bar");
 			startActivity(i);
-
-			// close this activity
 			finish();
 		}
 
