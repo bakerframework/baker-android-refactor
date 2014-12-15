@@ -1,2 +1,2 @@
-include ':ABaker'
-include ':app'
+include ':Baker'
+project(':Baker').projectDir = new File('Baker')

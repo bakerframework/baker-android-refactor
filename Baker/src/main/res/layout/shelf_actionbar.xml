@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_gravity="center_horizontal"
+    android:gravity="center_vertical">
+
+    <Button
+        android:id="@+id/category_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_centerVertical="true"
+        android:drawableLeft="@drawable/ic_drawer"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:clickable="true"
+        android:textColor="#818285"
+        android:background="#FFFFFF"
+        android:cropToPadding="true"
+        android:text="All Categories"
+        android:paddingLeft="4dp" />
+
+
+</RelativeLayout>
