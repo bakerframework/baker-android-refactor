@@ -12,7 +12,6 @@ import com.bakerframework.baker.view.IssueCardView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -40,7 +39,6 @@ public class IssueAdapter extends ArrayAdapter {
         this.context = context;
         this.category = IssueCollection.ALL_CATEGORIES_STRING;
         this.issueCollection = issueCollection;
-        updateIssues(false);
     }
 
     public void setCategory(String category) {

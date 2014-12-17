@@ -44,6 +44,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -114,11 +116,13 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         }
         */
 
-        // Prepare google play services
+        // Prepare google play services - not here
+        /*
         if (checkPlayServices()) {
             GCMRegistrationWorker registrationWorker = new GCMRegistrationWorker(this, 0, null);
             registrationWorker.execute();
         }
+        */
 
         // @TODO: Handle standalone mode?
 
@@ -126,6 +130,13 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_app_open_event)) {
             ((BakerApplication) this.getApplication()).sendEvent(getString(R.string.application_category), getString(R.string.application_open), getString(R.string.application_open_label));
         }
+
+        // Initialize issue collection
+        issueCollection = BakerApplication.getInstance().getIssueCollection();
+        issueCollection.addListener(this);
+
+        // Initialize issue adapter for shelf view
+        issueAdapter = new IssueAdapter(this, issueCollection);
 
         // Render View
         this.setContentView(R.layout.shelf_activity);
@@ -137,20 +148,19 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         setupActionBar();
         setupCategoryDrawer();
 
-        // Initialize issue collection
-        issueCollection = BakerApplication.getInstance().getIssueCollection();
-        issueCollection.addListener(this);
+        // Fade in animation
+        View view = findViewById(android.R.id.content);
+        Animation mLoadAnimation = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
+        mLoadAnimation.setDuration(2000);
+        view.startAnimation(mLoadAnimation);
 
         // Initialize shelf view
-        issueAdapter = new IssueAdapter(this, issueCollection);
         shelfView = (ShelfView) findViewById(R.id.shelf_view);
         shelfView.setAdapter(issueAdapter);
+        issueAdapter.updateIssues();
 
         // Update category drawer
         updateCategoryDrawer(issueCollection.getCategories(), issueAdapter.getCategoryIndex());
-
-        // Update shelf view adapter
-        issueAdapter.updateIssues();
 
         // Continue downloads
         unzipPendingPackages();

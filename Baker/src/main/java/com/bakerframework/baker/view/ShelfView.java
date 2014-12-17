@@ -1,6 +1,7 @@
 package com.bakerframework.baker.view;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.widget.GridView;
 
@@ -23,5 +24,12 @@ public class ShelfView extends GridView {
         int position = ((IssueAdapter) getAdapter()).getPosition(issue);
         return (IssueCardView) getChildAt(position);
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        this.setNumColumns(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
+        super.onConfigurationChanged(newConfig);
+    }
+
 
 }
