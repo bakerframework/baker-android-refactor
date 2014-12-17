@@ -1,10 +1,10 @@
-package com.bakerframework.baker.workers;
+package com.bakerframework.baker.task;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.bakerframework.baker.BakerApp;
+import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.client.TaskMandator;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.settings.Configuration;
@@ -55,8 +55,8 @@ public class GCMRegistrationWorker extends AsyncTask<Void, Long, String[]> {
             }
 
             // Update preferences with new value
-            BakerApp.setPreferenceString(Configuration.PREF_REGISTRATION_ID, registrationId);
-            BakerApp.setPreferenceInt(Configuration.PREF_APP_VERSION, BakerApp.getVersion());
+            BakerApplication.getInstance().setPreferenceString(Configuration.PREF_REGISTRATION_ID, registrationId);
+            BakerApplication.getInstance().setPreferenceInt(Configuration.PREF_APP_VERSION, BakerApplication.getInstance().getVersion());
 
         } catch (IOException e) {
             msg = "ERROR";

@@ -32,13 +32,13 @@
         android:windowSoftInputMode="adjustPan"
         android:vmSafeMode="true"
         android:allowClearUserData="true"
-        android:name="com.bakerframework.baker.BakerApp">
+        android:name=".BakerApplication">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.bakerframework.baker.SplashActivity"
+            android:name=".activity.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar">
@@ -48,33 +48,33 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ShelfActivity"
+            android:name=".activity.ShelfActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:theme="@style/custom_actionbar">
         </activity>
         <activity
-            android:name=".IssueActivity"
+            android:name=".activity.IssueActivity"
             android:configChanges="orientation|screenSize"
-            android:parentActivityName=".ShelfActivity"
+            android:parentActivityName=".activity.ShelfActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
         <activity
-            android:name="com.bakerframework.baker.InfoActivity"
+            android:name=".activity.InfoActivity"
             android:configChanges="orientation|screenSize"
-            android:parentActivityName=".ShelfActivity"
+            android:parentActivityName=".activity.ShelfActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.bakerframework.baker.settings.SettingsActivity"
             android:configChanges="orientation|screenSize"
-            android:parentActivityName=".ShelfActivity"
+            android:parentActivityName=".activity.ShelfActivity"
             android:theme="@style/custom_actionbar" >
         </activity>
         <activity
-            android:name="com.bakerframework.baker.ModalActivity"
+            android:name=".activity.ModalActivity"
             android:configChanges="orientation|screenSize"
-            android:parentActivityName=".IssueActivity"
+            android:parentActivityName=".activity.IssueActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
 

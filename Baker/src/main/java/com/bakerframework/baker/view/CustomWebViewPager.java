@@ -25,66 +25,29 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  **/
-package com.bakerframework.baker.client;
+package com.bakerframework.baker.view;
 
-import android.os.AsyncTask;
-import android.util.Log;
+import android.content.Context;
+import android.support.v4.view.ViewPager;
+import android.util.AttributeSet;
+import android.view.View;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
+public class CustomWebViewPager extends ViewPager {
 
-import java.util.ArrayList;
+    public CustomWebViewPager(Context context) {
+		super(context);
+	}
 
-public class PostClientTask extends AsyncTask<Void, Void, String> {
+	public CustomWebViewPager(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    private int asyncTaskId;
-
-    private TaskMandator mandator;
-
-    private String url;
-
-    private PostClient postClient;
-
-    private ArrayList<NameValuePair> parameters;
-
-    public PostClientTask(final int taskId, TaskMandator _mandator) {
-        asyncTaskId = taskId;
-        mandator = _mandator;
-        postClient = new PostClient();
-    }
-
-    public void setUrl(final String _url) {
-        url = _url;
-    }
-
-    public void addParameter(final String key, final String value) {
-        this.parameters.add(new BasicNameValuePair(key, value));
-    }
-
-    @Override
-    protected String doInBackground(Void... params) {
-
-        String result;
-
-        postClient.setUrl(url);
-        postClient.clearParameters();
-        if (parameters != null) {
-            postClient.addParameters(parameters);
-        }
-
-        result = postClient.doPost();
-
-        Log.d(this.getClass().toString(), "RAW POST RESPONSE:" + result);
-
-        if ("ERROR".equals(result)) {
-            Log.e(this.getClass().toString(), "ERROR RESPONSE FROM POST CLIENT");
-        }
-
-        return result;
-    }
-
-    @Override
-    protected void onPostExecute(final String results) {
-        mandator.postExecute(asyncTaskId, results);
-    }
+	@Override
+	protected boolean canScroll(View view, boolean checkV, int dx, int x, int y) {
+		if (view instanceof CustomWebView) {
+			return ((CustomWebView) view).canScrollHorizontal(-dx);
+		} else {
+			return super.canScroll(view, checkV, dx, x, y);
+		}
+	}
 }

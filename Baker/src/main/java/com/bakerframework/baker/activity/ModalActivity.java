@@ -25,47 +25,57 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  **/
-package com.bakerframework.baker;
+package com.bakerframework.baker.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.bakerframework.baker.R;
 
-public class InfoActivity extends Activity {
+
+public class ModalActivity extends Activity {
+
+    private int orientation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.info_activity);
+        setContentView(R.layout.modal_activity);
 
         // Here we allow the user to rotate the screen.
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
         Intent intent = getIntent();
         String url = intent.getStringExtra(IssueActivity.MODAL_URL);
+        orientation = intent.getIntExtra(IssueActivity.ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
         // Click on the CLOSE button.
-        findViewById(R.id.btnCloseInfo).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btnCloseModal).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            InfoActivity.this.finish();
+                ModalActivity.this.finish();
             }
         });
 
-        WebView webView = (WebView) this.findViewById(R.id.infoWebView);
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setSupportZoom(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setDisplayZoomControls(false);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setLoadWithOverviewMode(true);
+        WebView webView = (WebView) this.findViewById(R.id.modalWebView);
+        webView.getSettings().setJavaScriptEnabled(true);
+        //Set zoom enabled/disabled
+        webView.getSettings().setSupportZoom(true);
+        //Support zoom like normal browsers
+        webView.getSettings().setUseWideViewPort(true);
+        //Disable zoom buttons
+        webView.getSettings().setDisplayZoomControls(false);
+        //Add zoom controls
+        webView.getSettings().setBuiltInZoomControls(true);
+        //Load the page on the maximum zoom out available.
+        webView.getSettings().setLoadWithOverviewMode(true);
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -79,7 +89,22 @@ public class InfoActivity extends Activity {
 
     @Override
     public void onStop() {
+        // We set back the orientation to what we received when this activity was created.
+        this.setRequestedOrientation(orientation);
         super.onStop();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return super.onOptionsItemSelected(item);
     }
 
 }

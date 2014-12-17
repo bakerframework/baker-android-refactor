@@ -25,7 +25,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  **/
-package com.bakerframework.baker;
+package com.bakerframework.baker.activity;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -51,12 +51,14 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.bakerframework.baker.BakerApplication;
+import com.bakerframework.baker.R;
 import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.settings.Configuration;
-import com.bakerframework.baker.views.CustomWebView;
-import com.bakerframework.baker.views.CustomWebViewPager;
-import com.bakerframework.baker.views.WebViewFragment;
-import com.bakerframework.baker.views.WebViewFragmentPagerAdapter;
+import com.bakerframework.baker.view.CustomWebView;
+import com.bakerframework.baker.view.CustomWebViewPager;
+import com.bakerframework.baker.view.WebViewFragment;
+import com.bakerframework.baker.view.WebViewFragmentPagerAdapter;
 import com.viewpagerindicator.LinePageIndicator;
 
 import org.jsoup.Jsoup;
@@ -386,13 +388,13 @@ public class IssueActivity extends FragmentActivity {
                 if (hasElapsedTime) {
                     Long timeElapsed = System.currentTimeMillis() - startedTime;
                     if (timeElapsed > resources.getInteger(R.integer.ga_page_view_time_elapsed))
-                        ((BakerApp) IssueActivity.this.getApplication()).sendTimingEvent(
+                        ((BakerApplication) IssueActivity.this.getApplication()).sendTimingEvent(
                                 metaBakerPageCategory,
                                 timeElapsed,
                                 getString(R.string.issue_page_view),
                                 metaBakerPageName);
 
-                    ((BakerApp) IssueActivity.this.getApplication()).sendEvent(
+                    ((BakerApplication) IssueActivity.this.getApplication()).sendEvent(
                             metaBakerPageCategory,
                             getString(R.string.issue_page_view),
                             metaBakerPageName);
@@ -427,7 +429,7 @@ public class IssueActivity extends FragmentActivity {
                             metaBakerPageName = name;
                             metaBakerPageCategory = category;
                         } else {
-                            ((BakerApp) IssueActivity.this.getApplication()).sendEvent(
+                            ((BakerApplication) IssueActivity.this.getApplication()).sendEvent(
                                     category,
                                     getString(R.string.issue_page_view),
                                     name);

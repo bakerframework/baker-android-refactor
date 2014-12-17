@@ -25,29 +25,66 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  **/
-package com.bakerframework.baker.views;
+package com.bakerframework.baker.view;
 
-import android.content.Context;
-import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
-import android.view.View;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 
-public class CustomWebViewPager extends ViewPager {
+import com.bakerframework.baker.activity.IssueActivity;
+import com.bakerframework.baker.model.BookJson;
 
-    public CustomWebViewPager(Context context) {
-		super(context);
+import java.io.File;
+
+public class WebViewFragmentPagerAdapter extends FragmentStatePagerAdapter {
+
+	private BookJson book;
+
+	private String magazinePath;
+
+    private IssueActivity issueActivity;
+	
+	public WebViewFragmentPagerAdapter(FragmentManager fm) {
+		super(fm);
 	}
 
-	public CustomWebViewPager(Context context, AttributeSet attrs) {
-		super(context, attrs);
+	public WebViewFragmentPagerAdapter(FragmentManager fm, BookJson book,
+			final String magazinePath, IssueActivity _issueActivity) {
+		super(fm);
+        this.issueActivity = _issueActivity;
+		if (null == book) {
+			this.book = new BookJson();
+		} else {
+			this.book = book;
+		}
+		if (null == magazinePath) {
+			this.magazinePath = "";
+		} else {
+			this.magazinePath = magazinePath;
+		}
 	}
 
 	@Override
-	protected boolean canScroll(View view, boolean checkV, int dx, int x, int y) {
-		if (view instanceof CustomWebView) {
-			return ((CustomWebView) view).canScrollHorizontal(-dx);
-		} else {
-			return super.canScroll(view, checkV, dx, x, y);
-		}
+	public Fragment getItem(int i) {
+        Bundle args = new Bundle();
+
+        String page = this.magazinePath + book.getMagazineName() + File.separator
+                + book.getContents().get(i);
+        Log.d(this.getClass().getName(), "Loading page " + page);
+        args.putString(WebViewFragment.ARG_OBJECT, page);
+
+        return Fragment.instantiate(issueActivity, WebViewFragment.class.getName(), args);
+	}
+
+	@Override
+	public int getCount() {
+		return book.getContents().size();
+	}
+
+	@Override
+	public CharSequence getPageTitle(int position) {
+		return "OBJECT " + (position + 1);
 	}
 }

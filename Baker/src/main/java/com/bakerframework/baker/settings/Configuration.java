@@ -36,7 +36,7 @@ import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.bakerframework.baker.BakerApp;
+import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 
 import java.io.File;
@@ -74,7 +74,7 @@ public class Configuration {
     private static final String tag = "BakerConfiguration";
 
     // File and directory handling settings
-    public static final String MAGAZINES_FILES_DIR = "magazines";
+    public static final String MAGAZINES_FILES_DIR = "issues";
 
     /**
      * Empty constructor not to be used since the class is utils only.
@@ -82,8 +82,8 @@ public class Configuration {
 	private Configuration() {}
 
     public static String getManifestUrl() {
-        return BakerApp.getAppContext().getString(R.string.newstand_manifest_url)
-            .replace(":app_id", BakerApp.getAppContext().getString(R.string.app_id))
+        return BakerApplication.getInstance().getString(R.string.newstand_manifest_url)
+            .replace(":app_id", BakerApplication.getInstance().getString(R.string.app_id))
             .replace(":device_type", "ANDROID")
             .replace(":user_id", getUserId());
     }
@@ -92,14 +92,14 @@ public class Configuration {
     public static String getFilesDirectory() {
         String filesPath;
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            File externalFilesDirectory = BakerApp.getAppContext().getExternalFilesDir("");
+            File externalFilesDirectory = BakerApplication.getInstance().getExternalFilesDir("");
             if (null != externalFilesDirectory) {
                 filesPath = externalFilesDirectory.getPath();
             } else {
-                filesPath = BakerApp.getAppContext().getFilesDir().getPath();
+                filesPath = BakerApplication.getInstance().getFilesDir().getPath();
             }
         } else {
-            filesPath = BakerApp.getAppContext().getFilesDir().getPath();
+            filesPath = BakerApplication.getInstance().getFilesDir().getPath();
         }
         return filesPath;
     }
@@ -107,12 +107,12 @@ public class Configuration {
     public static boolean getPrefFirstTimeRun() {
 
         // Always return false if the tutorial is disabled
-        if(!BakerApp.getAppContext().getResources().getBoolean(R.bool.ut_enable_tutorial)) { return false; }
+        if(!BakerApplication.getInstance().getResources().getBoolean(R.bool.ut_enable_tutorial)) { return false; }
 
         // Check and update PREF_FIRST_TIME_RUN preference
-        boolean firstTimeRun = BakerApp.getPreferenceBoolean(PREF_FIRST_TIME_RUN, true);
+        boolean firstTimeRun = BakerApplication.getInstance().getPreferenceBoolean(PREF_FIRST_TIME_RUN, true);
         if(firstTimeRun) {
-            BakerApp.setPreferenceBoolean(PREF_FIRST_TIME_RUN, false);
+            BakerApplication.getInstance().setPreferenceBoolean(PREF_FIRST_TIME_RUN, false);
         }
 
         return firstTimeRun;
@@ -121,11 +121,11 @@ public class Configuration {
     public static String getUserId() {
 
         // Get saved settings
-        String userId = BakerApp.getPreferenceString("user_id");
+        String userId = BakerApplication.getInstance().getPreferenceString("user_id");
         if(userId == null) {
 
             // Getting the user main account
-            AccountManager manager = AccountManager.get(BakerApp.getAppContext());
+            AccountManager manager = AccountManager.get(BakerApplication.getInstance());
             Account[] primaryAccounts = manager.getAccountsByType("com.google");
             Account[] secondaryAccounts = manager.getAccounts();
             // Check for other accounts
@@ -137,11 +137,11 @@ public class Configuration {
                 userId = secondaryAccounts[0].type + "_" + secondaryAccounts[0].name;
             }else{
                 // Use android id
-                userId = Settings.Secure.getString(BakerApp.getAppContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+                userId = Settings.Secure.getString(BakerApplication.getInstance().getContentResolver(), Settings.Secure.ANDROID_ID);
             }
 
             // Save user id
-            BakerApp.setPreferenceString("user_id", userId);
+            BakerApplication.getInstance().setPreferenceString("user_id", userId);
 
         }
 
@@ -155,37 +155,28 @@ public class Configuration {
     /* Gets the absolute cache dir for accessing files */
     public static String getCacheDirectory() {
         String cachePath;
-
-        if (Environment.MEDIA_MOUNTED.equals(Environment
-                .getExternalStorageState())) {
-
-            Log.d(tag, "EXTERNAL STORAGE IS MOUNTED FOR CACHE.");
-
-            File externalCacheDirectory = BakerApp.getAppContext().getExternalCacheDir();
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            File externalCacheDirectory = BakerApplication.getInstance().getExternalCacheDir();
             if (null != externalCacheDirectory) {
-                Log.d(tag, "USING EXTERNAL STORAGE FOR CACHE.");
                 cachePath = externalCacheDirectory.getPath();
-                Log.d(tag, "EXTERNAL PATH TO USE FOR CACHE: " + cachePath);
             } else {
-                Log.d(tag, "USING INTERNAL STORAGE FOR CACHE.");
-                cachePath = BakerApp.getAppContext().getCacheDir().getPath();
+                cachePath = BakerApplication.getInstance().getCacheDir().getPath();
             }
         } else {
-            Log.d(tag, "EXTERNAL STORAGE IS *NOT* MOUNTED FOR CACHE.");
-            cachePath = BakerApp.getAppContext().getCacheDir().getPath();
+            cachePath = BakerApplication.getInstance().getCacheDir().getPath();
         }
         return cachePath;
     }
 
     public static boolean connectionIsWiFi() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) BakerApp.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) BakerApplication.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         return networkInfo.isConnected();
     }
 	
 	public static boolean hasNetworkConnection() {
-		ConnectivityManager cm = (ConnectivityManager) BakerApp.getAppContext()
+		ConnectivityManager cm = (ConnectivityManager) BakerApplication.getInstance()
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnected();

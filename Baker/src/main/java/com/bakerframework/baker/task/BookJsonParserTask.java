@@ -1,4 +1,4 @@
-package com.bakerframework.baker.workers;
+package com.bakerframework.baker.task;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -54,25 +54,7 @@ public class BookJsonParserTask extends AsyncTask<String, Long, BookJson> {
 		
 		String rawJson = "";
 		try {
-            if ("ONLINE".equals(params[0])) {
-                Log.d(this.getClass().toString(), "Will parse the BookJson from the Live URL: " + this.issue.getLiveUrl());
-
-                DefaultHttpClient httpClient = new DefaultHttpClient();
-                HttpGet httpGet = new HttpGet(this.issue.getLiveUrl() + "/" + this.context.getString(R.string.book));
-                HttpResponse response = httpClient.execute(httpGet);
-                if (null != response) {
-
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    if (statusCode == 200) {
-                        rawJson = EntityUtils.toString(response.getEntity());
-                        Log.d(this.getClass().toString(), "Get request for book.json succeeded: " + rawJson);
-                    } else {
-                        Log.e(this.getClass().toString(), "Bad response when obtaining the book.json: " + statusCode);
-                    }
-                } else {
-                    Log.e(this.getClass().toString(), "The response is NULL when obtaining the book.json.");
-                }
-            } else if ("STANDALONE".equals(params[0])) {
+            if ("STANDALONE".equals(params[0])) {
                 Log.d(this.getClass().getName(), "Will parse the BookJson from the assets directory." );
 
                 AssetManager assetManager = this.context.getAssets();
@@ -121,9 +103,6 @@ public class BookJsonParserTask extends AsyncTask<String, Long, BookJson> {
 		    if (valid) {
 			    Log.d(this.getClass().toString(), "Book.json is valid.");
 		    	result = new BookJson();
-                if (this.issue.getLiveUrl() != null) {
-                    result.setLiveUrl(this.issue.getLiveUrl() + "/");
-                }
 		    	result.fromJson(rawJson);
 		    	result.setMagazineName(this.issue.getName());
 		    } else {

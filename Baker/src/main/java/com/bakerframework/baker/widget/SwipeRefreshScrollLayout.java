@@ -3,6 +3,7 @@ package com.bakerframework.baker.widget;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.AttributeSet;
@@ -23,6 +24,10 @@ public class SwipeRefreshScrollLayout extends SwipeRefreshLayout {
         TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SwipeRefreshScrollLayout, 0, 0);
         adapterViewId = styledAttributes.getResourceId(R.styleable.SwipeRefreshScrollLayout_adapter_view, -1);
         styledAttributes.recycle ();
+
+        // Set refresh indicator colors
+        setColorSchemeColors(Color.RED, Color.BLUE, Color.RED, Color.BLUE);
+
     }
 
     @Override

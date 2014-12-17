@@ -118,4 +118,12 @@
      how to use Baker. These must be present in the "ut_directory" directory.
      You can customize those pages as you wish with HTML code, or add more if you want. -->
     <string name="ut_pages">download.html > read.html > archive.html</string>
+
+    <!-- Error messages -->
+    <string name="download_task_error_connect">Could not connect to the internet</string>
+    <string name="download_task_error_malformed_url">Invalid server url</string>
+    <string name="download_task_error_file_not_found">The file was not found</string>
+    <string name="download_task_error_io">Could not download file</string>
+    <string name="download_task_error_cancelled">Download cancelled</string>
+
 </resources>

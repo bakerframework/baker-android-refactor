@@ -25,16 +25,20 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.bakerframework.baker.model.IssueCollection;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.util.HashMap;
 
-public class BakerApp extends Application implements AnalyticsEvents {
+public class BakerApplication extends Application implements AnalyticsEvents {
 
-    private static Context context;
-    private static SharedPreferences preferences;
+    private static BakerApplication sInstance;
+
+    // Instance variables
+    private SharedPreferences preferences;
+    private IssueCollection issueCollection;
 
     public enum TrackerName {
         GLOBAL_TRACKER
@@ -42,32 +46,47 @@ public class BakerApp extends Application implements AnalyticsEvents {
 
     private HashMap<TrackerName, Tracker> mTrackers = new HashMap<>();
 
-    public BakerApp() {
+    public BakerApplication() {
         super();
     }
 
+    @Override
     public void onCreate(){
         super.onCreate();
-        BakerApp.context = getApplicationContext();
-        BakerApp.preferences = context.getSharedPreferences("baker.app", 0);
+        sInstance = this;
+        sInstance.initializeInstance();
     }
 
-    public static Context getAppContext() {
-        return BakerApp.context;
+    protected void initializeInstance() {
+        preferences = getSharedPreferences("baker.app", 0);
+        issueCollection = new IssueCollection();
     }
 
-    // App State
-    public static boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+    public static BakerApplication getInstance() {
+        return sInstance;
+    }
+
+    // Getters
+
+    public IssueCollection getIssueCollection() {
+        return issueCollection;
+    }
+
+    public SharedPreferences getPreferences() {
+        return preferences;
+    }
+
+    // Helpers
+
+    public boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) sInstance.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
         return (ni != null);
     }
 
-    // System
-
-    public static int getVersion() {
+    public int getVersion() {
         try {
-            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            PackageInfo packageInfo = sInstance.getPackageManager().getPackageInfo(sInstance.getPackageName(), 0);
             return packageInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             return 0;
@@ -76,47 +95,43 @@ public class BakerApp extends Application implements AnalyticsEvents {
 
     // Preferences
 
-    public static SharedPreferences getPreferences() {
-        return BakerApp.preferences;
-    }
-
-    public static int getPreferenceInt(String field) {
+    public int getPreferenceInt(String field) {
         return getPreferenceInt(field, -1);
     }
 
-    public static int getPreferenceInt(String field, int defaultValue) {
+    public int getPreferenceInt(String field, int defaultValue) {
         return preferences.getInt(field, defaultValue);
     }
 
-    public static String getPreferenceString(String field) {
+    public String getPreferenceString(String field) {
         return getPreferenceString(field, null);
     }
 
-    public static String getPreferenceString(String field, String defaultValue) {
+    public String getPreferenceString(String field, String defaultValue) {
         return preferences.getString(field, defaultValue);
     }
 
-    public static Boolean getPreferenceBoolean(String field) {
+    public Boolean getPreferenceBoolean(String field) {
         return getPreferenceBoolean(field, false);
     }
 
-    public static Boolean getPreferenceBoolean(String field, boolean defaultValue) {
+    public Boolean getPreferenceBoolean(String field, boolean defaultValue) {
         return preferences.getBoolean(field, defaultValue);
     }
 
-    public static void setPreferenceInt(String field, int value) {
+    public void setPreferenceInt(String field, int value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt(field, value);
         editor.apply();
     }
 
-    public static void setPreferenceString(String field, String value) {
+    public void setPreferenceString(String field, String value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(field, value);
         editor.apply();
     }
 
-    public static void setPreferenceBoolean(String field, boolean value) {
+    public void setPreferenceBoolean(String field, boolean value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(field, value);
         editor.apply();
@@ -159,12 +174,6 @@ public class BakerApp extends Application implements AnalyticsEvents {
                 .build());
     }
 
-    /**
-     * We return our only configured tracker.
-     *
-     * @param trackerId the name of tracker, in case others are added.
-     * @return Tracker the Tracker.
-     */
     synchronized Tracker getTracker(TrackerName trackerId) {
         if (!mTrackers.containsKey(trackerId)) {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
@@ -173,4 +182,5 @@ public class BakerApp extends Application implements AnalyticsEvents {
         }
         return mTrackers.get(trackerId);
     }
+
 }

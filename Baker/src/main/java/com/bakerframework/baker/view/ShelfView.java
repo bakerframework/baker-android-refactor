@@ -1,4 +1,4 @@
-package com.bakerframework.baker.views;
+package com.bakerframework.baker.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -19,20 +19,9 @@ public class ShelfView extends GridView {
         super(context, attrs);
     }
 
-    public IssueView getViewByIssue(Issue issue) {
+    public IssueCardView getViewByIssue(Issue issue) {
         int position = ((IssueAdapter) getAdapter()).getPosition(issue);
-        return (IssueView) getChildAt(position);
+        return (IssueCardView) getChildAt(position);
     }
 
-
-    public List<IssueView> getDownloadingViews() {
-        List<IssueView> views = new ArrayList<IssueView>();
-        for (int i = 0; i < getChildCount(); i++) {
-            IssueView issueView = (IssueView) getChildAt(i);
-            if(issueView.isDownloading()) {
-                views.add(issueView);
-            }
-        }
-        return views;
-    }
 }

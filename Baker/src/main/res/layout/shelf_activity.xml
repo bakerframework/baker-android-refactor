@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             swiperefreshscrolllayout:adapter_view="@+id/shelf_view">
-            <com.bakerframework.baker.views.ShelfView
+            <com.bakerframework.baker.view.ShelfView
                 android:id="@+id/shelf_view"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

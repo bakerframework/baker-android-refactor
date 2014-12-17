@@ -39,6 +39,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.bakerframework.baker.activity.ShelfActivity;
 import com.bakerframework.baker.settings.Configuration;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 

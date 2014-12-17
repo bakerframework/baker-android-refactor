@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#50000000"
-    tools:context="com.bakerframework.baker.ModalActivity">
+    tools:context="com.bakerframework.baker.activity.ModalActivity">
 
     <FrameLayout
         android:layout_width="match_parent"

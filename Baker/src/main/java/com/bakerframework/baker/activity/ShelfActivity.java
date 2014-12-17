@@ -25,7 +25,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  **/
-package com.bakerframework.baker;
+package com.bakerframework.baker.activity;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -56,14 +56,16 @@ import android.widget.Toast;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 
+import com.bakerframework.baker.BakerApplication;
+import com.bakerframework.baker.R;
 import com.bakerframework.baker.adapter.IssueAdapter;
 import com.bakerframework.baker.model.*;
-import com.bakerframework.baker.model.Manifest;
+import com.bakerframework.baker.model.IssueCollection;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.settings.SettingsActivity;
-import com.bakerframework.baker.views.IssueView;
-import com.bakerframework.baker.views.ShelfView;
-import com.bakerframework.baker.workers.GCMRegistrationWorker;
+import com.bakerframework.baker.view.IssueCardView;
+import com.bakerframework.baker.view.ShelfView;
+import com.bakerframework.baker.task.GCMRegistrationWorker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
@@ -72,14 +74,14 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShelfActivity extends ActionBarActivity implements ManifestListener, SwipeRefreshLayout.OnRefreshListener {
+public class ShelfActivity extends ActionBarActivity implements IssueCollectionListener, SwipeRefreshLayout.OnRefreshListener {
 
     public static final int STANDALONE_MAGAZINE_ACTIVITY_FINISH = 1;
 
     // Issues
-    private Manifest manifest;
     private ShelfView shelfView;
     private IssueAdapter issueAdapter;
+    private IssueCollection issueCollection;
 
     // Features
     SwipeRefreshLayout swipeRefreshLayout;
@@ -98,10 +100,6 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
         // Initialize preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         STANDALONE_MODE = getResources().getBoolean(R.bool.run_as_standalone);
-
-        // Initialize manifest manager
-        manifest = new Manifest();
-        manifest.setManifestListener(this);
 
         // Initialize tutorial
         if(Configuration.getPrefFirstTimeRun()) {
@@ -124,12 +122,9 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
 
         // @TODO: Handle standalone mode?
 
-        // Download shelf
-        this.downloadShelf(BakerApp.isNetworkConnected());
-
         // Prepare google analytics
         if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_app_open_event)) {
-            ((BakerApp) this.getApplication()).sendEvent(getString(R.string.application_category), getString(R.string.application_open), getString(R.string.application_open_label));
+            ((BakerApplication) this.getApplication()).sendEvent(getString(R.string.application_category), getString(R.string.application_open), getString(R.string.application_open_label));
         }
 
         // Render View
@@ -142,11 +137,23 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
         setupActionBar();
         setupCategoryDrawer();
 
+        // Initialize issue collection
+        issueCollection = BakerApplication.getInstance().getIssueCollection();
+        issueCollection.addListener(this);
+
         // Initialize shelf view
-        issueAdapter = new IssueAdapter(this, manifest);
+        issueAdapter = new IssueAdapter(this, issueCollection);
         shelfView = (ShelfView) findViewById(R.id.shelf_view);
         shelfView.setAdapter(issueAdapter);
 
+        // Update category drawer
+        updateCategoryDrawer(issueCollection.getCategories(), issueAdapter.getCategoryIndex());
+
+        // Update shelf view adapter
+        issueAdapter.updateIssues();
+
+        // Continue downloads
+        unzipPendingPackages();
 
     }
 
@@ -154,11 +161,6 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
     protected void setupSwipeLayout() {
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
-        swipeRefreshLayout.setColorSchemeColors(
-                android.R.color.holo_blue_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_green_light,
-                android.R.color.holo_red_light);
     }
 
     @Override
@@ -189,8 +191,8 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
             return true;
         } else if (itemId == R.id.action_refresh) {
             swipeRefreshLayout.setRefreshing(true);
-            if(!manifest.isLoading()) {
-                manifest.reload();
+            if(!issueCollection.isLoading()) {
+                issueCollection.reload();
             }
             return true;
         } else {
@@ -198,44 +200,25 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
         }
     }
 
-    public void downloadShelf(final boolean hasInternetAccess) {
-
-        // Load shelf from cache if available
-        if(manifest.isCacheAvailable()) {
-            manifest.loadFromCache();
-        }
-
-        if (hasInternetAccess) {
-            // Reload manifest if internet connection is available
-            manifest.reload();
-        }else if(!manifest.isCacheAvailable()) {
-            // No internet connection and no cached file
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(this.getString(R.string.exit))
-                .setMessage(this.getString(R.string.no_shelf_no_internet))
-                .setPositiveButton(this.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        ShelfActivity.this.finish();
-                    }
-                })
-                .show();
-        }
-    }
-
     @Override
-    public void onManifestLoaded() {
+    public void onIssueCollectionLoaded() {
 
         // Update Shelf Spinner
         swipeRefreshLayout.setRefreshing(false);
 
         // Update category drawer
-        updateCategoryDrawer(manifest.getCategories(), issueAdapter.getCategoryIndex());
+        updateCategoryDrawer(issueCollection.getCategories(), issueAdapter.getCategoryIndex());
 
         // Update shelf view adapter
         issueAdapter.updateIssues();
 
         // Continue downloads
         unzipPendingPackages();
+
+    }
+
+    @Override
+    public void onIssueCollectionLoadError() {
 
     }
 
@@ -351,17 +334,13 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
 
     private void unzipPendingPackages() {
         if(shelfView != null) {
+            // @TODO: Make it rain!
             for (int i = 0; i < shelfView.getChildCount(); i++) {
-                IssueView issueView = (IssueView) shelfView.getChildAt(i);
-                /* @TODO: Migrate downloader to issue model */
-                if(issueView.getIssue().isDownloaded() && !issueView.isDownloading()) {
+                IssueCardView issueCardView = (IssueCardView) shelfView.getChildAt(i);
+                if(issueCardView.getIssue().isDownloaded() && !issueCardView.getIssue().isDownloading()) {
                     // Continue issue extraction
-                    Log.d(this.getClass().toString(), "Continue unzip of " + issueView.getIssue().getName());
-                    issueView.startUnzip();
-                }else if (issueView.isDownloading()) {
-                    // Continue issue download
-                    Log.d(this.getClass().getName(), "Continue download of: " + issueView.getIssue().getName());
-                    issueView.startPackageDownload();
+                    Log.d(this.getClass().toString(), "Continue unzip of " + issueCardView.getIssue().getName());
+                    issueCardView.startUnzip();
                 }
             }
         }
@@ -371,15 +350,15 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
     @Override
     public void onBackPressed() {
         /* @TODO: Check if any downloading or unpacking process is currently running */
-        final List<IssueView> downloadingIssueViews = shelfView.getDownloadingViews();
-        if (downloadingIssueViews.size() > 0) {
+        final List<Issue> downloadingIssues = issueCollection.getDownloadingIssues();
+        if (downloadingIssues.size() > 0) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder
                 .setTitle(this.getString(R.string.exit))
                 .setMessage(this.getString(R.string.closing_app))
                 .setPositiveButton(this.getString(R.string.yes), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        ShelfActivity.this.terminateDownloads(downloadingIssueViews);
+                        issueCollection.cancelDownloadingIssues(downloadingIssues);
                         ShelfActivity.super.onBackPressed();
                     }
                 })
@@ -398,15 +377,9 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
         }
     }
 
-    private void terminateDownloads(final List<IssueView> issueViews) {
-        for (IssueView issueView : issueViews) {
-            issueView.getPackDownloader().cancel(false);
-        }
-    }
-
     @Override
     public void onRefresh() {
-        manifest.reload();
+        issueCollection.reload();
     }
 
     // Categories
@@ -432,7 +405,7 @@ public class ShelfActivity extends ActionBarActivity implements ManifestListener
     }
 
     private void onCategorySelected(int index) {
-        String category = manifest.getCategories().get(index);
+        String category = issueCollection.getCategories().get(index);
         issueAdapter.setCategory(category);
 
         // Update category drawer UI

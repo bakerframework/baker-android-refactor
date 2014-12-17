@@ -25,7 +25,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  **/
-package com.bakerframework.baker.views;
+package com.bakerframework.baker.view;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -42,7 +42,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
-import com.bakerframework.baker.IssueActivity;
+import com.bakerframework.baker.activity.IssueActivity;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.settings.Configuration;
 
