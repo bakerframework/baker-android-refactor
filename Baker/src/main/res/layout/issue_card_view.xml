@@ -3,10 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_margin="40dp">
+    android:layout_margin="20dp">
 
     <LinearLayout
-        android:layout_width="300dp"
+        android:layout_width="match_parent"
         android:layout_height="140dp"
         android:orientation="horizontal"
         android:layout_margin="0dp">
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="0dp"
             android:orientation="vertical">
 
             <TextView
@@ -79,11 +79,27 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/download_button"
+                    android:id="@+id/download_issue_button"
                     android:layout_width="wrap_content"
                     android:layout_height="28dp"
                     android:layout_margin="2dp"
-                    android:text="@string/download"
+                    android:text="@string/download_issue"
+                    style="@style/abaker_default_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/purchase_actions_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/buy_issue_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_margin="2dp"
+                    android:text="@string/buy_issue"
                     style="@style/abaker_default_button" />
             </LinearLayout>
 
@@ -97,6 +113,31 @@
                 android:fontFamily="sans-serif-light"
                 android:textColor="#AF160E"
                 android:textSize="11sp"/>
+
+            <LinearLayout
+                android:id="@+id/ready_actions_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/read_issue_button"
+                    android:text="@string/read_issue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_margin="2dp"
+                    android:layout_marginRight="5dp"
+                    style="@style/abaker_default_button" />
+
+                <Button
+                    android:id="@+id/archive_issue_button"
+                    android:text="@string/archive_issue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_margin="2dp"
+                    style="@style/abaker_default_button"/>
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/progress_bar_container"
@@ -115,30 +156,6 @@
                     style="?android:attr/progressBarStyleHorizontal"/>
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/ready_actions_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/read_button"
-                    android:text="@string/read"
-                    android:layout_width="wrap_content"
-                    android:layout_height="28dp"
-                    android:layout_margin="2dp"
-                    android:layout_marginRight="5dp"
-                    style="@style/abaker_default_button" />
-
-                <Button
-                    android:id="@+id/archive_button"
-                    android:text="@string/archive"
-                    android:layout_width="wrap_content"
-                    android:layout_height="28dp"
-                    android:layout_margin="2dp"
-                    style="@style/abaker_default_button"/>
-            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

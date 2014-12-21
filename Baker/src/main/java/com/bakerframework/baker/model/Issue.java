@@ -43,6 +43,7 @@ public class Issue extends Observable implements DownloadTaskDelegate {
 
     // Private members
     private String name;
+    private String productId;
     private String title;
     private String info;
     private String date;
@@ -50,6 +51,7 @@ public class Issue extends Observable implements DownloadTaskDelegate {
     private Integer size;
     private String cover;
     private String url;
+    private String price;
     private boolean standalone;
     private boolean coverChanged;
     private boolean urlChanged;
@@ -93,6 +95,13 @@ public class Issue extends Observable implements DownloadTaskDelegate {
 
     public String getName() {
         return name;
+    }
+
+    public String getProductId() {
+        return productId;
+    }
+    public void setProductId(String productId) {
+        this.productId = productId;
     }
 
     public String getTitle() {
@@ -142,6 +151,16 @@ public class Issue extends Observable implements DownloadTaskDelegate {
     }
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+    public void setPrice(String price) {
+        this.price= price;
+    }
+    public boolean hasPrice() {
+        return (this.price != null);
     }
 
     public boolean isCoverChanged() {

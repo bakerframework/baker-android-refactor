@@ -86,6 +86,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
 
     // Layout elements
     LinearLayout uiIdleActionsContainer;
+    LinearLayout uiPurchaseActionsContainer;
     LinearLayout uiReadyActionsContainer;
     LinearLayout uiProgressBarContainer;
     ImageView uiCoverImage;
@@ -95,9 +96,10 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
     TextView uiInfoText;
     TextView uiDateText;
     TextView uiSizeText;
-    Button uiReadButton;
-    Button uiArchiveButton;
-    Button uiDownloadButton;
+    Button uiBuyIssueButton;
+    Button uiReadIssueButton;
+    Button uiArchiveIssueButton;
+    Button uiDownloadIssueButton;
 
     private Activity parentActivity;
 
@@ -132,6 +134,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
 
         // Register UI elements
         uiIdleActionsContainer = (LinearLayout) findViewById(R.id.idle_actions_container);
+        uiPurchaseActionsContainer = (LinearLayout) findViewById(R.id.purchase_actions_container);
         uiReadyActionsContainer = (LinearLayout) findViewById(R.id.ready_actions_container);
         uiProgressBarContainer = (LinearLayout) findViewById(R.id.progress_bar_container);
         uiProgressText = (TextView) findViewById(R.id.progress_text);
@@ -141,9 +144,10 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
         uiInfoText = (TextView) findViewById(R.id.info_text);
         uiDateText = (TextView) findViewById(R.id.date_text);
         uiSizeText = (TextView) findViewById(R.id.size_text);
-        uiReadButton = (Button) findViewById(R.id.read_button);
-        uiArchiveButton = (Button) findViewById(R.id.archive_button);
-        uiDownloadButton = (Button) findViewById(R.id.download_button);
+        uiBuyIssueButton = (Button) findViewById(R.id.buy_issue_button);
+        uiReadIssueButton = (Button) findViewById(R.id.read_issue_button);
+        uiArchiveIssueButton = (Button) findViewById(R.id.archive_issue_button);
+        uiDownloadIssueButton = (Button) findViewById(R.id.download_issue_button);
 
         // Download cover (if not exist)
         if (!getCoverFile().exists()) {
@@ -152,17 +156,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
         } else {
             renderCover(getCoverFile());
         }
-
-        // Set up UI
-        uiTitleText.setText(issue.getTitle());
-        uiInfoText.setText(issue.getInfo());
-        uiDateText.setText(issue.getDate());
-        if (issue.getSize() == 0) {
-            uiSizeText.setVisibility(View.GONE);
-        } else {
-            uiSizeText.setText(issue.getSizeMB() + " MB");
-        }
-        uiProgressText.setText("0 MB / " + issue.getSizeMB() + " MB");
 
         // Initialize cover click handler
         uiCoverImage.setOnClickListener(new OnClickListener() {
@@ -174,7 +167,12 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
         });
 
         // Initialize download button click handler
-        uiDownloadButton.setOnClickListener(new OnClickListener() {
+        uiBuyIssueButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) { purchaseIssue(); }
+        });
+
+        // Initialize download button click handler
+        uiDownloadIssueButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 setUIState(UI_STATE_DOWNLOAD);
                 issue.startDownloadTask();
@@ -182,22 +180,49 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
         });
 
         // Initialize read button click handler
-        uiReadButton.setOnClickListener(new OnClickListener() {
+        uiReadIssueButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 readIssue();
             }
         });
 
         // Initialize archive button click handler
-        uiArchiveButton.setOnClickListener(new OnClickListener() {
+        uiArchiveIssueButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 archiveIssue();
             }
         });
 
+
+        // Redraw UI
+        redraw();
+
+    }
+
+    public void redraw() {
+        uiTitleText.setText(issue.getTitle());
+        uiInfoText.setText(issue.getInfo());
+        uiDateText.setText(issue.getDate());
+        if(issue.hasPrice()) {
+            uiBuyIssueButton.setText(issue.getPrice());
+        }
+        if (issue.getSize() == 0) {
+            uiSizeText.setVisibility(View.GONE);
+        } else {
+            uiSizeText.setText(issue.getSizeMB() + " MB");
+        }
+        uiProgressText.setText("0 MB / " + issue.getSizeMB() + " MB");
+
         // Prepare actions
         if (issue.isExtracted()) {
-            enableReadArchiveActions();
+            setUIState(UI_STATE_READY);
+            readable = true;
+        }else if(issue.isDownloading()){
+            setUIState(UI_STATE_DOWNLOAD);
+            readable = false;
+        }else{
+            setUIState(UI_STATE_INITIAL);
+            readable = false;
         }
     }
 
@@ -207,14 +232,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
 
     public Issue getIssue() {
         return issue;
-    }
-
-    /**
-     * Updates the UI to allow the user read/archive the issue.
-     */
-    public void enableReadArchiveActions() {
-        setUIState(UI_STATE_READY);
-        readable = true;
     }
 
     public void setBookJson(BookJson book) {
@@ -234,6 +251,10 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
                     parentActivity.getString(R.string.issue_open),
                     issue.getName());
         }
+    }
+
+    private void purchaseIssue() {
+        BakerApplication.getInstance().getBillingManager().purchase(this.parentActivity, issue.getProductId(), 12345);
     }
 
     /**
@@ -292,8 +313,14 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
     private void setUIState(int uiState) {
         switch (uiState) {
             case UI_STATE_INITIAL:
-                uiIdleActionsContainer.setVisibility(View.VISIBLE);
                 uiReadyActionsContainer.setVisibility(View.GONE);
+                if(issue.hasPrice()) {
+                    uiPurchaseActionsContainer.setVisibility(View.VISIBLE);
+                    uiIdleActionsContainer.setVisibility(View.GONE);
+                }else{
+                    uiPurchaseActionsContainer.setVisibility(View.GONE);
+                    uiIdleActionsContainer.setVisibility(View.VISIBLE);
+                }
                 uiProgressText.setVisibility(View.GONE);
                 uiProgressBarContainer.setVisibility(View.GONE);
                 uiProgressText.setText(null);
@@ -301,6 +328,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
             case UI_STATE_DOWNLOAD:
                 uiIdleActionsContainer.setVisibility(View.GONE);
                 uiReadyActionsContainer.setVisibility(View.GONE);
+                uiPurchaseActionsContainer.setVisibility(View.GONE);
                 uiProgressText.setVisibility(View.VISIBLE);
                 uiProgressBarContainer.setVisibility(View.VISIBLE);
                 uiProgressText.setText(R.string.downloading);
@@ -308,6 +336,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
             case UI_STATE_UNZIP:
                 uiIdleActionsContainer.setVisibility(View.GONE);
                 uiReadyActionsContainer.setVisibility(View.GONE);
+                uiPurchaseActionsContainer.setVisibility(View.GONE);
                 uiProgressText.setVisibility(View.VISIBLE);
                 uiProgressBarContainer.setVisibility(View.VISIBLE);
                 uiProgressText.setText(R.string.unzipping);
@@ -315,6 +344,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
             case UI_STATE_READY:
                 uiIdleActionsContainer.setVisibility(View.GONE);
                 uiReadyActionsContainer.setVisibility(View.VISIBLE);
+                uiPurchaseActionsContainer.setVisibility(View.GONE);
                 uiProgressText.setVisibility(View.GONE);
                 uiProgressBarContainer.setVisibility(View.GONE);
                 uiProgressText.setText(null);
@@ -329,6 +359,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
             case UI_STATE_ERROR:
                 uiIdleActionsContainer.setVisibility(View.VISIBLE);
                 uiReadyActionsContainer.setVisibility(View.GONE);
+                uiPurchaseActionsContainer.setVisibility(View.GONE);
                 uiProgressText.setVisibility(View.VISIBLE);
                 uiProgressBarContainer.setVisibility(View.GONE);
                 break;
@@ -358,9 +389,11 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
                 //start reading the issue.
                 unzipperTask = null;
                 if (results[0].equals("SUCCESS")) {
-                    enableReadArchiveActions();
+                    setUIState(UI_STATE_READY);
+                    readable = true;
                 } else {
                     setUIState(UI_STATE_INITIAL);
+                    readable = false;
                     Toast.makeText(getContext(), "Could not extract the package. Possibly corrupted.", Toast.LENGTH_LONG).show();
                 }
                 break;

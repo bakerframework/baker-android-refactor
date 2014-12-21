@@ -25,7 +25,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.bakerframework.baker.play.BillingManager;
 import com.bakerframework.baker.model.IssueCollection;
+import com.bakerframework.baker.play.LicenceManager;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -34,11 +36,19 @@ import java.util.HashMap;
 
 public class BakerApplication extends Application implements AnalyticsEvents {
 
+    // Instance configuration
     private static BakerApplication sInstance;
+
+    // Application mode (online/offline)
+    public static final int APPLICATION_MODE_OFFLINE = 0;
+    public static final int APPLICATION_MODE_ONLINE = 1;
 
     // Instance variables
     private SharedPreferences preferences;
     private IssueCollection issueCollection;
+    private BillingManager billingManager;
+    private LicenceManager licenceManager;
+    private int applicationMode = 1;
 
     public enum TrackerName {
         GLOBAL_TRACKER
@@ -60,6 +70,8 @@ public class BakerApplication extends Application implements AnalyticsEvents {
     protected void initializeInstance() {
         preferences = getSharedPreferences("baker.app", 0);
         issueCollection = new IssueCollection();
+        billingManager = new BillingManager();
+        licenceManager = new LicenceManager();
     }
 
     public static BakerApplication getInstance() {
@@ -76,7 +88,26 @@ public class BakerApplication extends Application implements AnalyticsEvents {
         return preferences;
     }
 
-    // Helpers
+    public BillingManager getBillingManager() {
+        return billingManager;
+    }
+
+    public LicenceManager getLicenceManager() {
+        return licenceManager;
+    }
+
+    public int getApplicationMode() {
+        return applicationMode;
+    }
+    public void setApplicationMode(int applicationMode) {
+        this.applicationMode = applicationMode;
+    }
+
+    // Helper methods
+
+    public String getEncodedPublicKey() {
+        return getString(R.string.google_play_license_key);
+    }
 
     public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) sInstance.getSystemService(Context.CONNECTIVITY_SERVICE);

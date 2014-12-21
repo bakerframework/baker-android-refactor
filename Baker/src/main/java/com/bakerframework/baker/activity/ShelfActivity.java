@@ -61,13 +61,16 @@ import android.support.v4.widget.DrawerLayout;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.adapter.IssueAdapter;
+import com.bakerframework.baker.play.BillingManager;
+import com.bakerframework.baker.play.BillingManagerDelegate;
 import com.bakerframework.baker.model.*;
 import com.bakerframework.baker.model.IssueCollection;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.settings.SettingsActivity;
+import com.bakerframework.baker.util.IabResult;
+import com.bakerframework.baker.util.Inventory;
 import com.bakerframework.baker.view.IssueCardView;
 import com.bakerframework.baker.view.ShelfView;
-import com.bakerframework.baker.task.GCMRegistrationWorker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
@@ -76,7 +79,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShelfActivity extends ActionBarActivity implements IssueCollectionListener, SwipeRefreshLayout.OnRefreshListener {
+public class ShelfActivity extends ActionBarActivity implements IssueCollectionListener, SwipeRefreshLayout.OnRefreshListener, BillingManagerDelegate {
 
     public static final int STANDALONE_MAGAZINE_ACTIVITY_FINISH = 1;
 
@@ -86,7 +89,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     private IssueCollection issueCollection;
 
     // Features
-    SwipeRefreshLayout swipeRefreshLayout;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private DrawerLayout drawerLayout;
     private ListView drawerList;
 
@@ -108,6 +111,11 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
             Log.d(this.getClass().getName(), "First time app running, launching tutorial.");
             showAppUsage();
         }
+
+        // Set up billing
+        BakerApplication.getInstance().getBillingManager().setDelegate(this);
+        BakerApplication.getInstance().getBillingManager().setup();
+
 
         /* @TODO: Prepare auto-downloader?
         Intent intent = this.getIntent();
@@ -212,7 +220,10 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     @Override
     public void onIssueCollectionLoaded() {
+        presentIssues();
+    }
 
+    public void presentIssues() {
         // Update Shelf Spinner
         swipeRefreshLayout.setRefreshing(false);
 
@@ -224,7 +235,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
         // Continue downloads
         unzipPendingPackages();
-
     }
 
     @Override
@@ -390,6 +400,46 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     @Override
     public void onRefresh() {
         issueCollection.reload();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        BillingManager billingManager = BakerApplication.getInstance().getBillingManager();
+        if (billingManager != null) billingManager.dispose();
+    }
+
+    // Billing
+
+    @Override
+    public void onBillingSetupSuccess(IabResult result) {
+        Log.i("BILLING", "onBillingSetupSuccess" + result);
+        BakerApplication.getInstance().getBillingManager().loadInventory(issueCollection.getSkuList());
+    }
+
+    @Override
+    public void onBillingSetupError(IabResult result) {
+        Log.i("BILLING", "onBillingSetupError" + result);
+    }
+
+    @Override
+    public void onInventoryLoaded(IabResult result, Inventory inventory) {
+        Log.i("BILLING", "onInventorQuerySuccess" + result + ", " + inventory);
+        Log.i("BILLING", "skuList count: " + BakerApplication.getInstance().getBillingManager().getSkuList().size());
+        Log.i("BILLING", "storeSkuList count: " + BakerApplication.getInstance().getBillingManager().getStoreSkuList().size());
+        Log.i("BILLING", "purchasedSkuList count: " + BakerApplication.getInstance().getBillingManager().getPurchasedSkuList().size());
+
+        // Update issue prices
+        issueCollection.updatePricesFromInventory(inventory);
+
+        // Present issues
+        presentIssues();
+
+    }
+
+    @Override
+    public void onInventoryError(IabResult result) {
+        Log.i("BILLING", "onInventorQueryError" + result);
     }
 
     // Categories

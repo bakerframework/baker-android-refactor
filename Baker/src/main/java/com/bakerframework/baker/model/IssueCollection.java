@@ -7,7 +7,8 @@ import com.bakerframework.baker.R;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.task.DownloadTask;
 import com.bakerframework.baker.task.DownloadTaskDelegate;
-import com.bakerframework.baker.view.IssueCardView;
+import com.bakerframework.baker.util.Inventory;
+import com.bakerframework.baker.util.SkuDetails;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +58,16 @@ public class IssueCollection implements DownloadTaskDelegate {
 
     public List<String> getCategories() {
         return categories;
+    }
+
+    public List<String> getSkuList() {
+        List<String> skuList = new ArrayList<>();
+        for(Issue issue : getIssues()) {
+            if(issue.getProductId() != null && !issue.getProductId().equals("")) {
+                skuList.add(issue.getProductId());
+            }
+        }
+        return skuList;
     }
 
     public List<Issue> getIssues() {
@@ -145,6 +156,7 @@ public class IssueCollection implements DownloadTaskDelegate {
 
             // Get issue data from json
             String issueName = jsonString(json.getString("name"));
+            String issueProductId = jsonString(json.getString("product_id"));
             String issueTitle = jsonString(json.getString("title"));
             String issueInfo = jsonString(json.getString("info"));
             String issueDate = jsonDate(json.getString("date"));
@@ -171,6 +183,7 @@ public class IssueCollection implements DownloadTaskDelegate {
 
             // Set issue data
             issue.setTitle(issueTitle);
+            issue.setProductId(issueProductId);
             issue.setInfo(issueInfo);
             issue.setDate(issueDate);
             issue.setCover(issueCover);
@@ -219,6 +232,16 @@ public class IssueCollection implements DownloadTaskDelegate {
 
     public boolean isCacheAvailable() {
         return getCachedFile().exists() && getCachedFile().isFile();
+    }
+
+    public void updatePricesFromInventory(Inventory inventory) {
+        SkuDetails details;
+        for(Issue issue : issueMap.values()) {
+            if (inventory.hasDetails(issue.getProductId())) {
+                details = inventory.getSkuDetails(issue.getProductId());
+                issue.setPrice(details.getPrice());
+            }
+        }
     }
 
     public List<String> extractAllCategories() {
