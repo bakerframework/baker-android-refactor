@@ -30,6 +30,7 @@ package com.bakerframework.baker.activity;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.app.AlertDialog;
@@ -61,25 +62,25 @@ import android.support.v4.widget.DrawerLayout;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.adapter.IssueAdapter;
-import com.bakerframework.baker.play.BillingManager;
-import com.bakerframework.baker.play.BillingManagerDelegate;
 import com.bakerframework.baker.model.*;
 import com.bakerframework.baker.model.IssueCollection;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.settings.SettingsActivity;
-import com.bakerframework.baker.util.IabResult;
-import com.bakerframework.baker.util.Inventory;
 import com.bakerframework.baker.view.IssueCardView;
 import com.bakerframework.baker.view.ShelfView;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.json.JSONException;
+import org.solovyev.android.checkout.ActivityCheckout;
+import org.solovyev.android.checkout.Checkout;
+import org.solovyev.android.checkout.Inventory;
+import org.solovyev.android.checkout.Purchase;
+import org.solovyev.android.checkout.RequestListener;
+import org.solovyev.android.checkout.ResponseCodes;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShelfActivity extends ActionBarActivity implements IssueCollectionListener, SwipeRefreshLayout.OnRefreshListener, BillingManagerDelegate {
+public class ShelfActivity extends ActionBarActivity implements IssueCollectionListener, SwipeRefreshLayout.OnRefreshListener {
 
     public static final int STANDALONE_MAGAZINE_ACTIVITY_FINISH = 1;
 
@@ -92,6 +93,16 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     private SwipeRefreshLayout swipeRefreshLayout;
     private DrawerLayout drawerLayout;
     private ListView drawerList;
+
+    // Billing
+    @NonNull
+    private final ActivityCheckout checkout = Checkout.forActivity(this, BakerApplication.getInstance().getCheckout());
+    @NonNull
+    private Inventory inventory;
+
+    public ActivityCheckout getCheckout() {
+        return checkout;
+    }
 
     /**
      * Used when running in standalone mode based on the run_as_standalone setting in booleans.xml.
@@ -111,28 +122,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
             Log.d(this.getClass().getName(), "First time app running, launching tutorial.");
             showAppUsage();
         }
-
-        // Set up billing
-        BakerApplication.getInstance().getBillingManager().setDelegate(this);
-        BakerApplication.getInstance().getBillingManager().setup();
-
-
-        /* @TODO: Prepare auto-downloader?
-        Intent intent = this.getIntent();
-        if (intent.hasExtra("START_DOWNLOAD")) {
-            this.startDownload = intent.getStringExtra("START_DOWNLOAD");
-        }
-        */
-
-        // Prepare google play services - not here
-        /*
-        if (checkPlayServices()) {
-            GCMRegistrationWorker registrationWorker = new GCMRegistrationWorker(this, 0, null);
-            registrationWorker.execute();
-        }
-        */
-
-        // @TODO: Handle standalone mode?
 
         // Prepare google analytics
         if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_app_open_event)) {
@@ -173,6 +162,53 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         // Continue downloads
         unzipPendingPackages();
 
+        // Initialize checkout
+        checkout.start();
+        // you only need this if this activity starts purchase process
+        checkout.createPurchaseFlow(new PurchaseListener());
+        // you only need this if this activity needs information about purchases/SKUs
+        inventory = checkout.loadInventory();
+        inventory.whenLoaded(new InventoryLoadedListener());
+
+    }
+
+    private class PurchaseListener extends BaseRequestListener<Purchase> {
+        @Override
+        public void onSuccess(@NonNull Purchase purchase) {
+            onPurchased();
+        }
+
+        private void onPurchased() {
+            // let's update purchase information in local inventory
+            inventory.load().whenLoaded(new InventoryLoadedListener());
+            Toast.makeText(getApplicationContext(), getString(R.string.purchase_thank_you_message), Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onError(int response, @NonNull Exception e) {
+            // it is possible that our data is not synchronized with data on Google Play => need to handle some errors
+            if (response == ResponseCodes.ITEM_ALREADY_OWNED) {
+                onPurchased();
+            } else {
+                super.onError(response, e);
+            }
+        }
+    }
+
+    private abstract class BaseRequestListener<R> implements RequestListener<R> {
+
+        @Override
+        public void onError(int response, @NonNull Exception e) {
+            // @TODO: add alert dialog or logging
+        }
+    }
+
+    private class InventoryLoadedListener implements Inventory.Listener {
+        @Override
+        public void onLoaded(@NonNull Inventory.Products inventoryProducts) {
+            BakerApplication.getInstance().getIssueCollection().updatePricesFromProducts(inventoryProducts);
+            issueAdapter.updateIssues();
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -184,7 +220,9 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     @Override
     protected void onResume() {
         super.onResume();
-        checkPlayServices();
+        if(!BakerApplication.getInstance().checkPlayServices(this)) {
+            // finish();
+        }
     }
 
     @Override
@@ -340,18 +378,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     }
 
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (!GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                Log.e(this.getClass().toString(), "This device does not support Google Play Services.");
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
-
     private void unzipPendingPackages() {
         if(shelfView != null) {
             // @TODO: Make it rain!
@@ -405,41 +431,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     @Override
     public void onDestroy() {
         super.onDestroy();
-        BillingManager billingManager = BakerApplication.getInstance().getBillingManager();
-        if (billingManager != null) billingManager.dispose();
-    }
-
-    // Billing
-
-    @Override
-    public void onBillingSetupSuccess(IabResult result) {
-        Log.i("BILLING", "onBillingSetupSuccess" + result);
-        BakerApplication.getInstance().getBillingManager().loadInventory(issueCollection.getSkuList());
-    }
-
-    @Override
-    public void onBillingSetupError(IabResult result) {
-        Log.i("BILLING", "onBillingSetupError" + result);
-    }
-
-    @Override
-    public void onInventoryLoaded(IabResult result, Inventory inventory) {
-        Log.i("BILLING", "onInventorQuerySuccess" + result + ", " + inventory);
-        Log.i("BILLING", "skuList count: " + BakerApplication.getInstance().getBillingManager().getSkuList().size());
-        Log.i("BILLING", "storeSkuList count: " + BakerApplication.getInstance().getBillingManager().getStoreSkuList().size());
-        Log.i("BILLING", "purchasedSkuList count: " + BakerApplication.getInstance().getBillingManager().getPurchasedSkuList().size());
-
-        // Update issue prices
-        issueCollection.updatePricesFromInventory(inventory);
-
-        // Present issues
-        presentIssues();
-
-    }
-
-    @Override
-    public void onInventoryError(IabResult result) {
-        Log.i("BILLING", "onInventorQueryError" + result);
     }
 
     // Categories

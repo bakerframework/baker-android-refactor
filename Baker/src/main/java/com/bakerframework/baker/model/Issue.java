@@ -35,6 +35,8 @@ import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.task.DownloadTask;
 import com.bakerframework.baker.task.DownloadTaskDelegate;
 
+import org.solovyev.android.checkout.Sku;
+
 import java.io.File;
 import java.util.List;
 import java.util.Observable;
@@ -52,6 +54,8 @@ public class Issue extends Observable implements DownloadTaskDelegate {
     private String cover;
     private String url;
     private String price;
+    private Sku sku;
+    private boolean purchased;
     private boolean standalone;
     private boolean coverChanged;
     private boolean urlChanged;
@@ -154,13 +158,27 @@ public class Issue extends Observable implements DownloadTaskDelegate {
     }
 
     public String getPrice() {
-        return price;
-    }
-    public void setPrice(String price) {
-        this.price= price;
+        return (sku != null) ? sku.price : null;
     }
     public boolean hasPrice() {
-        return (this.price != null);
+        return (sku != null && sku.price != null);
+    }
+
+    public Sku getSku() {
+        return sku;
+    }
+    public void setSku(Sku sku) {
+        this.sku= sku;
+    }
+    public boolean hasSku() {
+        return (this.sku != null);
+    }
+
+    public void setPurchased(boolean purchased) {
+        this.purchased = purchased;
+    }
+    public boolean isPurchased() {
+        return this.purchased;
     }
 
     public boolean isCoverChanged() {

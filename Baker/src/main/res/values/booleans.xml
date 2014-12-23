@@ -7,5 +7,5 @@
     <bool name="ut_enable_tutorial">true</bool>
 
     <!-- Enable Licence Checker. For testing you need to set "License Test Response" to "LICENCED" in "Settings" > "Account Details" of your Google Play Development Console. -->
-    <bool name="enable_licence_check">true</bool>
+    <bool name="enable_licence_check">false</bool>
 </resources>

@@ -16,6 +16,7 @@
 
 package com.bakerframework.baker;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -25,12 +26,24 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
-import com.bakerframework.baker.play.BillingManager;
 import com.bakerframework.baker.model.IssueCollection;
+import com.bakerframework.baker.play.ApiPurchaseVerifier;
 import com.bakerframework.baker.play.LicenceManager;
+import com.bakerframework.baker.settings.Configuration;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+
+import org.solovyev.android.checkout.Billing;
+import org.solovyev.android.checkout.Cache;
+import org.solovyev.android.checkout.Checkout;
+import org.solovyev.android.checkout.Products;
+import org.solovyev.android.checkout.PurchaseVerifier;
+
+import static java.util.Arrays.asList;
+import static org.solovyev.android.checkout.ProductTypes.IN_APP;
 
 import java.util.HashMap;
 
@@ -43,10 +56,30 @@ public class BakerApplication extends Application implements AnalyticsEvents {
     public static final int APPLICATION_MODE_OFFLINE = 0;
     public static final int APPLICATION_MODE_ONLINE = 1;
 
+    // Billing support
+    private final Billing billing = new Billing(this, new Billing.DefaultConfiguration() {
+
+        @Override
+        public PurchaseVerifier getPurchaseVerifier() {
+            return new ApiPurchaseVerifier();
+        }
+
+        @Override
+        public String getPublicKey() {
+            return "remote";
+        }
+
+        @Override
+        public Cache getCache() {
+            return Billing.newCache();
+        }
+
+    });
+    private final Checkout checkout = Checkout.forApplication(billing, Products.create().add(IN_APP, asList("com.magloft.demo.surfstoked.nov14")));
+
     // Instance variables
     private SharedPreferences preferences;
     private IssueCollection issueCollection;
-    private BillingManager billingManager;
     private LicenceManager licenceManager;
     private int applicationMode = 1;
 
@@ -70,7 +103,6 @@ public class BakerApplication extends Application implements AnalyticsEvents {
     protected void initializeInstance() {
         preferences = getSharedPreferences("baker.app", 0);
         issueCollection = new IssueCollection();
-        billingManager = new BillingManager();
         licenceManager = new LicenceManager();
     }
 
@@ -88,12 +120,16 @@ public class BakerApplication extends Application implements AnalyticsEvents {
         return preferences;
     }
 
-    public BillingManager getBillingManager() {
-        return billingManager;
-    }
-
     public LicenceManager getLicenceManager() {
         return licenceManager;
+    }
+
+    public Billing getBilling() {
+        return billing;
+    }
+
+    public Checkout getCheckout() {
+        return checkout;
     }
 
     public int getApplicationMode() {
@@ -104,6 +140,17 @@ public class BakerApplication extends Application implements AnalyticsEvents {
     }
 
     // Helper methods
+
+    public boolean checkPlayServices(Activity activity) {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, activity, 9000).show();
+            }
+            return false;
+        }
+        return true;
+    }
 
     public String getEncodedPublicKey() {
         return getString(R.string.google_play_license_key);

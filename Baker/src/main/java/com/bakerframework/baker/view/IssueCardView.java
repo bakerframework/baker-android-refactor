@@ -34,6 +34,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,6 +60,7 @@ import com.bakerframework.baker.task.DownloadTaskDelegate;
 import com.bakerframework.baker.task.UnzipperTask;
 
 import org.json.JSONException;
+import org.solovyev.android.checkout.*;
 
 import java.io.File;
 import java.text.ParseException;
@@ -254,7 +256,17 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
     }
 
     private void purchaseIssue() {
-        BakerApplication.getInstance().getBillingManager().purchase(this.parentActivity, issue.getProductId(), 12345);
+        if (!issue.isPurchased()) {
+            final ActivityCheckout checkout = ((ShelfActivity) parentActivity).getCheckout();
+            checkout.whenReady(new Checkout.ListenerAdapter() {
+                @Override
+                public void onReady(@NonNull BillingRequests requests) {
+                    if(issue.getSku() != null) {
+                        requests.purchase(issue.getSku(), null, checkout.getPurchaseFlow());
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -314,7 +326,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
         switch (uiState) {
             case UI_STATE_INITIAL:
                 uiReadyActionsContainer.setVisibility(View.GONE);
-                if(issue.hasPrice()) {
+                if(issue.hasPrice() && !issue.isPurchased()) {
                     uiPurchaseActionsContainer.setVisibility(View.VISIBLE);
                     uiIdleActionsContainer.setVisibility(View.GONE);
                 }else{

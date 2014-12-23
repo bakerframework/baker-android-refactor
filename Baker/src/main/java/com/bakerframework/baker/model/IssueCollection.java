@@ -7,12 +7,13 @@ import com.bakerframework.baker.R;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.task.DownloadTask;
 import com.bakerframework.baker.task.DownloadTaskDelegate;
-import com.bakerframework.baker.util.Inventory;
-import com.bakerframework.baker.util.SkuDetails;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.solovyev.android.checkout.Inventory;
+import org.solovyev.android.checkout.Purchase;
+import org.solovyev.android.checkout.Sku;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,6 +27,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import static org.solovyev.android.checkout.ProductTypes.IN_APP;
 
 /**
  * Created by Tobias Strebitzer <tobias.strebitzer@magloft.com> on 15/12/14.
@@ -76,6 +79,15 @@ public class IssueCollection implements DownloadTaskDelegate {
         }else{
             return new ArrayList<>(issueMap.values());
         }
+    }
+
+    public Issue getIssueBySku(Sku sku) {
+        for(Issue issue : getIssues()) {
+            if(issue.getProductId() != null && issue.getProductId().equals(sku.id)) {
+                return issue;
+            }
+        }
+        return null;
     }
 
     public boolean isLoading() {
@@ -234,13 +246,28 @@ public class IssueCollection implements DownloadTaskDelegate {
         return getCachedFile().exists() && getCachedFile().isFile();
     }
 
-    public void updatePricesFromInventory(Inventory inventory) {
-        SkuDetails details;
-        for(Issue issue : issueMap.values()) {
-            if (inventory.hasDetails(issue.getProductId())) {
-                details = inventory.getSkuDetails(issue.getProductId());
-                issue.setPrice(details.getPrice());
+    public void updatePricesFromProducts(Inventory.Products inventoryProducts) {
+        final Inventory.Product product = inventoryProducts.get(IN_APP);
+        if (product.supported) {
+            // Update issue prices
+            for (Sku sku : product.getSkus()) {
+                Issue issue = getIssueBySku(sku);
+                if(issue != null) {
+                    issue.setPurchased(product.isPurchased(sku));
+                    issue.setSku(sku);
+                    /* @TODO: We don't need the actual purchases yet (later for verification)
+                    final Purchase purchase = product.getPurchaseInState(sku, Purchase.State.PURCHASED);
+                    if(purchase != null) {
+                        // Verify purchases remotely
+                    }
+                    */
+                    Log.i(getClass().getName(), "inventory issue: " + issue);
+                    Log.i(getClass().getName(), "inventory sku: " + sku);
+                    Log.i(getClass().getName(), "inventory purchased: " + issue.isPurchased());
+                }
             }
+        } else {
+            Log.e(getClass().getName(), "Error: " + R.string.purchase_not_possible_message);
         }
     }
 

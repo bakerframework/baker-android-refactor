@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
@@ -16,8 +17,6 @@ import com.bakerframework.baker.model.IssueCollection;
 import com.bakerframework.baker.model.IssueCollectionListener;
 
 import com.bakerframework.baker.play.LicenceManagerDelegate;
-
-/* @TODO: Provide some meaning to the loading screen */
 
 public class SplashActivity extends Activity implements IssueCollectionListener, LicenceManagerDelegate {
 
@@ -35,7 +34,6 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
             BakerApplication.getInstance().getLicenceManager().setDelegate(this);
             BakerApplication.getInstance().getLicenceManager().checkAccess();
         }else{
-            // Directly load data
             loadIssueCollection();
         }
 
@@ -127,6 +125,7 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
     @Override
     public void onLicenceInvalid(int reason) {
         // Invalid licence
+        Log.i("LICENSING", "Invalid licence: " + reason);
         new AlertDialog.Builder(SplashActivity.this)
                 .setTitle(getString(R.string.exit))
                 .setMessage(getString(R.string.invalid_license_error))
@@ -150,4 +149,5 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
                 })
                 .show();
     }
+
 }

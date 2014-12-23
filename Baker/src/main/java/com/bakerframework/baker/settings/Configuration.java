@@ -30,6 +30,8 @@ package com.bakerframework.baker.settings;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
@@ -81,11 +83,30 @@ public class Configuration {
      */
 	private Configuration() {}
 
+    public static String getAppVersion() {
+        PackageInfo pInfo = null;
+        try {
+            pInfo = BakerApplication.getInstance().getPackageManager().getPackageInfo(BakerApplication.getInstance().getPackageName(), 0);
+            return String.valueOf(pInfo.versionCode);
+        } catch (PackageManager.NameNotFoundException e) {
+            return "0";
+        }
+
+    }
+
+
     public static String getManifestUrl() {
         return BakerApplication.getInstance().getString(R.string.newstand_manifest_url)
-            .replace(":app_id", BakerApplication.getInstance().getString(R.string.app_id))
-            .replace(":device_type", "ANDROID")
-            .replace(":user_id", getUserId());
+                .replace(":app_id", BakerApplication.getInstance().getString(R.string.app_id))
+                .replace(":device_type", "ANDROID")
+                .replace(":user_id", getUserId());
+    }
+
+    public static String getPurchaseConfirmationUrl() {
+        return BakerApplication.getInstance().getString(R.string.purchase_confirmation_url)
+                .replace(":app_id", BakerApplication.getInstance().getString(R.string.app_id))
+                .replace(":device_type", "ANDROID")
+                .replace(":user_id", getUserId());
     }
 
     // Tries to use external storage, if not available then fallback to internal.
