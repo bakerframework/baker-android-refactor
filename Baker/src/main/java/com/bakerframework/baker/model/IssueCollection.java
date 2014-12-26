@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.solovyev.android.checkout.ProductTypes.IN_APP;
+import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
 
 /**
  * Created by Tobias Strebitzer <tobias.strebitzer@magloft.com> on 15/12/14.
@@ -38,6 +39,8 @@ public class IssueCollection implements DownloadTaskDelegate {
 
     private HashMap<String, Issue> issueMap;
     private List<String> categories;
+
+    private Sku subscriptionSku;
 
     // Tasks management
     private DownloadTask downloadManifestTask;
@@ -61,6 +64,11 @@ public class IssueCollection implements DownloadTaskDelegate {
 
     public List<String> getCategories() {
         return categories;
+    }
+
+
+    public Sku getSubscriptionSku() {
+        return subscriptionSku;
     }
 
     public List<String> getSkuList() {
@@ -168,7 +176,7 @@ public class IssueCollection implements DownloadTaskDelegate {
 
             // Get issue data from json
             String issueName = jsonString(json.getString("name"));
-            String issueProductId = jsonString(json.getString("product_id"));
+            String issueProductId = json.isNull("product_id") ? null : jsonString(json.getString("product_id"));
             String issueTitle = jsonString(json.getString("title"));
             String issueInfo = jsonString(json.getString("info"));
             String issueDate = jsonDate(json.getString("date"));
@@ -231,7 +239,11 @@ public class IssueCollection implements DownloadTaskDelegate {
     }
 
     private String jsonString(String value) throws UnsupportedEncodingException {
-        return new String(value.getBytes(JSON_ENCODING), JSON_ENCODING);
+        if(value != null) {
+            return new String(value.getBytes(JSON_ENCODING), JSON_ENCODING);
+        }else{
+            return null;
+        }
     }
 
     private String getCachedPath() {
@@ -247,20 +259,34 @@ public class IssueCollection implements DownloadTaskDelegate {
     }
 
     public void updatePricesFromProducts(Inventory.Products inventoryProducts) {
-        final Inventory.Product product = inventoryProducts.get(IN_APP);
-        if (product.supported) {
+
+        // Handle single issue purchases
+        boolean hasSubscription = false;
+        final Inventory.Product subscriptionProductCollection = inventoryProducts.get(SUBSCRIPTION);
+        if (subscriptionProductCollection.supported) {
+
+            for (Sku sku : subscriptionProductCollection.getSkus()) {
+                if(sku.id.equals(BakerApplication.getInstance().getString(R.string.subscription_product_id))) {
+                    hasSubscription = inventoryProducts.get(SUBSCRIPTION).isPurchased(sku);
+                    subscriptionSku = sku;
+                }
+            }
+        }
+
+        // Handle single issue purchases
+        final Inventory.Product inAppProductCollection = inventoryProducts.get(IN_APP);
+        if (inAppProductCollection.supported) {
             // Update issue prices
-            for (Sku sku : product.getSkus()) {
+            for (Sku sku : inAppProductCollection.getSkus()) {
                 Issue issue = getIssueBySku(sku);
                 if(issue != null) {
-                    issue.setPurchased(product.isPurchased(sku));
-                    issue.setSku(sku);
-                    /* @TODO: We don't need the actual purchases yet (later for verification)
-                    final Purchase purchase = product.getPurchaseInState(sku, Purchase.State.PURCHASED);
-                    if(purchase != null) {
-                        // Verify purchases remotely
+                    // Check for subscription
+                    if(hasSubscription) {
+                        issue.setPurchased(true);
+                    }else{
+                        issue.setPurchased(inAppProductCollection.isPurchased(sku));
                     }
-                    */
+                    issue.setSku(sku);
                     Log.i(getClass().getName(), "inventory issue: " + issue);
                     Log.i(getClass().getName(), "inventory sku: " + sku);
                     Log.i(getClass().getName(), "inventory purchased: " + issue.isPurchased());
@@ -269,6 +295,7 @@ public class IssueCollection implements DownloadTaskDelegate {
         } else {
             Log.e(getClass().getName(), "Error: " + R.string.purchase_not_possible_message);
         }
+
     }
 
     public List<String> extractAllCategories() {

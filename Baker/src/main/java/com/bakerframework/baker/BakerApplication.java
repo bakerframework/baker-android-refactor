@@ -44,8 +44,11 @@ import org.solovyev.android.checkout.PurchaseVerifier;
 
 import static java.util.Arrays.asList;
 import static org.solovyev.android.checkout.ProductTypes.IN_APP;
+import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class BakerApplication extends Application implements AnalyticsEvents {
 
@@ -75,7 +78,7 @@ public class BakerApplication extends Application implements AnalyticsEvents {
         }
 
     });
-    private final Checkout checkout = Checkout.forApplication(billing, Products.create().add(IN_APP, asList("com.magloft.demo.surfstoked.nov14")));
+    private Checkout checkout;
 
     // Instance variables
     private SharedPreferences preferences;
@@ -126,6 +129,12 @@ public class BakerApplication extends Application implements AnalyticsEvents {
 
     public Billing getBilling() {
         return billing;
+    }
+
+    public void initializeCheckout(List<String> productIds) {
+        List<String> subscriptionIds = new ArrayList<>();
+        subscriptionIds.add(getString(R.string.subscription_product_id));
+        checkout = Checkout.forApplication(billing, Products.create().add(IN_APP, productIds).add(SUBSCRIPTION, subscriptionIds));
     }
 
     public Checkout getCheckout() {

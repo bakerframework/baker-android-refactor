@@ -31,14 +31,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -49,29 +48,25 @@ import android.widget.Toast;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.activity.ShelfActivity;
 import com.bakerframework.baker.client.TaskMandator;
+import com.bakerframework.baker.helper.ImageLoaderHelper;
 import com.bakerframework.baker.model.Issue;
-import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.task.ArchiveTask;
 import com.bakerframework.baker.task.BookJsonParserTask;
-import com.bakerframework.baker.task.DownloadTask;
-import com.bakerframework.baker.task.DownloadTaskDelegate;
 import com.bakerframework.baker.task.UnzipperTask;
 
 import org.json.JSONException;
 import org.solovyev.android.checkout.*;
 
-import java.io.File;
 import java.text.ParseException;
 import java.util.Observable;
 import java.util.Observer;
 
-public class IssueCardView extends LinearLayout implements TaskMandator, DownloadTaskDelegate, Observer {
+public class IssueCardView extends LinearLayout implements TaskMandator, Observer {
 
     private Issue issue;
 
-    private DownloadTask coverDownloadTask;
     private UnzipperTask unzipperTask;
     private boolean readable = false;
 
@@ -130,7 +125,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
     public void init(final Context context, AttributeSet attrs) {
 
         // Prepare and inflate layout
-        setOrientation(LinearLayout.HORIZONTAL);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.issue_card_view, this, true);
 
@@ -152,12 +146,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
         uiDownloadIssueButton = (Button) findViewById(R.id.download_issue_button);
 
         // Download cover (if not exist)
-        if (!getCoverFile().exists()) {
-            coverDownloadTask = new DownloadTask(this, issue.getCover(), getCoverFile());
-            coverDownloadTask.execute();
-        } else {
-            renderCover(getCoverFile());
-        }
+        ImageLoaderHelper.getImageLoader(context).displayImage(issue.getCover(), uiCoverImage);
 
         // Initialize cover click handler
         uiCoverImage.setOnClickListener(new OnClickListener() {
@@ -201,6 +190,15 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
 
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+
+        // Clean up
+
+
+        super.onDetachedFromWindow();
+    }
+
     public void redraw() {
         uiTitleText.setText(issue.getTitle());
         uiInfoText.setText(issue.getInfo());
@@ -226,10 +224,8 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
             setUIState(UI_STATE_INITIAL);
             readable = false;
         }
-    }
 
-    private File getCoverFile() {
-        return new File(Configuration.getCacheDirectory().concat(File.separator + issue.getName() + ".cover"));
+        requestLayout();
     }
 
     public Issue getIssue() {
@@ -312,14 +308,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
         // Create and trigger unzipper task
         unzipperTask = new UnzipperTask(parentActivity, this, UNZIP_MAGAZINE_TASK);
         unzipperTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, issue.getHpubPath(), issue.getName());
-    }
-
-    /**
-     * Sets an image file as the cover of this instance of an issue.
-     */
-    private void renderCover(final File file) {
-        Bitmap bmp = BitmapFactory.decodeFile(file.getPath());
-        uiCoverImage.setImageBitmap(bmp);
     }
 
     private void setUIState(int uiState) {
@@ -447,24 +435,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Downloa
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(getMeasuredWidth(), getMeasuredWidth());
-    }
-
-    @Override
-    public void onDownloadProgress(DownloadTask task, long progress, long bytesSoFar, long totalBytes) {
-
-    }
-
-    @Override
-    public void onDownloadComplete(DownloadTask task, File file) {
-        if(task == coverDownloadTask) {
-            renderCover(file);
-        }
-    }
-
-    @Override
-    public void onDownloadFailed(DownloadTask task) {
-
+        setMeasuredDimension(getMeasuredWidth(), getMeasuredHeight());
     }
 
     @Override

@@ -110,7 +110,9 @@ public class UnzipperTask extends AsyncTask<String, Long, String> {
             // Delete the zip file
             File zipFile = new File(inputFile);
             zipFile.delete();
-
+        }catch (Exception e) {
+            Log.e("UnzipperTask", "Error unzipping file: " + inputFile + ", " + e);
+            Log.e("UnzipperTask", "Error unzipping file: " + inputFile + ", " + e);
         } finally {
             try {
                 zipArchiveInputStream.close();

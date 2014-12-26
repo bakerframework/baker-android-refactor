@@ -18,6 +18,8 @@ import com.bakerframework.baker.model.IssueCollectionListener;
 
 import com.bakerframework.baker.play.LicenceManagerDelegate;
 
+import java.util.List;
+
 public class SplashActivity extends Activity implements IssueCollectionListener, LicenceManagerDelegate {
 
 	@Override
@@ -74,6 +76,11 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
 
         // Remove listener
         BakerApplication.getInstance().getIssueCollection().removeListener(this);
+
+        // Set up checkout
+        final IssueCollection issueCollection = BakerApplication.getInstance().getIssueCollection();
+        List<String> productIds = issueCollection.getSkuList();
+        BakerApplication.getInstance().initializeCheckout(productIds);
 
         // Wait for a little while for the shelf to load
         CountDownTimer timer = new CountDownTimer(getResources().getInteger(R.integer.splash_time_out), 1000) {

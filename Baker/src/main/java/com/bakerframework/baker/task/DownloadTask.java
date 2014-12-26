@@ -48,12 +48,26 @@ public class DownloadTask extends AsyncTask<String, Long, String> {
     @Override
     protected String doInBackground(String... params) {
         Log.d(tag, "DOWNLOADING FILE: " + url);
-        String result = "ERROR";
+        String result;
         downloading = true;
-        try {
-            result = (this.createTargetFile() && this.download()) ? "SUCCESS" : "ERROR";
-        } catch (Exception e) {
-            Log.w(tag, "Error while retrieving file from " + url, e);
+
+        // Create target file
+        if(!this.createTargetFile()) {
+            errorCause = "Unable to save the file.";
+            return "ERROR";
+        }
+
+        // Download file
+        if(this.download()) {
+            errorCause = "Unable to download the file.";
+            result = "SUCCESS";
+        }else{
+            result = "ERROR";
+        }
+
+        // Delete target file on error
+        if(result.equals("ERROR")) {
+            this.deleteTargetFile();
         }
 
         return result;
@@ -94,21 +108,37 @@ public class DownloadTask extends AsyncTask<String, Long, String> {
 
     // Helper methods
 
-    private boolean createTargetFile() throws IOException {
+    private boolean createTargetFile() {
+
         // Create directory structure
         if(!file.getParentFile().exists() || !file.getParentFile().isDirectory()) {
             file.getParentFile().mkdirs();
         }
         if(!file.exists()) {
-            file.createNewFile();
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                return false;
+            }
         }
         return file.exists();
     }
 
+    private boolean deleteTargetFile() {
+        // Create directory structure
+        if(file != null && file.exists()) {
+            file.delete();
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     private boolean download() {
 
-        // Prepare download
         try {
+
+            // Prepare Download
             errorCause = null;
             connection = null;
             URL url = new URL(this.url);

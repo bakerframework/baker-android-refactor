@@ -3,8 +3,12 @@
 
     <!-- Backend Configuration -->
     <string name="app_id">com.magloft.demo</string>
+
+    <!--<string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>-->
+    <!--<string name="purchase_confirmation_url">http://www.magloft.com/api/app/v1/android/verify/:app_id/:user_id</string>-->
     <string name="newstand_manifest_url">http://192.168.0.6:3000/manifest/:app_id/:user_id</string>
     <string name="purchase_confirmation_url">http://192.168.0.6:3000/api/app/v1/android/verify/:app_id/:user_id</string>
+
     <string name="purchases_url">http://bakerframework.com/demo/shelf.json</string>
     <string name="post_apns_token_url">http://bakerframework.com/demo/shelf.json</string>
     <string name="download_report_url">http://bakerframework.com/demo/shelf.json</string>
@@ -133,5 +137,7 @@
     <string name="download_task_error_cancelled">Download cancelled</string>
     <string name="purchase_thank_you_message">Thank you for purchasing this issue!</string>
     <string name="purchase_not_possible_message">Unable to complete checkout</string>
+    <string name="action_subscribe">Subscribe</string>
+    <string name="subscription_product_id">com.magloft.demo.subscription.monthly</string>
 
 </resources>

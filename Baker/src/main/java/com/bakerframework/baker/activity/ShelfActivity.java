@@ -71,6 +71,7 @@ import com.bakerframework.baker.view.ShelfView;
 
 import org.json.JSONException;
 import org.solovyev.android.checkout.ActivityCheckout;
+import org.solovyev.android.checkout.BillingRequests;
 import org.solovyev.android.checkout.Checkout;
 import org.solovyev.android.checkout.Inventory;
 import org.solovyev.android.checkout.Purchase;
@@ -251,6 +252,21 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
                 issueCollection.reload();
             }
             return true;
+        } else if (itemId == R.id.action_subscribe) {
+
+            if(issueCollection.getSubscriptionSku() != null) {
+                final ActivityCheckout checkout = this.getCheckout();
+                checkout.whenReady(new Checkout.ListenerAdapter() {
+                    @Override
+                    public void onReady(@NonNull BillingRequests requests) {
+                        requests.purchase(issueCollection.getSubscriptionSku(), null, checkout.getPurchaseFlow());
+                    }
+                });
+                return true;
+            }else{
+                Toast.makeText(this, "Subscriptions are currently not available!", Toast.LENGTH_LONG).show();
+                return false;
+            }
         } else {
             return super.onContextItemSelected(item);
         }
@@ -258,6 +274,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     @Override
     public void onIssueCollectionLoaded() {
+        // @TODO: Set checkout product ids
         presentIssues();
     }
 

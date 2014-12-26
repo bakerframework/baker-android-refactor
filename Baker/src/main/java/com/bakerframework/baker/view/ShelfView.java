@@ -20,11 +20,6 @@ public class ShelfView extends GridView {
         super(context, attrs);
     }
 
-    public IssueCardView getViewByIssue(Issue issue) {
-        int position = ((IssueAdapter) getAdapter()).getPosition(issue);
-        return (IssueCardView) getChildAt(position);
-    }
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         this.setNumColumns(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
