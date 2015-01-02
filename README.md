@@ -24,8 +24,8 @@ report any bugs or feature requests and to see the list of known issues.
         Extras > Google Play Licensing Library
 
 ## Installation
+Clone this repository, import in Android Studio and build/run the _Baker_ build configuration
 
-    # Clone this repository, import in Android Studio and build/run the _Baker_ build configuration
     $ git clone git@github.com:bakerframework/baker-android-refactor.git
 
 Beginner-friendly instructions can be found in [Tutorial - Installation Guide](https://github.com/bakerframework/baker-android-refactor/wiki/Tutorial---Installation-Guide)
