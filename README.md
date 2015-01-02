@@ -8,20 +8,34 @@ The HTML5 ebook framework to publish interactive books & magazines on any Androi
 Please see the [issues](https://github.com/bakerframework/baker-android-refactor/issues) section to
 report any bugs or feature requests and to see the list of known issues.
 
-## Building
+## Installation
 
-### With Gradle
+1. Install [Github Client](https://mac.github.com/) or [git](http://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+2. Download and install [Android Studio](http://developer.android.com/sdk/index.html)
+3. Open Android SDK Manager and install the following dependencies:
+  
+        Tools > Android SDK Tools
+        Tools > Android SDK Platform-tools
+        Tools > Android SDK Build-tools
+        Android 5.0.1 (API 21) > SDK Platform
+        Extras > Android Support Repository
+        Extras > Android Support Library
+        Extras > Google Play services
+        Extras > Google Repository
+        Extras > Google Play Billing Library
+        Extras > Google Play Licensing Library
 
-The easiest way to build is to install [Android Studio](https://developer.android.com/sdk/index.html) v1.+
-with [Gradle](https://www.gradle.org/) v2.2.1.
-Once installed, then you can import the project into Android Studio:
 
-1. Open `File`
-2. Import Project
-3. Select `build.gradle` under the project directory
-4. Click `OK`
+4. Open [Github Client](https://mac.github.com/) and clone the [baker-android-refactor repository](https://github.com/bakerframework/baker-android-refactor)
+5. Open [Android Studio](http://developer.android.com/sdk/index.html) and choose "File" > "Import Project"
+6. Choose the directory where the baker-android-refactor repository is located.
+7. Choose "Build" > "Make Project"
+8. Choose "Run" > "Run Baker"
+9. In the "Choose Device" dialog, either select "Choose a running device" when you have an android device attached via USB, or select "Launch Emulator" (you need to initially create a virtual device)
 
-Then, Gradle will do everything for you.
+## Tutorials
+
+Tutorials can be found in the [Baker Android Wiki](https://github.com/bakerframework/baker-android-refactor/wiki)
 
 ## Acknowledgements
 
