@@ -29,6 +29,8 @@ This project is based on the original [Baker Android](https://github.com/bakerfr
 
 This project follows the features and roadmap of the official [Baker iOS Project](https://github.com/bakerframework/baker), currently maintained by @pieterclaerhout, @nin9creative and the baker community.
 
+This project integrates nicely with [Baker Cloud Console](http://www.bakerframework.com/bakercloudce/) and [MagLoft](http://www.magloft.com).
+
 It also uses other great open source libraries such as:
 
 * [jsoup](https://github.com/jhy/jsoup)
