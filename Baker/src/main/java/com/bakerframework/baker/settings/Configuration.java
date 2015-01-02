@@ -1,20 +1,19 @@
 /**
  * Copyright (c) 2013-2014. Francisco Contreras, Holland Salazar.
+ * Copyright (c) 2015. Tobias Strebitzer, Francisco Contreras, Holland Salazar.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this list of
+ * Redistributions of source code must retain the above copyright notice, this list of
  * conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice, this list of
+ * Redistributions in binary form must reproduce the above copyright notice, this list of
  * conditions and the following disclaimer in the documentation and/or other materials
  * provided with the distribution.
- *
- * 3. Neither the name of the Baker Framework nor the names of its contributors may be used to
+ * Neither the name of the Baker Framework nor the names of its contributors may be used to
  * endorse or promote products derived from this software without specific prior written
  * permission.
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
@@ -63,7 +62,6 @@ public class Configuration {
 
     // Global preferences
     public final static String PREF_REGISTRATION_ID = "com.bakerframework.baker.REGISTRATION_ID";
-    public final static String PREF_DOWNLOAD_IN_PROGRESS = "com.bakerframework.baker.DOWNLOAD_IN_PROGRESS";
     public final static String PREF_APP_VERSION = "com.bakerframework.baker.APP_VERSION";
     public final static String PREF_FIRST_TIME_RUN = "com.bakerframework.baker.PREF_FIRST_TIME_RUN";
 
@@ -84,7 +82,7 @@ public class Configuration {
 	private Configuration() {}
 
     public static String getAppVersion() {
-        PackageInfo pInfo = null;
+        PackageInfo pInfo;
         try {
             pInfo = BakerApplication.getInstance().getPackageManager().getPackageInfo(BakerApplication.getInstance().getPackageName(), 0);
             return String.valueOf(pInfo.versionCode);
@@ -194,13 +192,6 @@ public class Configuration {
         NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         return networkInfo.isConnected();
-    }
-	
-	public static boolean hasNetworkConnection() {
-		ConnectivityManager cm = (ConnectivityManager) BakerApplication.getInstance()
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnected();
     }
 
     public static Map<String, String> splitUrlQueryString(URL url) throws UnsupportedEncodingException {

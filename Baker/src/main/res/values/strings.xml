@@ -3,34 +3,22 @@
 
     <!-- Backend Configuration -->
     <string name="app_id">com.magloft.demo</string>
-
-    <!--<string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>-->
-    <!--<string name="purchase_confirmation_url">http://www.magloft.com/api/app/v1/android/verify/:app_id/:user_id</string>-->
-    <string name="newstand_manifest_url">http://192.168.0.6:3000/manifest/:app_id/:user_id</string>
-    <string name="purchase_confirmation_url">http://192.168.0.6:3000/api/app/v1/android/verify/:app_id/:user_id</string>
-
+    <string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>
+    <string name="purchase_confirmation_url">ttp://www.magloft.com/api/app/v1/android/verify/:app_id/:user_id</string>
     <string name="purchases_url">http://bakerframework.com/demo/shelf.json</string>
     <string name="post_apns_token_url">http://bakerframework.com/demo/shelf.json</string>
     <string name="download_report_url">http://bakerframework.com/demo/shelf.json</string>
 
     <!-- Google Play Configuration / In App Billing -->
-    <string name="google_play_license_key">***REMOVED***</string>
-    <string name="license_error">Licensing is not possible in non-productive apps. Please disable enable_licence_check until publishing the app.</string>
-    <string name="invalid_license_error">It seems this app was not installed in a proper way. Please install this app only by using Google Play Store.</string>
-
-    <!-- Categories -->
-    <string-array name="categories_array">
-        <item>Sports</item>
-        <item>Music</item>
-        <item>Events</item>
-        <item>Culture</item>
-        <item>Science</item>
-    </string-array>
-    <string name="drawer_open">Open categories</string>
-    <string name="drawer_close">Close categories</string>
+    <string name="google_play_license_key"></string>
+    <string name="subscription_product_id"></string>
 
     <!-- Project Number of the Google API console identifying the notifications sender -->
     <string name="sender_id">670330094152</string>
+
+    <!-- Categories -->
+    <string name="drawer_open">Open categories</string>
+    <string name="drawer_close">Close categories</string>
 
     <!-- The application id that will be send to the server when retrieving the shelf -->
     <string name="exit">Exit</string>
@@ -138,6 +126,7 @@
     <string name="purchase_thank_you_message">Thank you for purchasing this issue!</string>
     <string name="purchase_not_possible_message">Unable to complete checkout</string>
     <string name="action_subscribe">Subscribe</string>
-    <string name="subscription_product_id">com.magloft.demo.subscription.monthly</string>
+    <string name="license_error">Licensing is not possible in non-productive apps. Please disable enable_licence_check until publishing the app.</string>
+    <string name="invalid_license_error">It seems this app was not installed in a proper way. Please install this app only by using Google Play Store.</string>
 
 </resources>

@@ -21,7 +21,8 @@
         android:background="#FFFFFF"
         android:cropToPadding="true"
         android:text="All Categories"
-        android:paddingLeft="4dp" />
+        android:paddingLeft="4dp"
+        android:visibility="gone"/>
 
 
 </RelativeLayout>
