@@ -51,7 +51,6 @@ import org.solovyev.android.checkout.Checkout;
 import org.solovyev.android.checkout.Products;
 import org.solovyev.android.checkout.PurchaseVerifier;
 
-import static java.util.Arrays.asList;
 import static org.solovyev.android.checkout.ProductTypes.IN_APP;
 import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
 
@@ -142,7 +141,7 @@ public class BakerApplication extends Application implements AnalyticsEvents {
 
     public void initializeCheckout(List<String> productIds) {
         List<String> subscriptionIds = new ArrayList<>();
-        subscriptionIds.add(getString(R.string.subscription_product_id));
+        subscriptionIds.add(getString(R.string.google_play_subscription_id));
         checkout = Checkout.forApplication(billing, Products.create().add(IN_APP, productIds).add(SUBSCRIPTION, subscriptionIds));
     }
 

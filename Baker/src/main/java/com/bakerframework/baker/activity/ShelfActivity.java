@@ -100,6 +100,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     @NonNull
     private Inventory inventory;
 
+    @NonNull
     public ActivityCheckout getCheckout() {
         return checkout;
     }
@@ -125,7 +126,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
         // Prepare google analytics
         if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_app_open_event)) {
-            ((BakerApplication) this.getApplication()).sendEvent(getString(R.string.application_category), getString(R.string.application_open), getString(R.string.application_open_label));
+            ((BakerApplication) this.getApplication()).sendEvent(getString(R.string.ga_application_category), getString(R.string.ga_application_open), getString(R.string.ga_application_open_label));
         }
 
         // Initialize issue collection
@@ -181,7 +182,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         private void onPurchased() {
             // let's update purchase information in local inventory
             inventory.load().whenLoaded(new InventoryLoadedListener());
-            Toast.makeText(getApplicationContext(), getString(R.string.purchase_thank_you_message), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.msg_purchase_complete), Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -195,8 +196,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         }
     }
 
-    private abstract class BaseRequestListener<R> implements RequestListener<R> {
-
+    private abstract class BaseRequestListener<Request> implements RequestListener<Request> {
         @Override
         public void onError(int response, @NonNull Exception e) {
             // @TODO: add alert dialog or logging
@@ -220,9 +220,11 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     @Override
     protected void onResume() {
         super.onResume();
+        /* @TODO: Handle network / play services error on application resume
         if(!BakerApplication.getInstance().checkPlayServices(this)) {
-            // finish();
+            finish();
         }
+        */
     }
 
     @Override
@@ -235,7 +237,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // Show / Hide subscription menu
-        if(!getString(R.string.subscription_product_id).isEmpty()) {
+        if(!getString(R.string.google_play_subscription_id).isEmpty()) {
             menu.getItem(0).setVisible(true);
         }
         return super.onPrepareOptionsMenu(menu);
@@ -248,7 +250,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
         if (itemId == R.id.action_info) {
             Intent intent = new Intent(this, InfoActivity.class);
-            intent.putExtra(IssueActivity.MODAL_URL, getString(R.string.infoUrl));
+            intent.putExtra(IssueActivity.MODAL_URL, getString(R.string.asset_url_info));
             startActivity(intent);
             return true;
         } else if (itemId == R.id.action_settings) {
@@ -317,7 +319,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
                 return true;
             }
         });
-        webview.loadUrl(getString(R.string.backgroundUrl));
+        webview.loadUrl(getString(R.string.asset_url_background));
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -358,7 +360,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         });
         webview.setBackgroundColor(Color.TRANSPARENT);
         webview.setWebChromeClient(new WebChromeClient());
-        webview.loadUrl(getString(R.string.headerUrl));
+        webview.loadUrl(getString(R.string.asset_url_header));
     }
 
     private void setupActionBar() {
@@ -382,9 +384,9 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     public void showAppUsage() {
         BookJson book = new BookJson();
-        book.setMagazineName(this.getString(R.string.ut_directory));
+        book.setMagazineName(this.getString(R.string.path_tutorial_directory));
         List<String> contents = new ArrayList<>();
-        String pages[] = this.getString(R.string.ut_pages).split(">");
+        String[] pages = this.getResources().getStringArray(R.array.list_tutorial_pages);
         for (String page : pages) {
             page = page.trim();
             contents.add(page);
@@ -422,6 +424,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     }
 
+
     @Override
     public void onBackPressed() {
         /* @TODO: Check if any downloading or unpacking process is currently running */
@@ -429,15 +432,15 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         if (downloadingIssues.size() > 0) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder
-                .setTitle(this.getString(R.string.exit))
-                .setMessage(this.getString(R.string.closing_app))
-                .setPositiveButton(this.getString(R.string.yes), new DialogInterface.OnClickListener() {
+                .setTitle(this.getString(R.string.msg_exit))
+                .setMessage(this.getString(R.string.msg_closing_app))
+                .setPositiveButton(this.getString(R.string.lbl_yes), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         issueCollection.cancelDownloadingIssues(downloadingIssues);
                         ShelfActivity.super.onBackPressed();
                     }
                 })
-                .setNegativeButton(this.getString(R.string.no), null)
+                .setNegativeButton(this.getString(R.string.lbl_no), null)
                 .show();
         } else {
             super.onBackPressed();

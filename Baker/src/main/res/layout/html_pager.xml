@@ -40,7 +40,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/next"
+        android:text="@string/lbl_next"
         android:id="@+id/buttonNext"
         android:layout_gravity="right|top"
         style="@style/abaker_default_button"
@@ -49,7 +49,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/back"
+        android:text="@string/lbl_back"
         android:id="@+id/buttonBack"
         android:layout_gravity="left|top"
         style="@style/abaker_default_button"

@@ -133,8 +133,8 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
     public void onIssueCollectionLoadError() {
         // No internet connection and no cached file
         new AlertDialog.Builder(this)
-            .setTitle(this.getString(R.string.exit))
-            .setMessage(this.getString(R.string.no_shelf_no_internet))
+            .setTitle(this.getString(R.string.msg_exit))
+            .setMessage(this.getString(R.string.err_application_no_internet))
             .setPositiveButton(this.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     SplashActivity.this.finish();
@@ -160,8 +160,8 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
         // Invalid licence
         Log.i("LICENSING", "Invalid licence: " + reason);
         new AlertDialog.Builder(SplashActivity.this)
-                .setTitle(getString(R.string.exit))
-                .setMessage(getString(R.string.invalid_license_error))
+                .setTitle(getString(R.string.msg_exit))
+                .setMessage(getString(R.string.err_application_license_problem))
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         SplashActivity.this.finish();
@@ -173,8 +173,8 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
     @Override
     public void onLicenceRetry(int reason) {
         new AlertDialog.Builder(SplashActivity.this)
-                .setTitle(getString(R.string.exit))
-                .setMessage(getString(R.string.no_shelf_no_internet))
+                .setTitle(getString(R.string.msg_exit))
+                .setMessage(getString(R.string.err_application_no_internet))
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         SplashActivity.this.finish();

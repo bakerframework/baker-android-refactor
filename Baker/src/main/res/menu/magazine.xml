@@ -5,6 +5,6 @@
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         app:showAsAction="never"
-        app:title="@string/action_settings"/>
+        app:title="@string/lbl_action_settings"/>
 
 </menu>

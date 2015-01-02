@@ -9,7 +9,7 @@
         android:id="@+id/cover_image"
         android:layout_width="100dp"
         android:layout_height="140dp"
-        android:contentDescription="@string/thumbImageDescription"
+        android:contentDescription="@string/msg_thumb_description"
         android:scaleType="fitXY"
         android:background="#9C9C9C"
         android:adjustViewBounds="true"
@@ -77,7 +77,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
                 android:layout_margin="2dp"
-                android:text="@string/download_issue"
+                android:text="@string/lbl_issue_download"
                 style="@style/abaker_default_button" />
         </LinearLayout>
 
@@ -93,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
                 android:layout_margin="2dp"
-                android:text="@string/buy_issue"
+                android:text="@string/lbl_issue_buy"
                 style="@style/abaker_default_button" />
         </LinearLayout>
 
@@ -117,7 +117,7 @@
 
             <Button
                 android:id="@+id/read_issue_button"
-                android:text="@string/read_issue"
+                android:text="@string/lbl_issue_read"
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
                 android:layout_margin="2dp"
@@ -126,7 +126,7 @@
 
             <Button
                 android:id="@+id/archive_issue_button"
-                android:text="@string/archive_issue"
+                android:text="@string/lbl_issue_archive"
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
                 android:layout_margin="2dp"

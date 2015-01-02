@@ -71,7 +71,7 @@ public class BookJsonParserTask extends AsyncTask<String, Long, BookJson> {
                 Log.d(this.getClass().getName(), "Will parse the BookJson from the assets directory." );
 
                 AssetManager assetManager = this.context.getAssets();
-                String bookJsonPath = this.context.getString(R.string.sa_books_directory)
+                String bookJsonPath = this.context.getString(R.string.path_standalone_books_directory)
                         .concat(File.separator)
                         .concat(this.issue.getName())
                         .concat(File.separator)
@@ -94,7 +94,7 @@ public class BookJsonParserTask extends AsyncTask<String, Long, BookJson> {
                 Log.d(this.getClass().getName(), "Will parse the BookJson from the file system." );
 
                 String workingDir = this.magazinesDirectory + File.separator;
-                File book = new File(workingDir + params[0] + File.separator + this.context.getString(R.string.book));
+                File book = new File(workingDir + params[0] + File.separator + this.context.getString(R.string.path_book));
 
                 FileInputStream input = new FileInputStream(book);
 

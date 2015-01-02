@@ -187,7 +187,7 @@ public class IssueActivity extends FragmentActivity {
 
         if (currentItem == (allItems - 1)) {
             Log.d(this.getClass().getName(), "Last page detected.");
-            ((Button)findViewById(R.id.buttonNext)).setText(getString(R.string.finish));
+            ((Button)findViewById(R.id.buttonNext)).setText(getString(R.string.lbl_finish));
 
             if (allItems > 1) {
                 findViewById(R.id.buttonBack).setVisibility(View.VISIBLE);
@@ -195,10 +195,10 @@ public class IssueActivity extends FragmentActivity {
         } else if (currentItem == 0) {
             Log.d(this.getClass().getName(), "First page detected.");
             findViewById(R.id.buttonBack).setVisibility(View.GONE);
-            ((Button)findViewById(R.id.buttonNext)).setText(getString(R.string.next));
+            ((Button)findViewById(R.id.buttonNext)).setText(getString(R.string.lbl_next));
         } else {
             findViewById(R.id.buttonBack).setVisibility(View.VISIBLE);
-            ((Button)findViewById(R.id.buttonNext)).setText(getString(R.string.next));
+            ((Button)findViewById(R.id.buttonNext)).setText(getString(R.string.lbl_next));
         }
     }
 
@@ -353,7 +353,7 @@ public class IssueActivity extends FragmentActivity {
 
         if (STANDALONE_MODE) {
             path = "file:///android_asset".concat(File.separator)
-                    .concat(getString(R.string.sa_books_directory)).concat(File.separator);
+                    .concat(getString(R.string.path_standalone_books_directory)).concat(File.separator);
         } else if (ENABLE_TUTORIAL) {
             path = "file:///android_asset".concat(File.separator);
         }
@@ -390,12 +390,12 @@ public class IssueActivity extends FragmentActivity {
                         ((BakerApplication) IssueActivity.this.getApplication()).sendTimingEvent(
                                 metaBakerPageCategory,
                                 timeElapsed,
-                                getString(R.string.issue_page_view),
+                                getString(R.string.ga_issue_page_view),
                                 metaBakerPageName);
 
                     ((BakerApplication) IssueActivity.this.getApplication()).sendEvent(
                             metaBakerPageCategory,
-                            getString(R.string.issue_page_view),
+                            getString(R.string.ga_issue_page_view),
                             metaBakerPageName);
 
                     startedTime = 0L;
@@ -416,10 +416,10 @@ public class IssueActivity extends FragmentActivity {
 
                     if (tags.containsKey("baker-page-name")) {
                         String name = tags.get("baker-page-name");
-                        String category = tags.containsKey("baker-page-category") ? tags.get("baker-page-category") : getString(R.string.issues_category);
+                        String category = tags.containsKey("baker-page-category") ? tags.get("baker-page-category") : getString(R.string.ga_issues_category);
 
                         name = (name.isEmpty()) ? book.getContents().get(position) : name;
-                        category = (category.isEmpty()) ? getString(R.string.issues_category) : category;
+                        category = (category.isEmpty()) ? getString(R.string.ga_issues_category) : category;
 
                         if (resources.getBoolean(R.bool.ga_register_page_view_time_elapsed_event)) {
                             startedTime = System.currentTimeMillis();
@@ -430,7 +430,7 @@ public class IssueActivity extends FragmentActivity {
                         } else {
                             ((BakerApplication) IssueActivity.this.getApplication()).sendEvent(
                                     category,
-                                    getString(R.string.issue_page_view),
+                                    getString(R.string.ga_issue_page_view),
                                     name);
                         }
                     }
@@ -480,7 +480,7 @@ public class IssueActivity extends FragmentActivity {
                                 Uri uri = Uri.parse(stringUrl);
                                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                 startActivity(intent);
-                            } else if (referrer.equals(IssueActivity.this.getString(R.string.url_gindpubs_referrer))) {
+                            } else if (referrer.equals(IssueActivity.this.getString(R.string.url_baker_referrer))) {
                                 IssueActivity.this.openLinkInModal(stringUrl);
                                 return true;
                             } else {

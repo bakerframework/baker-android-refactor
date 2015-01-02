@@ -243,8 +243,8 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         // Here we register the OPEN ISSUE event on Google Analytics
         if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_read_event)) {
             ((BakerApplication) parentActivity.getApplication()).sendEvent(
-                    parentActivity.getString(R.string.issues_category),
-                    parentActivity.getString(R.string.issue_open),
+                    parentActivity.getString(R.string.ga_issues_category),
+                    parentActivity.getString(R.string.ga_issue_open),
                     issue.getName());
         }
     }
@@ -268,11 +268,11 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
      */
     private void archiveIssue() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(R.string.confirmation)
-                .setMessage(R.string.archiveConfirm)
+        builder.setTitle(R.string.msg_confirmation)
+                .setMessage(R.string.msg_confirmation_delete_text)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setNegativeButton(R.string.no, null)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.lbl_no, null)
+                .setPositiveButton(R.string.lbl_yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // Update UI
                         setUIState(UI_STATE_ARCHIVE);
@@ -329,7 +329,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
                 uiPurchaseActionsContainer.setVisibility(View.GONE);
                 uiProgressText.setVisibility(View.VISIBLE);
                 uiProgressBarContainer.setVisibility(View.VISIBLE);
-                uiProgressText.setText(R.string.downloading);
+                uiProgressText.setText(R.string.msg_issue_downloading);
                 break;
             case UI_STATE_UNZIP:
                 uiIdleActionsContainer.setVisibility(View.GONE);
@@ -337,7 +337,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
                 uiPurchaseActionsContainer.setVisibility(View.GONE);
                 uiProgressText.setVisibility(View.VISIBLE);
                 uiProgressBarContainer.setVisibility(View.VISIBLE);
-                uiProgressText.setText(R.string.unzipping);
+                uiProgressText.setText(R.string.msg_issue_unzipping);
                 break;
             case UI_STATE_READY:
                 uiIdleActionsContainer.setVisibility(View.GONE);
@@ -352,7 +352,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
                 uiReadyActionsContainer.setVisibility(View.GONE);
                 uiProgressText.setVisibility(View.VISIBLE);
                 uiProgressBarContainer.setVisibility(View.VISIBLE);
-                uiProgressText.setText(R.string.deleting);
+                uiProgressText.setText(R.string.msg_issue_deleting);
                 break;
             case UI_STATE_ERROR:
                 uiIdleActionsContainer.setVisibility(View.VISIBLE);
@@ -402,8 +402,8 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
                     // Here we register the DELETE ISSUE event on Google Analytics
                     if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_delete_event)) {
                         ((BakerApplication)parentActivity.getApplication()).sendEvent(
-                                parentActivity.getString(R.string.issues_category),
-                                parentActivity.getString(R.string.issue_delete),
+                                parentActivity.getString(R.string.ga_issues_category),
+                                parentActivity.getString(R.string.ga_issue_delete),
                                 issue.getName());
                     }
 
@@ -448,8 +448,8 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
                     // Send google analytics event
                     if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_download_event)) {
                         BakerApplication.getInstance().sendEvent(
-                                parentActivity.getString(R.string.issues_category),
-                                parentActivity.getString(R.string.issue_download),
+                                parentActivity.getString(R.string.ga_issues_category),
+                                parentActivity.getString(R.string.ga_issue_download),
                                 issue.getName());
                     }
                     // Trigger unzipping
@@ -457,7 +457,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
                     break;
                 case Issue.EVENT_ON_DOWNLOAD_FAILED:
                     setUIState(UI_STATE_ERROR);
-                    uiProgressText.setText(getContext().getString(R.string.download_task_error_io));
+                    uiProgressText.setText(getContext().getString(R.string.err_download_task_io));
                     break;
             }
         }

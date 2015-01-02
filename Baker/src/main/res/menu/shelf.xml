@@ -3,25 +3,25 @@
 
     <item android:id="@+id/action_subscribe"
         android:icon="@drawable/ic_action_labels"
-        android:title="@string/action_subscribe"
+        android:title="@string/lbl_action_subscribe"
         app:showAsAction="ifRoom"
         android:visible="false" />
 
     <item android:id="@+id/action_refresh"
         android:icon="@drawable/ic_action_refresh"
-        android:title="@string/action_refresh"
+        android:title="@string/lbl_action_refresh"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_action_settings"
         app:showAsAction="ifRoom"
-        android:title="@string/action_settings"/>
+        android:title="@string/lbl_action_settings"/>
 
     <item
         android:id="@+id/action_info"
         android:icon="@drawable/ic_action_about"
         app:showAsAction="ifRoom"
-        android:title="@string/action_info"/>
+        android:title="@string/lbl_action_info"/>
 
 </menu>

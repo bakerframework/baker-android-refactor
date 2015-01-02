@@ -134,7 +134,7 @@ public class WebViewFragment extends Fragment {
                                 Uri uri = Uri.parse(stringUrl);
                                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                 startActivity(intent);
-                            } else if (referrer.equals(WebViewFragment.this.activity.getString(R.string.url_gindpubs_referrer))) {
+                            } else if (referrer.equals(WebViewFragment.this.activity.getString(R.string.url_baker_referrer))) {
                                 WebViewFragment.this.activity.openLinkInModal(stringUrl);
                                 return true;
                             } else {

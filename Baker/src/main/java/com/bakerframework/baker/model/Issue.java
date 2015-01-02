@@ -218,7 +218,7 @@ public class Issue extends Observable implements DownloadTaskDelegate {
     }
 
     public String getBookJsonPath() {
-        return Configuration.getMagazinesDirectory() + File.separator + name + File.separator + BakerApplication.getInstance().getString(R.string.book);
+        return Configuration.getMagazinesDirectory() + File.separator + name + File.separator + BakerApplication.getInstance().getString(R.string.path_book);
     }
 
     public File getBookJsonFile() {
@@ -226,7 +226,7 @@ public class Issue extends Observable implements DownloadTaskDelegate {
     }
 
     public String getHpubPath() {
-        return Configuration.getMagazinesDirectory() + File.separator + name + BakerApplication.getInstance().getString(R.string.package_extension);
+        return Configuration.getMagazinesDirectory() + File.separator + name + BakerApplication.getInstance().getString(R.string.path_package_extension);
     }
 
     public File getHpubFile() {

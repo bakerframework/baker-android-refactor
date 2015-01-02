@@ -207,16 +207,16 @@ public class DownloadTask extends AsyncTask<String, Long, String> {
             // Close output
             output.close();
         } catch (ConnectException e) {
-            errorCause = BakerApplication.getInstance().getString(R.string.download_task_error_connect);
+            errorCause = BakerApplication.getInstance().getString(R.string.err_download_task_connect);
             return false;
         } catch (MalformedURLException e) {
-            errorCause = BakerApplication.getInstance().getString(R.string.download_task_error_malformed_url);
+            errorCause = BakerApplication.getInstance().getString(R.string.err_download_task_malformed_url);
             return false;
         } catch (FileNotFoundException e) {
-            errorCause = BakerApplication.getInstance().getString(R.string.download_task_error_file_not_found);
+            errorCause = BakerApplication.getInstance().getString(R.string.err_download_task_file_not_found);
             return false;
         } catch (IOException e) {
-            errorCause = BakerApplication.getInstance().getString(R.string.download_task_error_io);
+            errorCause = BakerApplication.getInstance().getString(R.string.err_download_task_io);
             return false;
         } finally {
             if(connection != null) { connection.disconnect(); }
@@ -224,7 +224,7 @@ public class DownloadTask extends AsyncTask<String, Long, String> {
         }
 
         if(isCancelled()) {
-            errorCause = BakerApplication.getInstance().getString(R.string.download_task_error_cancelled);
+            errorCause = BakerApplication.getInstance().getString(R.string.err_download_task_cancelled);
             return false;
         }else{
             return true;

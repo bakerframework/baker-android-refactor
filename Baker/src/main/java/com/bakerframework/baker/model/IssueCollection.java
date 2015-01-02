@@ -38,7 +38,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.solovyev.android.checkout.Inventory;
-import org.solovyev.android.checkout.Purchase;
 import org.solovyev.android.checkout.Sku;
 
 import java.io.File;
@@ -70,8 +69,8 @@ public class IssueCollection implements DownloadTaskDelegate {
 
     // Data Processing
     String JSON_ENCODING = "utf-8";
-    SimpleDateFormat SDF_INPUT = new SimpleDateFormat(BakerApplication.getInstance().getString(R.string.inputDateFormat), Locale.US);
-    SimpleDateFormat SDF_OUTPUT = new SimpleDateFormat(BakerApplication.getInstance().getString(R.string.outputDateFormat), Locale.US);
+    SimpleDateFormat SDF_INPUT = new SimpleDateFormat(BakerApplication.getInstance().getString(R.string.format_input_date), Locale.US);
+    SimpleDateFormat SDF_OUTPUT = new SimpleDateFormat(BakerApplication.getInstance().getString(R.string.format_output_date), Locale.US);
 
     // Categories
     public static final String ALL_CATEGORIES_STRING = "All Categories";
@@ -273,7 +272,7 @@ public class IssueCollection implements DownloadTaskDelegate {
     }
 
     private String getCachedPath() {
-        return Configuration.getCacheDirectory() + File.separator + BakerApplication.getInstance().getString(R.string.shelf);
+        return Configuration.getCacheDirectory() + File.separator + BakerApplication.getInstance().getString(R.string.path_shelf);
     }
 
     private File getCachedFile() {
@@ -292,7 +291,7 @@ public class IssueCollection implements DownloadTaskDelegate {
         if (subscriptionProductCollection.supported) {
 
             for (Sku sku : subscriptionProductCollection.getSkus()) {
-                if(sku.id.equals(BakerApplication.getInstance().getString(R.string.subscription_product_id))) {
+                if(sku.id.equals(BakerApplication.getInstance().getString(R.string.google_play_subscription_id))) {
                     hasSubscription = inventoryProducts.get(SUBSCRIPTION).isPurchased(sku);
                     subscriptionSku = sku;
                 }
@@ -319,7 +318,7 @@ public class IssueCollection implements DownloadTaskDelegate {
                 }
             }
         } else {
-            Log.e(getClass().getName(), "Error: " + R.string.purchase_not_possible_message);
+            Log.e(getClass().getName(), "Error: " + R.string.err_purchase_not_possible);
         }
 
     }
