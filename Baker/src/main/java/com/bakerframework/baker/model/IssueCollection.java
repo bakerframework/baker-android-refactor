@@ -211,12 +211,16 @@ public class IssueCollection implements DownloadTaskDelegate {
             issue.setSize(issueSize);
 
             // Set categories
-            jsonCategories = json.getJSONArray("categories");
-            categories = new ArrayList<>();
-            for (int j = 0; j < jsonCategories.length(); j++) {
-                categories.add(jsonCategories.get(j).toString());
+            if(json.has("categories")) {
+                jsonCategories = json.getJSONArray("categories");
+                categories = new ArrayList<>();
+                for (int j = 0; j < jsonCategories.length(); j++) {
+                    categories.add(jsonCategories.get(j).toString());
+                }
+                issue.setCategories(categories);
+            }else{
+                issue.setCategories(new ArrayList<String>());
             }
-            issue.setCategories(categories);
 
             // Add name to issue name list
             issueNameList.add(issueName);

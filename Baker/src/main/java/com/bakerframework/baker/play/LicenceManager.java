@@ -28,7 +28,6 @@ public class LicenceManager {
 
     public LicenceManager() {
         licenseCheckerCallback = new AppLicenseCheckerCallback();
-        licenseChecker = new LicenseChecker(BakerApplication.getInstance(), new ServerManagedPolicy(BakerApplication.getInstance(), new AESObfuscator(SALT, BakerApplication.getInstance().getPackageName(), Configuration.getUserId())), BakerApplication.getInstance().getString(R.string.google_play_license_key));
     }
 
     public void setDelegate(LicenceManagerDelegate delegate) {
@@ -36,6 +35,7 @@ public class LicenceManager {
     }
 
     public void checkAccess() {
+        licenseChecker = new LicenseChecker(BakerApplication.getInstance(), new ServerManagedPolicy(BakerApplication.getInstance(), new AESObfuscator(SALT, BakerApplication.getInstance().getPackageName(), Configuration.getUserId())), BakerApplication.getInstance().getString(R.string.google_play_license_key));
         licenseChecker.checkAccess(licenseCheckerCallback);
     }
 

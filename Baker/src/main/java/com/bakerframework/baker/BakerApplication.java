@@ -29,7 +29,6 @@ import android.util.Log;
 import com.bakerframework.baker.model.IssueCollection;
 import com.bakerframework.baker.play.ApiPurchaseVerifier;
 import com.bakerframework.baker.play.LicenceManager;
-import com.bakerframework.baker.settings.Configuration;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -159,10 +158,6 @@ public class BakerApplication extends Application implements AnalyticsEvents {
             return false;
         }
         return true;
-    }
-
-    public String getEncodedPublicKey() {
-        return getString(R.string.google_play_license_key);
     }
 
     public boolean isNetworkConnected() {

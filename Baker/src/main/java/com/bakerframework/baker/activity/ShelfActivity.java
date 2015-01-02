@@ -234,6 +234,16 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // Show / Hide subscription menu
+        if(!getString(R.string.subscription_product_id).isEmpty()) {
+            menu.getItem(0).setVisible(true);
+        }
+        return super.onPrepareOptionsMenu(menu);
+
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         final int itemId = item.getItemId();
 
@@ -274,7 +284,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     @Override
     public void onIssueCollectionLoaded() {
-        // @TODO: Set checkout product ids
         presentIssues();
     }
 
@@ -330,8 +339,12 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     private void updateCategoryDrawer(List<String> categories, int position) {
         Log.d(this.getClass().getName(), "CATEGORIES: " + categories.size() + "; POSITION: " + position);
-        drawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, categories));
-        drawerList.setItemChecked(position, true);
+        if(categories.size() == 0) {
+            ((Button) findViewById(R.id.category_toggle)).setVisibility(View.GONE);
+        }else{
+            drawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, categories));
+            drawerList.setItemChecked(position, true);
+        }
     }
 
     private void setupHeader() {
