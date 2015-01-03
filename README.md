@@ -2,11 +2,14 @@
 
 The HTML5 ebook framework to publish interactive books & magazines on any Android device using simply open web standards http://bakerframework.com
 
-[![Download from Google Play](http://magloft-static.s3.amazonaws.com/baker-screen.png)](https://play.google.com/store/apps/details?id=com.magloft.demo)
-
-
 Please see the [issues](https://github.com/bakerframework/baker-android-refactor/issues) section to
 report any bugs or feature requests and to see the list of known issues.
+
+## Preview
+
+[![View Demo](http://magloft-static.s3.amazonaws.com/baker-android.gif)](http://cdn.magloft.com/preview/baker-android.mp4)
+
+[![Download from Google Play](http://magloft-static.s3.amazonaws.com/baker-screen.png)](https://play.google.com/store/apps/details?id=com.magloft.demo)
 
 ## Requirements
 
