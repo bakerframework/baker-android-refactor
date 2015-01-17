@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="110dp"
     android:orientation="horizontal"
     android:weightSum="100"
     android:paddingLeft="20dp"
@@ -11,17 +11,17 @@
     <ImageView
         android:id="@+id/cover_image"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="fill_parent"
         android:layout_weight="30"
         android:contentDescription="@string/msg_thumb_description"
         android:adjustViewBounds="true"
         android:scaleType="fitEnd"
-        android:padding="0dp"/>
+        android:padding="0dp" />
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_weight="70"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:layout_marginLeft="10dp"
         android:orientation="vertical">
 
@@ -75,7 +75,7 @@
             android:layout_height="28dp"
             android:visibility="gone"
             android:orientation="horizontal"
-            android:paddingTop="2dp">
+            android:paddingTop="3dp">
 
             <Button
                 android:id="@+id/download_issue_button"
@@ -90,7 +90,8 @@
             android:layout_width="match_parent"
             android:layout_height="28dp"
             android:visibility="gone"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="3dp">
 
             <Button
                 android:id="@+id/buy_issue_button"
@@ -116,7 +117,8 @@
             android:layout_width="match_parent"
             android:layout_height="28dp"
             android:visibility="visible"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="3dp">
 
             <Button
                 android:id="@+id/read_issue_button"

@@ -44,6 +44,9 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.path.android.jobqueue.JobManager;
+import com.path.android.jobqueue.config.Configuration;
+import com.path.android.jobqueue.log.CustomLogger;
 
 import org.solovyev.android.checkout.Billing;
 import org.solovyev.android.checkout.Cache;
@@ -59,9 +62,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public class BakerApplication extends Application implements AnalyticsEvents {
+    private static BakerApplication instance;
+    private JobManager jobManager;
 
-    // Instance configuration
-    private static BakerApplication sInstance;
+    public BakerApplication() {
+        instance = this;
+    }
 
     // Application mode (online/offline)
     public static final int APPLICATION_MODE_OFFLINE = 0;
@@ -100,28 +106,52 @@ public class BakerApplication extends Application implements AnalyticsEvents {
 
     private HashMap<TrackerName, Tracker> mTrackers = new HashMap<>();
 
-    public BakerApplication() {
-        super();
-    }
-
     @Override
     public void onCreate(){
         super.onCreate();
-        sInstance = this;
-        sInstance.initializeInstance();
-    }
-
-    protected void initializeInstance() {
+        configureJobManager();
         preferences = getSharedPreferences("baker.app", 0);
         issueCollection = new IssueCollection();
         licenceManager = new LicenceManager();
     }
 
-    public static BakerApplication getInstance() {
-        return sInstance;
+    private void configureJobManager() {
+        Configuration configuration = new Configuration.Builder(this)
+                .customLogger(new CustomLogger() {
+                    private static final String TAG = "JOBS";
+                    @Override
+                    public boolean isDebugEnabled() {
+                        return true;
+                    }
+
+                    @Override
+                    public void d(String text, Object... args) {
+                        Log.d(TAG, String.format(text, args));
+                    }
+
+                    @Override
+                    public void e(Throwable t, String text, Object... args) {
+                        Log.e(TAG, String.format(text, args), t);
+                    }
+
+                    @Override
+                    public void e(String text, Object... args) {
+                        Log.e(TAG, String.format(text, args));
+                    }
+                })
+                .minConsumerCount(1)
+                .maxConsumerCount(3)
+                .loadFactor(3)
+                .consumerKeepAlive(120)
+                .build();
+        jobManager = new JobManager(this, configuration);
     }
 
     // Getters
+
+    public JobManager getJobManager() {
+        return jobManager;
+    }
 
     public IssueCollection getIssueCollection() {
         return issueCollection;
@@ -170,14 +200,14 @@ public class BakerApplication extends Application implements AnalyticsEvents {
     }
 
     public boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) sInstance.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) instance.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
         return (ni != null);
     }
 
     public int getVersion() {
         try {
-            PackageInfo packageInfo = sInstance.getPackageManager().getPackageInfo(sInstance.getPackageName(), 0);
+            PackageInfo packageInfo = instance.getPackageManager().getPackageInfo(instance.getPackageName(), 0);
             return packageInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             return 0;
@@ -272,6 +302,10 @@ public class BakerApplication extends Application implements AnalyticsEvents {
             mTrackers.put(trackerId, tracker);
         }
         return mTrackers.get(trackerId);
+    }
+
+    public static BakerApplication getInstance() {
+        return instance;
     }
 
 }

@@ -67,6 +67,7 @@ import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.settings.SettingsActivity;
 import com.bakerframework.baker.view.IssueCardView;
 import com.bakerframework.baker.view.ShelfView;
+import com.path.android.jobqueue.JobManager;
 
 import org.json.JSONException;
 import org.solovyev.android.checkout.ActivityCheckout;
@@ -99,11 +100,13 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     private final ActivityCheckout checkout = Checkout.forActivity(this, BakerApplication.getInstance().getCheckout());
     @NonNull
     private Inventory inventory;
-
     @NonNull
     public ActivityCheckout getCheckout() {
         return checkout;
     }
+
+    // Jobs
+    JobManager jobManager;
 
     /**
      * Used when running in standalone mode based on the run_as_standalone setting in booleans.xml.
@@ -123,6 +126,9 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
             Log.d(this.getClass().getName(), "First time app running, launching tutorial.");
             showAppUsage();
         }
+
+        // Initialize jobs
+        jobManager = BakerApplication.getInstance().getJobManager();
 
         // Prepare google analytics
         if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_app_open_event)) {
@@ -264,7 +270,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
             }
             return true;
         } else if (itemId == R.id.action_subscribe) {
-
             if(issueCollection.getSubscriptionSku() != null) {
                 final ActivityCheckout checkout = this.getCheckout();
                 checkout.whenReady(new Checkout.ListenerAdapter() {
@@ -297,9 +302,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
         // Update shelf view adapter
         issueAdapter.updateIssues();
-
-        // Continue downloads
-        unzipPendingPackages();
     }
 
     @Override
@@ -411,19 +413,16 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     private void unzipPendingPackages() {
         if(shelfView != null) {
-            // @TODO: Make it rain!
             for (int i = 0; i < shelfView.getChildCount(); i++) {
                 IssueCardView issueCardView = (IssueCardView) shelfView.getChildAt(i);
-                if(issueCardView.getIssue().isDownloaded() && !issueCardView.getIssue().isDownloading()) {
+                if(issueCardView.getIssue().isDownloaded() && !issueCardView.getIssue().isDownloading() && !issueCardView.getIssue().isExtracted() && !issueCardView.getIssue().isExtracting()) {
                     // Continue issue extraction
-                    Log.d(this.getClass().toString(), "Continue unzip of " + issueCardView.getIssue().getName());
-                    issueCardView.startUnzip();
+                    Log.d(this.getClass().toString(), "Continue extract of " + issueCardView.getIssue().getName());
+                    issueCardView.extractZip();
                 }
             }
         }
-
     }
-
 
     @Override
     public void onBackPressed() {

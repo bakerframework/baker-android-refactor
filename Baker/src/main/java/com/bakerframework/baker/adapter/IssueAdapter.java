@@ -38,6 +38,7 @@ import com.bakerframework.baker.view.IssueCardView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 public class IssueAdapter extends ArrayAdapter {
@@ -48,6 +49,7 @@ public class IssueAdapter extends ArrayAdapter {
     private String category = null;
     private IssueCollection issueCollection;
     private boolean filterChanged = false;
+    private HashMap<Issue,IssueCardView> issueCardViewCache = new HashMap<>();
 
     private class IssueDateComparator implements Comparator<Issue> {
         @Override
@@ -135,7 +137,6 @@ public class IssueAdapter extends ArrayAdapter {
 
         // Check if a convertView exists
         if(convertView != null) {
-
             // Receive issue
             Issue issue = ((IssueCardView) convertView).getIssue();
 
@@ -144,16 +145,19 @@ public class IssueAdapter extends ArrayAdapter {
                 ((IssueCardView) convertView).redraw();
                 return convertView;
             }
-
         }
 
         // If not, (re-)create the view and store it in cache
         Issue issue = getItem(position);
-        IssueCardView issueCardView = new IssueCardView(context, issue);
-        issueCardView.init(context, null);
 
-        // Return view
-        return issueCardView;
+        if(issueCardViewCache.containsKey(issue)) {
+            return issueCardViewCache.get(issue);
+        }else{
+            IssueCardView issueCardView = new IssueCardView(context, issue);
+            issueCardView.init(context, null);
+            issueCardViewCache.put(issue, issueCardView);
+            return issueCardView;
+        }
 
     }
 

@@ -14,9 +14,9 @@
     <!-- UI Messages, Labels and Texts -->
     <string name="msg_exit">Exit</string>
     <string name="msg_closing_app">If you exit now, all downloads will be cancelled, are you sure you want to exit ?</string>
-    <string name="msg_issue_downloading">Starting download</string>
-    <string name="msg_issue_unzipping">Preparing…</string>
-    <string name="msg_issue_deleting">Now Deleting</string>
+    <string name="msg_issue_downloading">Download</string>
+    <string name="msg_issue_extracting">Extract</string>
+    <string name="msg_issue_deleting">Deleting</string>
     <string name="msg_thumb_description">Thumbnail</string>
     <string name="msg_confirmation">Confirmation</string>
     <string name="msg_confirmation_delete_text">Are you sure you want to archive this issue?</string>

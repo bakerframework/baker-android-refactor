@@ -30,9 +30,13 @@ import android.os.AsyncTask;
 
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
+import com.bakerframework.baker.jobs.ExtractZipJob;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.task.DownloadTask;
 import com.bakerframework.baker.task.DownloadTaskDelegate;
+import com.path.android.jobqueue.Job;
+import com.path.android.jobqueue.JobManager;
+import com.path.android.jobqueue.JobStatus;
 
 import org.solovyev.android.checkout.Sku;
 
@@ -58,7 +62,16 @@ public class Issue extends Observable implements DownloadTaskDelegate {
     private boolean standalone;
     private boolean coverChanged;
     private boolean urlChanged;
+
+    // Tasks and Jobs
     private DownloadTask downloadTask;
+    private ExtractZipJob extractJob;
+    public ExtractZipJob getExtractJob() {
+        return extractJob;
+    }
+    public String getExtractJobId() {
+        return extractJob != null ? extractJob.getId() : null;
+    }
 
     // Events
     public static final int EVENT_ON_DOWNLOAD_PROGRESS = 0;
@@ -233,8 +246,12 @@ public class Issue extends Observable implements DownloadTaskDelegate {
         return new File(getHpubPath());
     }
 
+    public boolean isExtracting() {
+        return getExtractJob() != null && !getExtractJob().isCompleted();
+    }
+
     public boolean isExtracted() {
-        return getBookJsonFile().exists() && getBookJsonFile().isFile();
+        return !isExtracting() && !getHpubFile().exists() && getBookJsonFile().exists() && getBookJsonFile().isFile();
     }
 
     public boolean isDownloaded() {
@@ -244,6 +261,11 @@ public class Issue extends Observable implements DownloadTaskDelegate {
 
     public boolean isInCategory(String category) {
         return categories.contains(category);
+    }
+
+    public void extractZip() {
+        extractJob = new ExtractZipJob(getName(), getHpubPath(), getName());
+        BakerApplication.getInstance().getJobManager().addJobInBackground(extractJob);
     }
 
     // Delegates

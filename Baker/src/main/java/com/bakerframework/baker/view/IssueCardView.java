@@ -30,7 +30,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -46,13 +45,15 @@ import android.widget.Toast;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.activity.ShelfActivity;
 import com.bakerframework.baker.client.TaskMandator;
+import com.bakerframework.baker.events.ExtractZipCompleteEvent;
+import com.bakerframework.baker.events.ExtractZipErrorEvent;
+import com.bakerframework.baker.events.ExtractZipProgressEvent;
 import com.bakerframework.baker.helper.ImageLoaderHelper;
 import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.task.ArchiveTask;
 import com.bakerframework.baker.task.BookJsonParserTask;
-import com.bakerframework.baker.task.UnzipperTask;
 
 import org.json.JSONException;
 import org.solovyev.android.checkout.*;
@@ -61,20 +62,20 @@ import java.text.ParseException;
 import java.util.Observable;
 import java.util.Observer;
 
+import de.greenrobot.event.EventBus;
+
 public class IssueCardView extends LinearLayout implements TaskMandator, Observer {
 
     private Issue issue;
 
-    private UnzipperTask unzipperTask;
     private boolean readable = false;
 
-    private final int UNZIP_MAGAZINE_TASK = 2;
     private final int MAGAZINE_DELETE_TASK = 3;
     private final int BOOK_JSON_PARSE_TASK = 5;
 
     private final int UI_STATE_INITIAL = 0;
     private final int UI_STATE_DOWNLOAD = 1;
-    private final int UI_STATE_UNZIP = 2;
+    private final int UI_STATE_EXTRACT = 2;
     private final int UI_STATE_READY = 3;
     private final int UI_STATE_ARCHIVE = 4;
     private final int UI_STATE_ERROR = 5;
@@ -149,9 +150,9 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         // Initialize cover click handler
         uiCoverImage.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                if (readable && !issue.isDownloading()) {
-                    readIssue();
-                }
+            if (readable && !issue.isDownloading()) {
+                readIssue();
+            }
             }
         });
 
@@ -163,8 +164,8 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         // Initialize download button click handler
         uiDownloadIssueButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                setUIState(UI_STATE_DOWNLOAD);
-                issue.startDownloadTask();
+            setUIState(UI_STATE_DOWNLOAD);
+            issue.startDownloadTask();
             }
         });
 
@@ -182,6 +183,8 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
             }
         });
 
+        // Initialize event listener
+        EventBus.getDefault().register(this);
 
         // Redraw UI
         redraw();
@@ -190,12 +193,9 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
 
     @Override
     protected void onDetachedFromWindow() {
-
-        // Clean up
-
-
         super.onDetachedFromWindow();
     }
+
 
     public void redraw() {
         uiTitleText.setText(issue.getTitle());
@@ -209,12 +209,16 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         } else {
             uiSizeText.setText(issue.getSizeMB() + " MB");
         }
-        uiProgressText.setText("0 MB / " + issue.getSizeMB() + " MB");
+
+        // uiProgressText.setText("...");
 
         // Prepare actions
         if (issue.isExtracted()) {
             setUIState(UI_STATE_READY);
             readable = true;
+        }else if(issue.getExtractJob() != null && !issue.getExtractJob().isCompleted()) {
+            setUIState(UI_STATE_EXTRACT);
+            readable = false;
         }else if(issue.isDownloading()){
             setUIState(UI_STATE_DOWNLOAD);
             readable = false;
@@ -298,14 +302,13 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
     /**
      * Start the unzipping task for an issue. Also handles the controls update.
      */
-    public void startUnzip() {
+    public void extractZip() {
 
         // Update UI
-        setUIState(UI_STATE_UNZIP);
+        setUIState(UI_STATE_EXTRACT);
 
         // Create and trigger unzipper task
-        unzipperTask = new UnzipperTask(parentActivity, this, UNZIP_MAGAZINE_TASK);
-        unzipperTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, issue.getHpubPath(), issue.getName());
+        issue.extractZip();
     }
 
     private void setUIState(int uiState) {
@@ -331,13 +334,13 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
                 uiProgressBarContainer.setVisibility(View.VISIBLE);
                 uiProgressText.setText(R.string.msg_issue_downloading);
                 break;
-            case UI_STATE_UNZIP:
+            case UI_STATE_EXTRACT:
                 uiIdleActionsContainer.setVisibility(View.GONE);
                 uiReadyActionsContainer.setVisibility(View.GONE);
                 uiPurchaseActionsContainer.setVisibility(View.GONE);
                 uiProgressText.setVisibility(View.VISIBLE);
                 uiProgressBarContainer.setVisibility(View.VISIBLE);
-                uiProgressText.setText(R.string.msg_issue_unzipping);
+                uiProgressText.setText(R.string.msg_issue_extracting);
                 break;
             case UI_STATE_READY:
                 uiIdleActionsContainer.setVisibility(View.GONE);
@@ -382,19 +385,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
 
         //TODO: Handle failures.
         switch (taskId) {
-            case UNZIP_MAGAZINE_TASK:
-                //If the Unzip tasks ended successfully we will update the UI to let the user
-                //start reading the issue.
-                unzipperTask = null;
-                if (results[0].equals("SUCCESS")) {
-                    setUIState(UI_STATE_READY);
-                    readable = true;
-                } else {
-                    setUIState(UI_STATE_INITIAL);
-                    readable = false;
-                    Toast.makeText(getContext(), "Could not extract the package. Possibly corrupted.", Toast.LENGTH_LONG).show();
-                }
-                break;
             case MAGAZINE_DELETE_TASK:
                 //If the issue files were deleted successfully the UI will be updated to let
                 //the user download the issue again.
@@ -441,7 +431,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         if(observable == issue) {
             switch ((int) o) {
                 case Issue.EVENT_ON_DOWNLOAD_PROGRESS:
-                    uiProgressText.setText(String.valueOf(issue.getBytesSoFar() / 1048576) + " MB (" + (int) issue.getProgress()+ " %)");
+                    uiProgressText.setText(parentActivity.getString(R.string.msg_issue_downloading) + ": " + (int) issue.getProgress() + "% (" + String.valueOf(issue.getBytesSoFar() / 1048576) + " MB)");
                     uiProgressBar.setProgress((int) issue.getProgress());
                     break;
                 case Issue.EVENT_ON_DOWNLOAD_COMPLETE:
@@ -453,13 +443,38 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
                                 issue.getName());
                     }
                     // Trigger unzipping
-                    startUnzip();
+                    extractZip();
                     break;
                 case Issue.EVENT_ON_DOWNLOAD_FAILED:
                     setUIState(UI_STATE_ERROR);
                     uiProgressText.setText(getContext().getString(R.string.err_download_task_io));
                     break;
             }
+        }
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(ExtractZipCompleteEvent event) {
+        if(event.getJobId() == issue.getExtractJobId()) {
+            setUIState(UI_STATE_READY);
+            readable = true;
+        }
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(ExtractZipErrorEvent event) {
+        if(event.getJobId() == issue.getExtractJobId()) {
+            setUIState(UI_STATE_INITIAL);
+            readable = false;
+            Toast.makeText(getContext(), "Could not extract this issue.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(ExtractZipProgressEvent event) {
+        if(event.getJobId() == issue.getExtractJobId()) {
+            uiProgressText.setText(parentActivity.getString(R.string.msg_issue_extracting) + ": " + String.valueOf(event.getProgress()) + "%");
+            uiProgressBar.setProgress(event.getProgress());
         }
     }
 
