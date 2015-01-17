@@ -53,9 +53,7 @@ import java.util.Map;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class WebViewFragment extends Fragment {
-
 	public static final String ARG_OBJECT = "object";
-
     private FrameLayout progressBarContainer;
 	private CustomWebView webView;
     private FrameLayout customViewContainer;
@@ -65,34 +63,38 @@ public class WebViewFragment extends Fragment {
     private IssueActivity activity;
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         this.activity = (IssueActivity) this.getActivity();
 
-		// The last two arguments ensure LayoutParams are inflated
-		// properly.
-		View rootView = inflater.inflate(R.layout.fragment_collection_object,
-				container, false);
+		// The last two arguments ensure LayoutParams are inflated properly.
+		View rootView = inflater.inflate(R.layout.fragment_collection_object, container, false);
 		Bundle args = getArguments();
 
 		customViewContainer = (FrameLayout) this.getActivity().findViewById(R.id.customViewContainer);
-		
 		webView = (CustomWebView) rootView.findViewById(R.id.webpage1);
         progressBarContainer = (FrameLayout) rootView.findViewById(R.id.progressBarContainer);
 
-        //Enable javascript
+        // enable javascript
         webView.getSettings().setJavaScriptEnabled(true);
-        //Set zoom enabled/disabled
+
+        // set zoom enabled/disabled
         webView.getSettings().setSupportZoom(true);
-        //Support zoom like normal browsers
+
+        // support zoom like normal browsers
         webView.getSettings().setUseWideViewPort(true);
-        //Disable zoom buttons
+
+        // disable zoom buttons
         webView.getSettings().setDisplayZoomControls(false);
-        //Add zoom controls
+
+        // add zoom controls
         webView.getSettings().setBuiltInZoomControls(true);
-        //Load the page on the maximum zoom out available.
+
+        // load the page on the maximum zoom out available.
         webView.getSettings().setLoadWithOverviewMode(true);
+
+        // set initial scale so zoom works properly
+        webView.setInitialScale(30);
 
         webView.setWebChromeClient(chromeClient);
         webView.setWebViewClient(new WebViewClient() {

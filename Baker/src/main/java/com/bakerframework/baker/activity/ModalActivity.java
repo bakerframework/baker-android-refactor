@@ -65,16 +65,25 @@ public class ModalActivity extends Activity {
 
         WebView webView = (WebView) this.findViewById(R.id.modalWebView);
         webView.getSettings().setJavaScriptEnabled(true);
-        //Set zoom enabled/disabled
+
+        // set zoom enabled/disabled
         webView.getSettings().setSupportZoom(true);
-        //Support zoom like normal browsers
+
+        // support zoom like normal browsers
         webView.getSettings().setUseWideViewPort(true);
-        //Disable zoom buttons
+
+        // disable zoom buttons
         webView.getSettings().setDisplayZoomControls(false);
-        //Add zoom controls
+
+        // add zoom controls
         webView.getSettings().setBuiltInZoomControls(true);
-        //Load the page on the maximum zoom out available.
+
+        // load the page on the maximum zoom out available.
         webView.getSettings().setLoadWithOverviewMode(true);
+
+        // set initial scale so zoom works properly
+        webView.setInitialScale(30);
+
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
