@@ -12,20 +12,16 @@
     <!-- ActionBar styles -->
     <style name="action_bar_style" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
         <item name="android:background"  tools:ignore="NewApi">#FFFFFF</item>
-        <!--<item name="background">#FFFFFF</item>-->
     </style>
 
     <style name="abaker_default_button">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:layout_margin">20dp</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:shadowColor">#000000</item>
-        <item name="android:shadowDx">1</item>
-        <item name="android:shadowDy">1</item>
-        <item name="android:shadowRadius">2</item>
-        <item name="android:background">@drawable/abaker_button</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:layout_marginRight">5dp</item>
+        <item name="android:minWidth">20dp</item>
+        <item name="android:background">@drawable/baker_action_button</item>
     </style>
 
     <!-- ViewPagerIndicator styles -->

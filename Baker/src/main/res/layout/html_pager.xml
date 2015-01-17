@@ -28,6 +28,8 @@
         android:id="@+id/webViewIndex"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:scrollbarThumbVertical="@drawable/baker_scrollbar_vertical"
+        android:scrollbarThumbHorizontal="@drawable/baker_scrollbar_horizontal"
         android:layout_gravity="left|bottom"
         android:visibility="gone" />
 

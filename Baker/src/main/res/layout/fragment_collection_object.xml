@@ -6,6 +6,8 @@
     <com.bakerframework.baker.view.CustomWebView
         android:id="@+id/webpage1"
         android:layout_width="match_parent"
+        android:scrollbarThumbVertical="@drawable/baker_scrollbar_vertical"
+        android:scrollbarThumbHorizontal="@drawable/baker_scrollbar_horizontal"
         android:layout_height="match_parent" />
 
     <FrameLayout
