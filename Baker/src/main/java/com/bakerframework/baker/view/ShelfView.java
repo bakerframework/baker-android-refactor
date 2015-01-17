@@ -29,24 +29,33 @@ package com.bakerframework.baker.view;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.widget.GridView;
-
-import com.bakerframework.baker.adapter.IssueAdapter;
-import com.bakerframework.baker.model.Issue;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ShelfView extends GridView {
 
     public ShelfView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        updateColumnCount();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        this.setNumColumns(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
+        updateColumnCount();
         super.onConfigurationChanged(newConfig);
+    }
+
+    private void updateColumnCount() {
+
+        // Get metrics information
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+        int width = metrics.widthPixels;
+
+        // Each issue card needs at lease 450px width to display correctly
+        int columnCount = ((int) Math.max(Math.floor(width / 450), 1));
+        setNumColumns(columnCount);
+
     }
 
 
