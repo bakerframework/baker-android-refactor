@@ -26,14 +26,16 @@
  */
 package com.bakerframework.baker.events;
 
-public class ExtractIssueCompleteEvent {
-    private final String jobId;
+import com.bakerframework.baker.model.Issue;
 
-    public ExtractIssueCompleteEvent(String jobId) {
-        this.jobId = jobId;
+public class ExtractIssueCompleteEvent {
+    private final Issue issue;
+
+    public ExtractIssueCompleteEvent(Issue issue) {
+        this.issue = issue;
     }
 
-    public String getJobId() {
-        return jobId;
+    public Issue getIssue() {
+        return issue;
     }
 }

@@ -26,17 +26,19 @@
  */
 package com.bakerframework.baker.events;
 
+import com.bakerframework.baker.model.Issue;
+
 public class DownloadIssueErrorEvent {
-    private final String jobId;
+    private final Issue issue;
     private final Throwable throwable;
 
-    public DownloadIssueErrorEvent(String jobId, Throwable throwable) {
-        this.jobId = jobId;
+    public DownloadIssueErrorEvent(Issue issue, Throwable throwable) {
+        this.issue = issue;
         this.throwable = throwable;
     }
 
-    public String getJobId() {
-        return jobId;
+    public Issue getIssue() {
+        return issue;
     }
 
     public Throwable getThrowable() {

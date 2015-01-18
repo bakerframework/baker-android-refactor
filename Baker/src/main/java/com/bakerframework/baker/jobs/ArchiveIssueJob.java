@@ -28,25 +28,31 @@ package com.bakerframework.baker.jobs;
 
 import android.util.Log;
 
-import com.bakerframework.baker.events.DownloadIssueCompleteEvent;
-import com.bakerframework.baker.events.DownloadIssueErrorEvent;
-import com.bakerframework.baker.events.DownloadIssueProgressEvent;
-import com.bakerframework.baker.handler.DownloadHandler;
+import com.bakerframework.baker.events.ArchiveIssueCompleteEvent;
+import com.bakerframework.baker.events.ExtractIssueCompleteEvent;
+import com.bakerframework.baker.events.ExtractIssueProgressEvent;
 import com.bakerframework.baker.model.Issue;
+import com.bakerframework.baker.settings.Configuration;
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
 
+import org.zeroturnaround.zip.ZipUtil;
+import org.zeroturnaround.zip.commons.FileUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 import de.greenrobot.event.EventBus;
 
-public class DownloadIssueJob extends Job {
+public class ArchiveIssueJob extends Job {
     private final Issue issue;
     private boolean completed;
-    private DownloadHandler downloadHandler;
 
-    public DownloadIssueJob(Issue issue) {
-        super(new Params(Priority.LOW).requireNetwork().setPersistent(false));
+    public ArchiveIssueJob(Issue issue) {
+        super(new Params(Priority.MID).setPersistent(false));
         this.issue = issue;
-        this.completed = false;
+        completed = false;
     }
 
     @Override
@@ -56,43 +62,29 @@ public class DownloadIssueJob extends Job {
 
     @Override
     public void onRun() throws Throwable {
-        // Download file
-         downloadHandler = new DownloadHandler(issue.getUrl(), issue.getHpubFile()) {
-            @Override
-            public void onDownloadProgress(int percentComplete, long bytesSoFar, long totalBytes) {
-                EventBus.getDefault().post(new DownloadIssueProgressEvent(issue, percentComplete, bytesSoFar, totalBytes));
-            }
-        };
-        downloadHandler.run();
 
-        // Complete job
-        completed = true;
-        EventBus.getDefault().post(new DownloadIssueCompleteEvent(issue));
-    }
+        // Delete directory
+        File issueDirectory = new File(Configuration.getMagazinesDirectory(), issue.getName());
+        Configuration.deleteDirectory(issueDirectory.getAbsolutePath());
 
-    @Override
-    protected boolean shouldReRunOnThrowable(Throwable throwable) {
-        Log.e("DownloadIssueJob", throwable.getLocalizedMessage());
+        // Post complete event
         completed = true;
-        EventBus.getDefault().post(new DownloadIssueErrorEvent(issue, throwable));
-        return false;
+        Log.i("ArchiveIssueJob", "completed");
+        EventBus.getDefault().post(new ArchiveIssueCompleteEvent(issue));
     }
 
     @Override
     protected void onCancel() {
-        downloadHandler.cancel();
+
     }
 
-    public Issue getIssue() {
-        return issue;
+    @Override
+    protected boolean shouldReRunOnThrowable(Throwable throwable) {
+        return false;
     }
 
     public boolean isCompleted() {
         return completed;
-    }
-
-    public void cancel() {
-        this.completed = true;
     }
 
 }

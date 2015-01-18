@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -44,35 +43,30 @@ import android.widget.Toast;
 
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.activity.ShelfActivity;
-import com.bakerframework.baker.client.TaskMandator;
+import com.bakerframework.baker.events.ArchiveIssueCompleteEvent;
 import com.bakerframework.baker.events.DownloadIssueCompleteEvent;
 import com.bakerframework.baker.events.DownloadIssueErrorEvent;
 import com.bakerframework.baker.events.DownloadIssueProgressEvent;
 import com.bakerframework.baker.events.ExtractIssueCompleteEvent;
 import com.bakerframework.baker.events.ExtractIssueErrorEvent;
 import com.bakerframework.baker.events.ExtractIssueProgressEvent;
+import com.bakerframework.baker.events.IssueDataUpdatedEvent;
 import com.bakerframework.baker.helper.ImageLoaderHelper;
+import com.bakerframework.baker.jobs.ArchiveIssueJob;
+import com.bakerframework.baker.jobs.ParseBookJsonJob;
 import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.R;
-import com.bakerframework.baker.model.BookJson;
-import com.bakerframework.baker.task.ArchiveTask;
-import com.bakerframework.baker.task.BookJsonParserTask;
+import com.bakerframework.baker.settings.Configuration;
 
-import org.json.JSONException;
 import org.solovyev.android.checkout.*;
-
-import java.text.ParseException;
 
 import de.greenrobot.event.EventBus;
 
-public class IssueCardView extends LinearLayout implements TaskMandator {
+public class IssueCardView extends LinearLayout {
 
     private Issue issue;
 
     private boolean readable = false;
-
-    private final int MAGAZINE_DELETE_TASK = 3;
-    private final int BOOK_JSON_PARSE_TASK = 5;
 
     private final int UI_STATE_INITIAL = 0;
     private final int UI_STATE_DOWNLOAD = 1;
@@ -209,8 +203,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
             uiSizeText.setText(issue.getSizeMB() + " MB");
         }
 
-        // uiProgressText.setText("...");
-
         // Prepare actions
         if (issue.isExtracted()) {
             setUIState(UI_STATE_READY);
@@ -233,25 +225,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
         return issue;
     }
 
-    public void setBookJson(BookJson book) {
-
-        if (book != null) {
-            ShelfActivity activity = (ShelfActivity) getContext();
-            activity.viewMagazine(book);
-        } else {
-            Toast.makeText(getContext(), "The book.json was not found!",
-                    Toast.LENGTH_LONG).show();
-        }
-
-        // Here we register the OPEN ISSUE event on Google Analytics
-        if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_read_event)) {
-            ((BakerApplication) parentActivity.getApplication()).sendEvent(
-                    parentActivity.getString(R.string.ga_issues_category),
-                    parentActivity.getString(R.string.ga_issue_open),
-                    issue.getName());
-        }
-    }
-
     private void purchaseIssue() {
         if (!issue.isPurchased()) {
             final ActivityCheckout checkout = ((ShelfActivity) parentActivity).getCheckout();
@@ -259,7 +232,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
                 @Override
                 public void onReady(@NonNull BillingRequests requests) {
                     if(issue.getSku() != null) {
-                        requests.purchase(issue.getSku(), null, checkout.getPurchaseFlow());
+                        requests.purchase(issue.getSku(), Configuration.getUserId(), checkout.getPurchaseFlow());
                     }
                 }
             });
@@ -280,8 +253,8 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
                         // Update UI
                         setUIState(UI_STATE_ARCHIVE);
                         // Create and trigger archive task
-                        // @TODO: Convert to listener logic
-                        new ArchiveTask(IssueCardView.this, MAGAZINE_DELETE_TASK).execute(issue.getName());
+                        ArchiveIssueJob archiveIssueJob = new ArchiveIssueJob(issue);
+                        BakerApplication.getInstance().getJobManager().addJobInBackground(archiveIssueJob);
                     }
                 }).show();
     }
@@ -290,23 +263,15 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
      * Change the views to start reading the issue.
      */
     private void readIssue() {
-        BookJsonParserTask parser = new BookJsonParserTask(getContext(), issue, this, BOOK_JSON_PARSE_TASK);
-        if (issue.isStandalone()) {
-            parser.execute("STANDALONE");
-        } else {
-            parser.execute(issue.getName());
-        }
+        ParseBookJsonJob parseBookJsonJob = new ParseBookJsonJob(issue);
+        BakerApplication.getInstance().getJobManager().addJobInBackground(parseBookJsonJob);
     }
 
     /**
      * Start the unzipping task for an issue. Also handles the controls update.
      */
     public void extractZip() {
-
-        // Update UI
         setUIState(UI_STATE_EXTRACT);
-
-        // Create and trigger unzipper task
         issue.startExtractIssueJob();
     }
 
@@ -366,59 +331,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
         }
     }
 
-    // @TODO: this should be gone soon
-    @Override
-    public void updateProgress(int taskId, Long... progress) {
-
-    }
-
-    /**
-     * As an instance of GindMandator, this class should implement a method postExecute
-     * to be executed when one of the tasks is done.
-     *
-     * @param taskId  the id of the task that ended.
-     * @param results the results values.
-     */
-    @Override
-    public void postExecute(final int taskId, String... results) {
-
-        //TODO: Handle failures.
-        switch (taskId) {
-            case MAGAZINE_DELETE_TASK:
-                //If the issue files were deleted successfully the UI will be updated to let
-                //the user download the issue again.
-                if (results[0].equals("SUCCESS")) {
-                    // Here we register the DELETE ISSUE event on Google Analytics
-                    if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_delete_event)) {
-                        ((BakerApplication)parentActivity.getApplication()).sendEvent(
-                                parentActivity.getString(R.string.ga_issues_category),
-                                parentActivity.getString(R.string.ga_issue_delete),
-                                issue.getName());
-                    }
-
-                    readable = false;
-                    setUIState(UI_STATE_INITIAL);
-                }
-                break;
-            case BOOK_JSON_PARSE_TASK:
-                try {
-                    BookJson bookJson = new BookJson();
-
-                    final String magazineName = results[0];
-                    final String rawJson = results[1];
-
-                    bookJson.setMagazineName(magazineName);
-                    bookJson.fromJson(rawJson);
-
-                    setBookJson(bookJson);
-                } catch (JSONException | ParseException ex) {
-                    Log.e(getClass().getName(), "Error parsing the book.json", ex);
-                }
-
-                break;
-        }
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -427,7 +339,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
 
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ExtractIssueCompleteEvent event) {
-        if(event.getJobId() == issue.getExtractJobId()) {
+        if(event.getIssue() == issue) {
             setUIState(UI_STATE_READY);
             readable = true;
         }
@@ -435,7 +347,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
 
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ExtractIssueErrorEvent event) {
-        if(event.getJobId() == issue.getExtractJobId()) {
+        if(event.getIssue() == issue) {
             setUIState(UI_STATE_INITIAL);
             readable = false;
             Toast.makeText(getContext(), "Could not extract this issue.", Toast.LENGTH_LONG).show();
@@ -444,7 +356,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
 
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ExtractIssueProgressEvent event) {
-        if(event.getJobId() == issue.getExtractJobId()) {
+        if(event.getIssue() == issue) {
             uiProgressText.setText(parentActivity.getString(R.string.msg_issue_extracting) + ": " + String.valueOf(event.getProgress()) + "%");
             uiProgressBar.setProgress(event.getProgress());
         }
@@ -453,7 +365,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
 
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueCompleteEvent event) {
-        if(event.getJobId() == issue.getDownloadJobId()) {
+        if(event.getIssue() == issue) {
             if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_download_event)) {
                 BakerApplication.getInstance().sendEvent(
                         parentActivity.getString(R.string.ga_issues_category),
@@ -467,17 +379,32 @@ public class IssueCardView extends LinearLayout implements TaskMandator {
 
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueErrorEvent event) {
-        if(event.getJobId() == issue.getDownloadJobId()) {
+        if(event.getIssue() == issue) {
             setUIState(UI_STATE_ERROR);
-            uiProgressText.setText(getContext().getString(R.string.err_download_task_io));
+            Toast.makeText(this.parentActivity, getContext().getString(R.string.err_download_task_io), Toast.LENGTH_LONG).show();
         }
     }
 
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueProgressEvent event) {
-        if(event.getJobId() == issue.getDownloadJobId()) {
+        if(event.getIssue() == issue) {
             uiProgressText.setText(parentActivity.getString(R.string.msg_issue_downloading) + ": " + event.getProgress() + "% (" + String.valueOf(event.getBytesSoFar() / 1048576) + " MB)");
             uiProgressBar.setProgress(event.getProgress());
+        }
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(IssueDataUpdatedEvent event) {
+        if(event.getIssue() == issue) {
+            redraw();
+        }
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(ArchiveIssueCompleteEvent event) {
+        if(event.getIssue() == issue) {
+            readable = false;
+            setUIState(UI_STATE_INITIAL);
         }
     }
 

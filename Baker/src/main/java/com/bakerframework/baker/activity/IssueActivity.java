@@ -153,9 +153,9 @@ public class IssueActivity extends FragmentActivity {
             }
 
 			jsonBook = new BookJson();
-            jsonBook.setMagazineName(intent.getStringExtra(Configuration.ISSUE_NAME));
+            jsonBook.setIssueName(intent.getStringExtra(Configuration.ISSUE_NAME));
             Log.d(this.getClass().toString(), "THE RAW BOOK.JSON IS: " + intent.getStringExtra(Configuration.BOOK_JSON_KEY));
-            jsonBook.fromJson(intent.getStringExtra(Configuration.BOOK_JSON_KEY));
+            jsonBook.fromJsonString(intent.getStringExtra(Configuration.BOOK_JSON_KEY));
 
             this.setOrientation(jsonBook.getOrientation());
             this.setPagerView(jsonBook);

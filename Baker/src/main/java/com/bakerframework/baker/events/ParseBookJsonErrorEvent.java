@@ -28,14 +28,19 @@ package com.bakerframework.baker.events;
 
 import com.bakerframework.baker.model.Issue;
 
-public class DownloadIssueCompleteEvent {
+public class ParseBookJsonErrorEvent {
     private final Issue issue;
+    private final Throwable throwable;
 
-    public DownloadIssueCompleteEvent(Issue issue) {
+    public ParseBookJsonErrorEvent(Issue issue, Throwable throwable) {
         this.issue = issue;
+        this.throwable = throwable;
     }
 
     public Issue getIssue() {
         return issue;
+    }
+    public Throwable getThrowable() {
+        return throwable;
     }
 }

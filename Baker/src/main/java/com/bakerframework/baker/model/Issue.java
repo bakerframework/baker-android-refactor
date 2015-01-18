@@ -28,6 +28,7 @@ package com.bakerframework.baker.model;
 
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
+import com.bakerframework.baker.events.IssueDataUpdatedEvent;
 import com.bakerframework.baker.jobs.DownloadIssueJob;
 import com.bakerframework.baker.jobs.ExtractIssueJob;
 import com.bakerframework.baker.settings.Configuration;
@@ -36,6 +37,8 @@ import org.solovyev.android.checkout.Sku;
 
 import java.io.File;
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 public class Issue {
     private String name;
@@ -125,21 +128,25 @@ public class Issue {
         return (sku != null) ? sku.price : null;
     }
     public boolean hasPrice() {
-        return (sku != null && sku.price != null);
+        return (sku != null);
     }
 
     public Sku getSku() {
         return sku;
     }
     public void setSku(Sku sku) {
+        boolean needsUpdate = (sku != this.sku);
         this.sku = sku;
+        if(needsUpdate) { sendUpdateEvent(); }
     }
     public boolean hasSku() {
         return (this.sku != null);
     }
 
     public void setPurchased(boolean purchased) {
+        boolean needsUpdate = (purchased != this.purchased);
         this.purchased = purchased;
+        if(needsUpdate) { sendUpdateEvent(); }
     }
     public boolean isPurchased() {
         return this.purchased;
@@ -168,12 +175,12 @@ public class Issue {
 
     // Tasks and Jobs
 
-    public DownloadIssueJob getDownloadJob() {
-        return downloadJob;
+    public void sendUpdateEvent() {
+        EventBus.getDefault().post(new IssueDataUpdatedEvent(this));
     }
 
-    public String getDownloadJobId() {
-        return downloadJob != null ? downloadJob.getId() : null;
+    public DownloadIssueJob getDownloadJob() {
+        return downloadJob;
     }
 
     public void cancelDownloadJob() {
@@ -190,16 +197,12 @@ public class Issue {
     }
 
     public void startDownloadIssueJob() {
-        downloadJob = new DownloadIssueJob(getName(), getUrl(), getHpubFile());
+        downloadJob = new DownloadIssueJob(this);
         BakerApplication.getInstance().getJobManager().addJobInBackground(downloadJob);
     }
 
     public ExtractIssueJob getExtractJob() {
         return extractJob;
-    }
-
-    public String getExtractJobId() {
-        return extractJob != null ? extractJob.getId() : null;
     }
 
     public void cancelExtractJob() {
@@ -215,7 +218,7 @@ public class Issue {
     }
 
     public void startExtractIssueJob() {
-        extractJob = new ExtractIssueJob(getName(), getHpubPath(), getName());
+        extractJob = new ExtractIssueJob(this);
         BakerApplication.getInstance().getJobManager().addJobInBackground(extractJob);
     }
 

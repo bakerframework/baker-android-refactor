@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2014. Francisco Contreras, Holland Salazar.
  * Copyright (c) 2015. Tobias Strebitzer, Francisco Contreras, Holland Salazar.
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- *
+ * <p/>
  * Redistributions of source code must retain the above copyright notice, this list of
  * conditions and the following disclaimer.
  * Redistributions in binary form must reproduce the above copyright notice, this list of
@@ -23,13 +23,19 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- **/
-package com.bakerframework.baker.task;
+ */
+package com.bakerframework.baker.events;
 
-import java.io.File;
+import com.bakerframework.baker.model.Issue;
 
-public interface DownloadTaskDelegate {
-    void onDownloadProgress(DownloadTask task, long progress, long bytesSoFar, long totalBytes);
-    void onDownloadComplete(DownloadTask task, File file);
-    void onDownloadFailed(DownloadTask task);
+public class ArchiveIssueCompleteEvent {
+    private final Issue issue;
+
+    public ArchiveIssueCompleteEvent(Issue issue) {
+        this.issue = issue;
+    }
+
+    public Issue getIssue() {
+        return issue;
+    }
 }

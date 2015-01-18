@@ -28,24 +28,26 @@ package com.bakerframework.baker.jobs;
 
 import android.util.Log;
 
-import com.bakerframework.baker.events.DownloadIssueCompleteEvent;
-import com.bakerframework.baker.events.DownloadIssueErrorEvent;
-import com.bakerframework.baker.events.DownloadIssueProgressEvent;
+import com.bakerframework.baker.events.DownloadManifestCompleteEvent;
+import com.bakerframework.baker.events.DownloadManifestErrorEvent;
 import com.bakerframework.baker.handler.DownloadHandler;
-import com.bakerframework.baker.model.Issue;
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
 
+import java.io.File;
+
 import de.greenrobot.event.EventBus;
 
-public class DownloadIssueJob extends Job {
-    private final Issue issue;
+public class DownloadManifestJob extends Job {
+    private final String url;
+    private final File targetFile;
     private boolean completed;
     private DownloadHandler downloadHandler;
 
-    public DownloadIssueJob(Issue issue) {
+    public DownloadManifestJob(String url, File targetFile) {
         super(new Params(Priority.LOW).requireNetwork().setPersistent(false));
-        this.issue = issue;
+        this.url= url;
+        this.targetFile = targetFile;
         this.completed = false;
     }
 
@@ -56,35 +58,28 @@ public class DownloadIssueJob extends Job {
 
     @Override
     public void onRun() throws Throwable {
+        Log.d("DownloadManifestJob", "DOWNLOADING FILE: " + url);
+
         // Download file
-         downloadHandler = new DownloadHandler(issue.getUrl(), issue.getHpubFile()) {
-            @Override
-            public void onDownloadProgress(int percentComplete, long bytesSoFar, long totalBytes) {
-                EventBus.getDefault().post(new DownloadIssueProgressEvent(issue, percentComplete, bytesSoFar, totalBytes));
-            }
-        };
+        downloadHandler = new DownloadHandler(this.url, this.targetFile);
         downloadHandler.run();
 
         // Complete job
         completed = true;
-        EventBus.getDefault().post(new DownloadIssueCompleteEvent(issue));
+        EventBus.getDefault().post(new DownloadManifestCompleteEvent());
     }
 
     @Override
     protected boolean shouldReRunOnThrowable(Throwable throwable) {
-        Log.e("DownloadIssueJob", throwable.getLocalizedMessage());
+        Log.e("DownloadManifestJob", throwable.getLocalizedMessage());
         completed = true;
-        EventBus.getDefault().post(new DownloadIssueErrorEvent(issue, throwable));
+        EventBus.getDefault().post(new DownloadManifestErrorEvent(throwable));
         return false;
     }
 
     @Override
     protected void onCancel() {
         downloadHandler.cancel();
-    }
-
-    public Issue getIssue() {
-        return issue;
     }
 
     public boolean isCompleted() {

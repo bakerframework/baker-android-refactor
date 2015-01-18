@@ -1,3 +1,14 @@
+package com.bakerframework.baker.helper;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  * Copyright (c) 2013-2014. Francisco Contreras, Holland Salazar.
  * Copyright (c) 2015. Tobias Strebitzer, Francisco Contreras, Holland Salazar.
@@ -24,18 +35,40 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.bakerframework.baker.events;
+public class FileHelper {
 
-import com.bakerframework.baker.model.Issue;
-
-public class DownloadIssueCompleteEvent {
-    private final Issue issue;
-
-    public DownloadIssueCompleteEvent(Issue issue) {
-        this.issue = issue;
+    public static String getContentsFromFile(File file) {
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            byte[] buffer = new byte[1024];
+            StringBuilder data = new StringBuilder("");
+            while (in.read(buffer) != -1) {
+                data.append(new String(buffer));
+            }
+            in.close();
+            return data.toString();
+        } catch (FileNotFoundException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
     }
 
-    public Issue getIssue() {
-        return issue;
+    public static JSONArray getJsonArrayFromFile(File file) {
+        try {
+            return new JSONArray(getContentsFromFile(file));
+        } catch (JSONException e) {
+            return null;
+        }
     }
+
+    public static JSONObject getJsonObjectFromFile(File file) {
+        try {
+            return new JSONObject(getContentsFromFile(file));
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
 }

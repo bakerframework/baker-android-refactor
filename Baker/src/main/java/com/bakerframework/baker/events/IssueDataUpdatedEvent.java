@@ -28,10 +28,10 @@ package com.bakerframework.baker.events;
 
 import com.bakerframework.baker.model.Issue;
 
-public class DownloadIssueCompleteEvent {
+public class IssueDataUpdatedEvent {
     private final Issue issue;
 
-    public DownloadIssueCompleteEvent(Issue issue) {
+    public IssueDataUpdatedEvent(Issue issue) {
         this.issue = issue;
     }
 

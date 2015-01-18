@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2014. Francisco Contreras, Holland Salazar.
  * Copyright (c) 2015. Tobias Strebitzer, Francisco Contreras, Holland Salazar.
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- *
+ * <p/>
  * Redistributions of source code must retain the above copyright notice, this list of
  * conditions and the following disclaimer.
  * Redistributions in binary form must reproduce the above copyright notice, this list of
@@ -23,40 +23,13 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- **/
-package com.bakerframework.baker.task;
+ */
+package com.bakerframework.baker.events;
 
-import android.os.AsyncTask;
+public class DownloadManifestCompleteEvent {
 
-import com.bakerframework.baker.client.TaskMandator;
-import com.bakerframework.baker.settings.Configuration;
+    public DownloadManifestCompleteEvent() {
 
-import java.io.File;
-
-public class ArchiveTask extends AsyncTask<String, Long, String> {
-
-    private TaskMandator mandator;
-
-    private int taskId;
-
-    public ArchiveTask(TaskMandator mandator, final int taskId) {
-        this.mandator = mandator;
-        this.taskId = taskId;
-    }
-
-    @Override
-    protected String doInBackground(String... params) {
-        String filePath = Configuration.getMagazinesDirectory() + File.separator + params[0];
-        return Configuration.deleteDirectory(filePath) ? "SUCCESS" : "ERROR";
-    }
-
-    @Override
-    protected void onProgressUpdate(Long... progress) {
-    }
-
-    @Override
-    protected void onPostExecute(final String result) {
-        mandator.postExecute(taskId, result);
     }
 
 }

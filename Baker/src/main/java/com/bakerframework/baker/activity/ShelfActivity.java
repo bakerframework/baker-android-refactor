@@ -61,6 +61,10 @@ import android.support.v4.widget.DrawerLayout;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.adapter.IssueAdapter;
+import com.bakerframework.baker.events.ArchiveIssueCompleteEvent;
+import com.bakerframework.baker.events.DownloadIssueErrorEvent;
+import com.bakerframework.baker.events.ParseBookJsonCompleteEvent;
+import com.bakerframework.baker.events.ParseBookJsonErrorEvent;
 import com.bakerframework.baker.model.*;
 import com.bakerframework.baker.model.IssueCollection;
 import com.bakerframework.baker.settings.Configuration;
@@ -80,6 +84,8 @@ import org.solovyev.android.checkout.ResponseCodes;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 public class ShelfActivity extends ActionBarActivity implements IssueCollectionListener, SwipeRefreshLayout.OnRefreshListener {
 
@@ -129,6 +135,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
         // Initialize jobs
         jobManager = BakerApplication.getInstance().getJobManager();
+        EventBus.getDefault().register(this);
 
         // Prepare google analytics
         if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_app_open_event)) {
@@ -175,7 +182,8 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         checkout.createPurchaseFlow(new PurchaseListener());
         // you only need this if this activity needs information about purchases/SKUs
         inventory = checkout.loadInventory();
-        inventory.whenLoaded(new InventoryLoadedListener());
+        // As issueCollection has already been loaded in splash, we trigger the callback here manually
+        onIssueCollectionLoaded();
 
     }
 
@@ -187,7 +195,9 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
         private void onPurchased() {
             // let's update purchase information in local inventory
-            inventory.load().whenLoaded(new InventoryLoadedListener());
+            if(!issueCollection.isLoading()) {
+                issueCollection.reload();
+            }
             Toast.makeText(getApplicationContext(), getString(R.string.msg_purchase_complete), Toast.LENGTH_SHORT).show();
         }
 
@@ -206,6 +216,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         @Override
         public void onError(int response, @NonNull Exception e) {
             // @TODO: add alert dialog or logging
+            Log.e("ShelfActivity", e.getMessage());
         }
     }
 
@@ -291,6 +302,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     @Override
     public void onIssueCollectionLoaded() {
         presentIssues();
+        inventory.load().whenLoaded(new InventoryLoadedListener());
     }
 
     public void presentIssues() {
@@ -386,7 +398,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     public void showAppUsage() {
         BookJson book = new BookJson();
-        book.setMagazineName(this.getString(R.string.path_tutorial_directory));
+        book.setIssueName(this.getString(R.string.path_tutorial_directory));
         List<String> contents = new ArrayList<>();
         String[] pages = this.getResources().getStringArray(R.array.list_tutorial_pages);
         for (String page : pages) {
@@ -497,5 +509,38 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         // Close category drawer
         drawerLayout.closeDrawer(drawerList);
     }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(DownloadIssueErrorEvent event) {
+        // Restore purchases
+        if(!issueCollection.isLoading()) {
+            issueCollection.reload();
+        }
+        Toast.makeText(getApplicationContext(), getString(R.string.err_download_task_io), Toast.LENGTH_SHORT).show();
+    }
+
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(ParseBookJsonCompleteEvent event) {
+        // Track google analytics event
+        if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_issue_read_event)) {
+            BakerApplication.getInstance().sendEvent(getString(R.string.ga_issues_category), getString(R.string.ga_issue_open), event.getIssue().getName());
+        }
+        // View magazine
+        viewMagazine(event.getBookJson());
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(ParseBookJsonErrorEvent event) {
+        Toast.makeText(this, "The book.json was not found for issue " + event.getIssue().getName(), Toast.LENGTH_LONG).show();
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(ArchiveIssueCompleteEvent event) {
+        if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_issue_delete_event)) {
+            BakerApplication.getInstance().sendEvent(getString(R.string.ga_issues_category), getString(R.string.ga_issue_delete), event.getIssue().getName());
+        }
+    }
+
 
 }

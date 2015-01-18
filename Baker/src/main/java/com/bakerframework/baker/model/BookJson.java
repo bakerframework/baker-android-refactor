@@ -240,7 +240,7 @@ public class BookJson {
 		return magazineName;
 	}
 
-	public void setMagazineName(String magazineName) {
+	public void setIssueName(String magazineName) {
 		this.magazineName = magazineName;
 	}
 
@@ -252,47 +252,45 @@ public class BookJson {
         this.liveUrl = liveUrl;
     }
 
-    public void fromJson(final String jsonString) throws JSONException,
-			ParseException {
-		JSONObject json = new JSONObject(jsonString);
+    public void fromJsonString(final String jsonString) throws JSONException, ParseException {
+        this.fromJson(new JSONObject(jsonString));
+    }
+
+    public void fromJson(JSONObject json) throws JSONException, ParseException {
         if (json.has("liveUrl")) {
             this.liveUrl = json.getString("liveUrl");
         }
-//		SimpleDateFormat sdfInput = new SimpleDateFormat("yyyy-MM-dd",
-//				Locale.US);
 
 		// The other properties are commented by now, as we are not gonna use them yet.
-		
 		this.hpub = json.optString("hpub", "1");
 		this.title = json.optString("title", "");
-//		this.date = sdfInput.parse(json.getString("date"));
 		this.url = json.optString("url", "");
 		this.cover = json.optString("cover", "");
         this.orientation = json.optString("orientation", "PORTRAIT");
-//		this.zoomable = json.getBoolean("zoomable");
-//		this.background = json.getString("-baker-background");
-//		this.verticalBounce = json.getBoolean("-baker-vertical-bounce");
-//		this.indexHeight = json.getInt("-baker-index-height");
-//		this.mediaDisplay = json.getBoolean("-baker-media-autoplay");
-//		this.pageNumberColors = json.getString("-baker-page-numbers-color");
-//		this.rendering = json.getString("-baker-rendering");
-//		this.pageTurnTap = json.getBoolean("-baker-page-turn-tap");
+        // this.date = sdfInput.parse(json.getString("date"));
+        // this.zoomable = json.getBoolean("zoomable");
+        // this.background = json.getString("-baker-background");
+        // this.verticalBounce = json.getBoolean("-baker-vertical-bounce");
+        // this.indexHeight = json.getInt("-baker-index-height");
+        // this.mediaDisplay = json.getBoolean("-baker-media-autoplay");
+        // this.pageNumberColors = json.getString("-baker-page-numbers-color");
+        // this.rendering = json.getString("-baker-rendering");
+        // this.pageTurnTap = json.getBoolean("-baker-page-turn-tap");
+        // JSONArray authors = new JSONArray(json.getString("author"));
+        // JSONArray creators = new JSONArray(json.getString("creator"));
+        // this.authors = new ArrayList<String>();
+        // this.creators = new ArrayList<String>();
+        // for (int i = 0; i < authors.length(); i++) {
+        // 	this.authors.add(authors.getString(i));
+        // }
 
-//		JSONArray authors = new JSONArray(json.getString("author"));
-//		JSONArray creators = new JSONArray(json.getString("creator"));
-		JSONArray contents = new JSONArray(json.getString("contents"));
-//		this.authors = new ArrayList<String>();
-//		this.creators = new ArrayList<String>();
-		this.contents = new ArrayList<String>();
+        // for (int i = 0; i < creators.length(); i++) {
+        // 	this.creators.add(creators.getString(i));
+        // }
 
-//		for (int i = 0; i < authors.length(); i++) {
-//			this.authors.add(authors.getString(i));
-//		}
-//
-//		for (int i = 0; i < creators.length(); i++) {
-//			this.creators.add(creators.getString(i));
-//		}
-
+        // Parse contents
+        this.contents = new ArrayList<String>();
+        JSONArray contents = new JSONArray(json.getString("contents"));
 		for (int i = 0; i < contents.length(); i++) {
 			this.contents.add(contents.getString(i));
 		}

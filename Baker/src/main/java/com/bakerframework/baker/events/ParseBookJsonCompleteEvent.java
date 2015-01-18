@@ -26,16 +26,22 @@
  */
 package com.bakerframework.baker.events;
 
+import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.model.Issue;
 
-public class DownloadIssueCompleteEvent {
+public class ParseBookJsonCompleteEvent {
     private final Issue issue;
+    private final BookJson bookJson;
 
-    public DownloadIssueCompleteEvent(Issue issue) {
+    public ParseBookJsonCompleteEvent(Issue issue, BookJson bookJson) {
         this.issue = issue;
+        this.bookJson = bookJson;
     }
 
     public Issue getIssue() {
         return issue;
+    }
+    public BookJson getBookJson() {
+        return bookJson;
     }
 }

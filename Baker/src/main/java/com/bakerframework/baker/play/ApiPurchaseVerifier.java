@@ -57,9 +57,9 @@ public class ApiPurchaseVerifier extends BasePurchaseVerifier {
         try {
             // Build parameters
             Gson gson = new Gson();
-            String payload = "{\"payload\":" + gson.toJson(purchases) + ",\"user_id\":\"" + Configuration.getUserId() + "\",\"source\":\"android-" + Configuration.getAppVersion() + "\"}";
+            String payload = "{\"payload\":" + gson.toJson(purchases) + ",\"payload_user_id\":\"" + Configuration.getUserId() + "\",\"source\":\"android-" + Configuration.getAppVersion() + "\"}";
 
-            StringEntity params =new StringEntity(payload);
+            StringEntity params = new StringEntity(payload);
             request.addHeader("content-type", "application/json;charset=UTF-8");
             request.setEntity(params);
 

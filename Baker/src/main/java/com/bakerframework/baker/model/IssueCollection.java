@@ -30,9 +30,11 @@ import android.util.Log;
 
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
+import com.bakerframework.baker.events.DownloadManifestCompleteEvent;
+import com.bakerframework.baker.events.DownloadManifestErrorEvent;
+import com.bakerframework.baker.helper.FileHelper;
+import com.bakerframework.baker.jobs.DownloadManifestJob;
 import com.bakerframework.baker.settings.Configuration;
-import com.bakerframework.baker.task.DownloadTask;
-import com.bakerframework.baker.task.DownloadTaskDelegate;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,10 +55,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import de.greenrobot.event.EventBus;
+
 import static org.solovyev.android.checkout.ProductTypes.IN_APP;
 import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
 
-public class IssueCollection implements DownloadTaskDelegate {
+public class IssueCollection {
 
     private HashMap<String, Issue> issueMap;
     private List<String> categories;
@@ -64,8 +68,7 @@ public class IssueCollection implements DownloadTaskDelegate {
     private Sku subscriptionSku;
 
     // Tasks management
-    private DownloadTask downloadManifestTask;
-    private boolean isLoading = false;
+    private DownloadManifestJob downloadManifestJob;
 
     // Data Processing
     String JSON_ENCODING = "utf-8";
@@ -81,6 +84,7 @@ public class IssueCollection implements DownloadTaskDelegate {
     public IssueCollection() {
         // Initialize issue map
         issueMap = new HashMap<>();
+        EventBus.getDefault().register(this);
     }
 
     public List<String> getCategories() {
@@ -103,7 +107,7 @@ public class IssueCollection implements DownloadTaskDelegate {
     }
 
     public List<Issue> getIssues() {
-        if(isLoading || issueMap == null) {
+        if(isLoading() || issueMap == null) {
             return new ArrayList<>();
         }else{
             return new ArrayList<>(issueMap.values());
@@ -120,7 +124,7 @@ public class IssueCollection implements DownloadTaskDelegate {
     }
 
     public boolean isLoading() {
-        return isLoading;
+        return downloadManifestJob != null && !downloadManifestJob.isCompleted();
     }
 
     // Event listeners
@@ -135,10 +139,9 @@ public class IssueCollection implements DownloadTaskDelegate {
 
     // Reload data from backend
     public void reload() {
-        if(!isLoading) {
-            isLoading = true;
-            downloadManifestTask = new DownloadTask(this, Configuration.getManifestUrl(), getCachedFile());
-            downloadManifestTask.execute();
+        if(!isLoading()) {
+            downloadManifestJob = new DownloadManifestJob(Configuration.getManifestUrl(), getCachedFile());
+            BakerApplication.getInstance().getJobManager().addJobInBackground(downloadManifestJob);
         }else{
             throw new RuntimeException("reload method invoked on Manifest while already downloading data");
         }
@@ -152,17 +155,8 @@ public class IssueCollection implements DownloadTaskDelegate {
 
         try {
 
-            // Read file
-            FileInputStream in = new FileInputStream(file);
-            byte[] buffer = new byte[1024];
-            StringBuilder data = new StringBuilder("");
-            while (in.read(buffer) != -1) {
-                data.append(new String(buffer));
-            }
-            in.close();
-
             // Create issues
-            processJson(new JSONArray(data.toString()));
+            processJson(FileHelper.getJsonArrayFromFile(file));
 
             // Process categories
             categories = extractAllCategories();
@@ -172,8 +166,6 @@ public class IssueCollection implements DownloadTaskDelegate {
                 listener.onIssueCollectionLoaded();
             }
 
-        } catch (FileNotFoundException e) {
-            Log.e(this.getClass().getName(), "processing error (not found): " + e);
         } catch (JSONException e) {
             Log.e(this.getClass().getName(), "processing error (invalid json): " + e);
         } catch (IOException e) {
@@ -312,9 +304,6 @@ public class IssueCollection implements DownloadTaskDelegate {
                         issue.setPurchased(inAppProductCollection.isPurchased(sku));
                     }
                     issue.setSku(sku);
-                    Log.i(getClass().getName(), "inventory issue: " + issue);
-                    Log.i(getClass().getName(), "inventory sku: " + sku);
-                    Log.i(getClass().getName(), "inventory purchased: " + issue.isPurchased());
                 }
             }
         } else {
@@ -365,22 +354,16 @@ public class IssueCollection implements DownloadTaskDelegate {
         }
     }
 
-    // Overrides
 
-    @Override
-    public void onDownloadProgress(DownloadTask task, long progress, long bytesSoFar, long totalBytes) {
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(DownloadManifestCompleteEvent event) {
+        processManifestFile(getCachedFile());
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(DownloadManifestErrorEvent event) {
 
     }
 
-    @Override
-    public void onDownloadComplete(DownloadTask task, File file) {
-        isLoading = false;
-        processManifestFile(file);
-    }
-
-    @Override
-    public void onDownloadFailed(DownloadTask task) {
-        isLoading = false;
-    }
 
 }

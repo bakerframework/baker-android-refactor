@@ -26,17 +26,19 @@
  */
 package com.bakerframework.baker.events;
 
+import com.bakerframework.baker.model.Issue;
+
 public class DownloadIssueProgressEvent {
+    private Issue issue;
     private final int progress;
     private final long bytesSoFar;
     private final long totalBytes;
-    private String jobId;
 
-    public DownloadIssueProgressEvent(int progress, long bytesSoFar, long totalBytes, String jobId) {
+    public DownloadIssueProgressEvent(Issue issue, int progress, long bytesSoFar, long totalBytes) {
         this.progress = progress;
         this.bytesSoFar = bytesSoFar;
         this.totalBytes = totalBytes;
-        this.jobId = jobId;
+        this.issue = issue;
     }
 
     public int getProgress() {
@@ -49,7 +51,7 @@ public class DownloadIssueProgressEvent {
         return totalBytes;
     }
 
-    public String getJobId() {
-        return jobId;
+    public Issue getIssue() {
+        return issue;
     }
 }

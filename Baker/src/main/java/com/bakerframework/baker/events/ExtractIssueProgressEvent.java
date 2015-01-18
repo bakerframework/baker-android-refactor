@@ -26,20 +26,22 @@
  */
 package com.bakerframework.baker.events;
 
-public class ExtractIssueProgressEvent {
-    private int progress;
-    private String jobId;
+import com.bakerframework.baker.model.Issue;
 
-    public ExtractIssueProgressEvent(int progress, String jobId) {
+public class ExtractIssueProgressEvent {
+    private Issue issue;
+    private int progress;
+
+    public ExtractIssueProgressEvent(Issue issue, int progress) {
         this.progress = progress;
-        this.jobId = jobId;
+        this.issue = issue;
     }
 
     public int getProgress() {
         return progress;
     }
 
-    public String getJobId() {
-        return jobId;
+    public Issue getIssue() {
+        return issue;
     }
 }
