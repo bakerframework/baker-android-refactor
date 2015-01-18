@@ -5,22 +5,44 @@
         body {
             background-color: #FFFFFF;
             color: #444444;
+            text-align: center;
+            font-family: "Helvetica Neue", Helvetica;
+            padding: 20px 0px;
+            margin: 0px;
         }
         #logo {
-            background-color: transparent;
-            background-image: url('img/logo.png');
-            background-repeat: no-repeat;
-            background-size: 75% auto;
-            background-position:center center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
+
         }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        div.teaser {
+            padding: 6% 8%;
+            background: #F2F2F2;
+            margin-bottom: 32px;
+        }
+
+        h3 {
+            font-weight: 200;
+            font-size: 3.0vw;
+        }
+
     </style>
 </head>
 <body>
-    <div id="logo"></div>
+    <div id="logo">
+        <img src="img/logo.png" alt="Baker Framework" />
+    </div>
+
+    <div class="teaser">
+        <div class="teaser-inner">
+            <h3>Baker is a HTML5 based digital publication framework for publishing interactive books &amp; magazines on iPad &amp; iPhone using simply open web standards.</h3>
+        </div>
+    </div>
+
+    <img src="img/splash.png" alt="Splash" />
 </body>
 </html>
