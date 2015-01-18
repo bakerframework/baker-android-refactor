@@ -142,7 +142,7 @@ public class IssueAdapter extends ArrayAdapter {
 
             // Check if the view exists at the current location
             if(issue.getName() == getItem(position).getName()) {
-                ((IssueCardView) convertView).redraw();
+                // ((IssueCardView) convertView).redraw();
                 return convertView;
             }
         }

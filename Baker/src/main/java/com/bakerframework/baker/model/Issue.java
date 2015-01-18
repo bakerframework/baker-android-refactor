@@ -26,27 +26,18 @@
  **/
 package com.bakerframework.baker.model;
 
-import android.os.AsyncTask;
-
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
-import com.bakerframework.baker.jobs.ExtractZipJob;
+import com.bakerframework.baker.jobs.DownloadIssueJob;
+import com.bakerframework.baker.jobs.ExtractIssueJob;
 import com.bakerframework.baker.settings.Configuration;
-import com.bakerframework.baker.task.DownloadTask;
-import com.bakerframework.baker.task.DownloadTaskDelegate;
-import com.path.android.jobqueue.Job;
-import com.path.android.jobqueue.JobManager;
-import com.path.android.jobqueue.JobStatus;
 
 import org.solovyev.android.checkout.Sku;
 
 import java.io.File;
 import java.util.List;
-import java.util.Observable;
 
-public class Issue extends Observable implements DownloadTaskDelegate {
-
-    // Private members
+public class Issue {
     private String name;
     private String productId;
     private String title;
@@ -56,55 +47,16 @@ public class Issue extends Observable implements DownloadTaskDelegate {
     private Integer size;
     private String cover;
     private String url;
-    private String price;
     private Sku sku;
     private boolean purchased;
     private boolean standalone;
     private boolean coverChanged;
     private boolean urlChanged;
-
-    // Tasks and Jobs
-    private DownloadTask downloadTask;
-    private ExtractZipJob extractJob;
-    public ExtractZipJob getExtractJob() {
-        return extractJob;
-    }
-    public String getExtractJobId() {
-        return extractJob != null ? extractJob.getId() : null;
-    }
-
-    // Events
-    public static final int EVENT_ON_DOWNLOAD_PROGRESS = 0;
-    public static final int EVENT_ON_DOWNLOAD_COMPLETE = 1;
-    public static final int EVENT_ON_DOWNLOAD_FAILED= 2;
-
-    // Download variables
-    private long bytesSoFar;
-    private long progress;
-    private long totalBytes;
-
-    // Constructor
+    private DownloadIssueJob downloadJob;
+    private ExtractIssueJob extractJob;
 
     public Issue(String name) {
         this.name = name;
-    }
-
-    // Task handling
-
-    public void cancelDownloadTask() {
-        if(downloadTask != null) {
-            downloadTask.cancel(true);
-        }
-    }
-
-    public void startDownloadTask() {
-        // Create and trigger download task
-        downloadTask = new DownloadTask(this, getUrl(), getHpubFile());
-        downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-    }
-
-    public boolean isDownloading() {
-        return downloadTask != null && downloadTask.isDownloading();
     }
 
     // Getters & Setters
@@ -180,7 +132,7 @@ public class Issue extends Observable implements DownloadTaskDelegate {
         return sku;
     }
     public void setSku(Sku sku) {
-        this.sku= sku;
+        this.sku = sku;
     }
     public boolean hasSku() {
         return (this.sku != null);
@@ -214,21 +166,60 @@ public class Issue extends Observable implements DownloadTaskDelegate {
         this.standalone = standalone;
     }
 
-    public long getBytesSoFar() {
-        return bytesSoFar;
-    }
-    public long getProgress() {
-        return progress;
-    }
-    public long getTotalBytes() {
-        return totalBytes;
+    // Tasks and Jobs
+
+    public DownloadIssueJob getDownloadJob() {
+        return downloadJob;
     }
 
-    // Helpers
-
-    public Integer getSizeMB() {
-        return size / 1048576;
+    public String getDownloadJobId() {
+        return downloadJob != null ? downloadJob.getId() : null;
     }
+
+    public void cancelDownloadJob() {
+        if(downloadJob != null) { downloadJob.cancel(); }
+    }
+
+    public boolean isDownloading() {
+        return downloadJob != null && !downloadJob.isCompleted();
+    }
+
+    public boolean isDownloaded() {
+        File archiveFile = getHpubFile();
+        return  (downloadJob == null || downloadJob.isCompleted()) && archiveFile.exists() && archiveFile.isFile();
+    }
+
+    public void startDownloadIssueJob() {
+        downloadJob = new DownloadIssueJob(getName(), getUrl(), getHpubFile());
+        BakerApplication.getInstance().getJobManager().addJobInBackground(downloadJob);
+    }
+
+    public ExtractIssueJob getExtractJob() {
+        return extractJob;
+    }
+
+    public String getExtractJobId() {
+        return extractJob != null ? extractJob.getId() : null;
+    }
+
+    public void cancelExtractJob() {
+        if(extractJob != null) { extractJob.cancel(); }
+    }
+
+    public boolean isExtracting() {
+        return getExtractJob() != null && !getExtractJob().isCompleted();
+    }
+
+    public boolean isExtracted() {
+        return !isExtracting() && !getHpubFile().exists() && getBookJsonFile().exists() && getBookJsonFile().isFile();
+    }
+
+    public void startExtractIssueJob() {
+        extractJob = new ExtractIssueJob(getName(), getHpubPath(), getName());
+        BakerApplication.getInstance().getJobManager().addJobInBackground(extractJob);
+    }
+
+    // File Management
 
     public String getBookJsonPath() {
         return Configuration.getMagazinesDirectory() + File.separator + name + File.separator + BakerApplication.getInstance().getString(R.string.path_book);
@@ -246,52 +237,14 @@ public class Issue extends Observable implements DownloadTaskDelegate {
         return new File(getHpubPath());
     }
 
-    public boolean isExtracting() {
-        return getExtractJob() != null && !getExtractJob().isCompleted();
-    }
+    // Helpers
 
-    public boolean isExtracted() {
-        return !isExtracting() && !getHpubFile().exists() && getBookJsonFile().exists() && getBookJsonFile().isFile();
-    }
-
-    public boolean isDownloaded() {
-        File archiveFile = getHpubFile();
-        return  (downloadTask == null || !downloadTask.isDownloading()) && archiveFile.exists() && archiveFile.isFile();
+    public Integer getSizeMB() {
+        return size / 1048576;
     }
 
     public boolean isInCategory(String category) {
         return categories.contains(category);
     }
-
-    public void extractZip() {
-        extractJob = new ExtractZipJob(getName(), getHpubPath(), getName());
-        BakerApplication.getInstance().getJobManager().addJobInBackground(extractJob);
-    }
-
-    // Delegates
-
-    @Override
-    public void onDownloadProgress(DownloadTask task, long progress, long bytesSoFar, long totalBytes) {
-        if(task == downloadTask) {
-            this.progress = progress;
-            this.bytesSoFar = bytesSoFar;
-            this.totalBytes = totalBytes;
-            setChanged();
-            notifyObservers(EVENT_ON_DOWNLOAD_PROGRESS);
-        }
-    }
-
-    @Override
-    public void onDownloadComplete(DownloadTask task, File file) {
-        setChanged();
-        notifyObservers(EVENT_ON_DOWNLOAD_COMPLETE);
-    }
-
-    @Override
-    public void onDownloadFailed(DownloadTask task) {
-        setChanged();
-        notifyObservers(EVENT_ON_DOWNLOAD_FAILED);
-    }
-
 
 }

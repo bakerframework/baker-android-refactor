@@ -28,8 +28,8 @@ package com.bakerframework.baker.jobs;
 
 import android.util.Log;
 
-import com.bakerframework.baker.events.ExtractZipCompleteEvent;
-import com.bakerframework.baker.events.ExtractZipProgressEvent;
+import com.bakerframework.baker.events.ExtractIssueCompleteEvent;
+import com.bakerframework.baker.events.ExtractIssueProgressEvent;
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
 
@@ -42,23 +42,19 @@ import java.io.IOException;
 
 import de.greenrobot.event.EventBus;
 
-public class ExtractZipJob extends Job {
+public class ExtractIssueJob extends Job {
     private final String id;
     private File zipFile;
     private File outputDirectory;
     private boolean completed;
 
-    public ExtractZipJob(String id, String zipFilePath, String outputDirectoryName) {
+    public ExtractIssueJob(String id, String zipFilePath, String outputDirectoryName) {
         super(new Params(Priority.LOW).setPersistent(false));
         Log.i("ExtractZipJob", "JOB CREATED");
         this.id = id;
         this.zipFile = new File(zipFilePath);
         this.outputDirectory = new File(this.zipFile.getParent(), outputDirectoryName);
         completed = false;
-    }
-
-    public boolean isCompleted() {
-        return completed;
     }
 
     @Override
@@ -71,7 +67,7 @@ public class ExtractZipJob extends Job {
         Log.i("ExtractZipJob", "start");
 
         // Send zero progress event
-        EventBus.getDefault().post(new ExtractZipProgressEvent(0, id));
+        EventBus.getDefault().post(new ExtractIssueProgressEvent(0, id));
 
         // Delete directory if exists
         if (outputDirectory.exists() && outputDirectory.isDirectory()) {
@@ -90,7 +86,7 @@ public class ExtractZipJob extends Job {
         // Post complete event
         completed = true;
         Log.i("ExtractZipJob", "completed");
-        EventBus.getDefault().post(new ExtractZipCompleteEvent(id));
+        EventBus.getDefault().post(new ExtractIssueCompleteEvent(id));
     }
 
     @Override
@@ -101,6 +97,18 @@ public class ExtractZipJob extends Job {
     @Override
     protected boolean shouldReRunOnThrowable(Throwable throwable) {
         return false;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void cancel() {
+        // @TODO: Implement unzip cancellation logic
     }
 
     private class MonitorFileInputStream extends FileInputStream {
@@ -121,13 +129,10 @@ public class ExtractZipJob extends Job {
             int newPercentComplete = (int) Math.floor((totalRead / totalSize) * 100);
             if(newPercentComplete > percentComplete) {
                 percentComplete = newPercentComplete;
-                EventBus.getDefault().post(new ExtractZipProgressEvent(percentComplete, id));
+                EventBus.getDefault().post(new ExtractIssueProgressEvent(percentComplete, id));
             }
             return super.read(buffer, byteOffset, byteCount);
         }
     }
 
-    public String getId() {
-        return id;
-    }
 }

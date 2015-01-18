@@ -26,11 +26,17 @@
  */
 package com.bakerframework.baker.events;
 
-public class ExtractZipCompleteEvent {
-    private final String jobId;
+public class ExtractIssueProgressEvent {
+    private int progress;
+    private String jobId;
 
-    public ExtractZipCompleteEvent(String jobId) {
+    public ExtractIssueProgressEvent(int progress, String jobId) {
+        this.progress = progress;
         this.jobId = jobId;
+    }
+
+    public int getProgress() {
+        return progress;
     }
 
     public String getJobId() {

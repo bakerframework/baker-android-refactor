@@ -26,20 +26,20 @@
  */
 package com.bakerframework.baker.events;
 
-public class ExtractZipProgressEvent {
-    private int progress;
-    private String jobId;
+public class DownloadIssueErrorEvent {
+    private final String jobId;
+    private final Throwable throwable;
 
-    public ExtractZipProgressEvent(int progress, String jobId) {
-        this.progress = progress;
+    public DownloadIssueErrorEvent(String jobId, Throwable throwable) {
         this.jobId = jobId;
-    }
-
-    public int getProgress() {
-        return progress;
+        this.throwable = throwable;
     }
 
     public String getJobId() {
         return jobId;
+    }
+
+    public Throwable getThrowable() {
+        return throwable;
     }
 }

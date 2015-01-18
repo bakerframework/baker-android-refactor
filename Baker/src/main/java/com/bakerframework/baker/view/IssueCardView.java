@@ -45,9 +45,12 @@ import android.widget.Toast;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.activity.ShelfActivity;
 import com.bakerframework.baker.client.TaskMandator;
-import com.bakerframework.baker.events.ExtractZipCompleteEvent;
-import com.bakerframework.baker.events.ExtractZipErrorEvent;
-import com.bakerframework.baker.events.ExtractZipProgressEvent;
+import com.bakerframework.baker.events.DownloadIssueCompleteEvent;
+import com.bakerframework.baker.events.DownloadIssueErrorEvent;
+import com.bakerframework.baker.events.DownloadIssueProgressEvent;
+import com.bakerframework.baker.events.ExtractIssueCompleteEvent;
+import com.bakerframework.baker.events.ExtractIssueErrorEvent;
+import com.bakerframework.baker.events.ExtractIssueProgressEvent;
 import com.bakerframework.baker.helper.ImageLoaderHelper;
 import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.R;
@@ -59,12 +62,10 @@ import org.json.JSONException;
 import org.solovyev.android.checkout.*;
 
 import java.text.ParseException;
-import java.util.Observable;
-import java.util.Observer;
 
 import de.greenrobot.event.EventBus;
 
-public class IssueCardView extends LinearLayout implements TaskMandator, Observer {
+public class IssueCardView extends LinearLayout implements TaskMandator {
 
     private Issue issue;
 
@@ -110,8 +111,6 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         this.parentActivity = (Activity)parentActivity;
         this.issue = issue;
 
-        // Observe issue changes
-        issue.addObserver(this);
     }
 
     public IssueCardView(Context context) {
@@ -165,7 +164,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         uiDownloadIssueButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             setUIState(UI_STATE_DOWNLOAD);
-            issue.startDownloadTask();
+            issue.startDownloadIssueJob();
             }
         });
 
@@ -308,7 +307,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         setUIState(UI_STATE_EXTRACT);
 
         // Create and trigger unzipper task
-        issue.extractZip();
+        issue.startExtractIssueJob();
     }
 
     private void setUIState(int uiState) {
@@ -426,35 +425,8 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
         setMeasuredDimension(getMeasuredWidth(), getMeasuredHeight());
     }
 
-    @Override
-    public void update(Observable observable, Object o) {
-        if(observable == issue) {
-            switch ((int) o) {
-                case Issue.EVENT_ON_DOWNLOAD_PROGRESS:
-                    uiProgressText.setText(parentActivity.getString(R.string.msg_issue_downloading) + ": " + (int) issue.getProgress() + "% (" + String.valueOf(issue.getBytesSoFar() / 1048576) + " MB)");
-                    uiProgressBar.setProgress((int) issue.getProgress());
-                    break;
-                case Issue.EVENT_ON_DOWNLOAD_COMPLETE:
-                    // Send google analytics event
-                    if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_download_event)) {
-                        BakerApplication.getInstance().sendEvent(
-                                parentActivity.getString(R.string.ga_issues_category),
-                                parentActivity.getString(R.string.ga_issue_download),
-                                issue.getName());
-                    }
-                    // Trigger unzipping
-                    extractZip();
-                    break;
-                case Issue.EVENT_ON_DOWNLOAD_FAILED:
-                    setUIState(UI_STATE_ERROR);
-                    uiProgressText.setText(getContext().getString(R.string.err_download_task_io));
-                    break;
-            }
-        }
-    }
-
     // @SuppressWarnings("UnusedDeclaration")
-    public void onEventMainThread(ExtractZipCompleteEvent event) {
+    public void onEventMainThread(ExtractIssueCompleteEvent event) {
         if(event.getJobId() == issue.getExtractJobId()) {
             setUIState(UI_STATE_READY);
             readable = true;
@@ -462,7 +434,7 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
     }
 
     // @SuppressWarnings("UnusedDeclaration")
-    public void onEventMainThread(ExtractZipErrorEvent event) {
+    public void onEventMainThread(ExtractIssueErrorEvent event) {
         if(event.getJobId() == issue.getExtractJobId()) {
             setUIState(UI_STATE_INITIAL);
             readable = false;
@@ -471,9 +443,40 @@ public class IssueCardView extends LinearLayout implements TaskMandator, Observe
     }
 
     // @SuppressWarnings("UnusedDeclaration")
-    public void onEventMainThread(ExtractZipProgressEvent event) {
+    public void onEventMainThread(ExtractIssueProgressEvent event) {
         if(event.getJobId() == issue.getExtractJobId()) {
             uiProgressText.setText(parentActivity.getString(R.string.msg_issue_extracting) + ": " + String.valueOf(event.getProgress()) + "%");
+            uiProgressBar.setProgress(event.getProgress());
+        }
+    }
+
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(DownloadIssueCompleteEvent event) {
+        if(event.getJobId() == issue.getDownloadJobId()) {
+            if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_download_event)) {
+                BakerApplication.getInstance().sendEvent(
+                        parentActivity.getString(R.string.ga_issues_category),
+                        parentActivity.getString(R.string.ga_issue_download),
+                        issue.getName());
+            }
+            // Trigger unzipping
+            extractZip();
+        }
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(DownloadIssueErrorEvent event) {
+        if(event.getJobId() == issue.getDownloadJobId()) {
+            setUIState(UI_STATE_ERROR);
+            uiProgressText.setText(getContext().getString(R.string.err_download_task_io));
+        }
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(DownloadIssueProgressEvent event) {
+        if(event.getJobId() == issue.getDownloadJobId()) {
+            uiProgressText.setText(parentActivity.getString(R.string.msg_issue_downloading) + ": " + event.getProgress() + "% (" + String.valueOf(event.getBytesSoFar() / 1048576) + " MB)");
             uiProgressBar.setProgress(event.getProgress());
         }
     }

@@ -360,7 +360,7 @@ public class IssueCollection implements DownloadTaskDelegate {
     public void cancelDownloadingIssues(final List<Issue> downloadingIssues) {
         for (Issue issue : downloadingIssues) {
             if(issue.isDownloading()) {
-                issue.cancelDownloadTask();
+                issue.cancelDownloadJob();
             }
         }
     }

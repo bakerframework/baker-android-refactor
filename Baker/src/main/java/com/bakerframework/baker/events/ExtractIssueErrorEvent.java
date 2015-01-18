@@ -26,10 +26,10 @@
  */
 package com.bakerframework.baker.events;
 
-public class ExtractZipErrorEvent {
+public class ExtractIssueErrorEvent {
     private final String jobId;
 
-    public ExtractZipErrorEvent(String jobId) {
+    public ExtractIssueErrorEvent(String jobId) {
         this.jobId = jobId;
     }
 
