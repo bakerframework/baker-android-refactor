@@ -2,14 +2,19 @@
 <resources>
 
     <!-- App Configuration -->
-    <string name="app_id">com.bakerframework.baker</string>
+    <string name="app_id">com.magloft.demo</string>
     <string name="app_name">Baker App</string>
-    <string name="newstand_manifest_url">http://bakerframework.com/demo/shelf.json</string>
-    <string name="purchase_confirmation_url">http://bakerframework.com/demo/shelf.json</string>
+    <string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>
+    <string name="purchase_confirmation_url">http://192.168.1.33:3000/api/app/v1/android/verify/:purchase_type/:app_id/:user_id</string>
+    <string name="purchases_url">http://192.168.1.33:3000/api/app/v1/android/purchases/:app_id/:user_id</string>
 
     <!-- Google Play Configuration / In App Billing -->
-    <string name="google_play_license_key"/>
-    <string name="google_play_subscription_id"/>
+    <string name="google_play_license_key">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn1nhtTc4bXLLONB6p3MgRj9aW8t9RRlv36dWFuWl6sDQE78WL8hzgjxGdqSQWsZuXQHF6b2drQk/pCApVHgt6bFOLKbT40p6BUn5tHQxLVcPzZbZOJA50nq8XLNvWCR46NSqtkdEqAUBD70AbyL3yA+nRmJNs1662+oll7bTEPvD/6IR9rbFI2ehny06fN3bl6p7pNCadBttc/+pHXvWZd1BSnEJqk+KC0HWFCjzTmlhBttm5GJaudpP4ZqNUF1ytCFT/VBC0vJsqtm1tePC1MWU5GXYOzGacNyGe8r3u7UooS9p8eFhpDdGemZjrZSWat6eaS30GfnkeMvVNNLiqwIDAQAB</string>
+    <string-array name="google_play_subscription_ids">
+        <item>com.magloft.demo.subscription.weekly</item>
+        <item>com.magloft.demo.subscription.monthly</item>
+        <item>com.magloft.demo.subscription.yearly</item>
+    </string-array>
 
     <!-- UI Messages, Labels and Texts -->
     <string name="msg_exit">Exit</string>
@@ -72,16 +77,6 @@
     <string name="pref_google_analytics_title">Google Analytics</string>
     <string name="pref_enable_analytics">Enable Google Analytics</string>
     <string name="pref_enable_analytics_summary">Send usage data to Google Analytics</string>
-    
-    <!-- Google Analytics -->
-    <string name="ga_issues_category">Issues</string>
-    <string name="ga_issue_open">Issue Open</string>
-    <string name="ga_issue_download">Issue Download</string>
-    <string name="ga_issue_delete">Issue Delete</string>
-    <string name="ga_issue_page_view">Issue Page View</string>
-    <string name="ga_application_category">Application</string>
-    <string name="ga_application_open">Application Open</string>
-    <string name="ga_application_open_label">Application Opened</string>
 
     <!-- Usage Tutorial -->
     <string name="path_tutorial_directory">abaker_usage</string>
@@ -104,5 +99,16 @@
     <string name="err_application_license_invalid">Licensing is not possible in non-productive apps. Please disable enable_licence_check until publishing the app.</string>
     <string name="err_application_license_problem">It seems this app was not installed in a proper way. Please install this app only by using Google Play Store.</string>
     <string name="err_application_no_internet">You need internet connection the first time you start this application.</string>
+
+    <!-- Plugins -->
+    <string-array name="baker_plugins">
+        <item>ParsePlugin</item>
+        <item>GoogleAnalyticsPlugin</item>
+    </string-array>
+
+    <!-- Plugin configuration -->
+    <string name="parse_application_id">tWgLCcdZdGBvl1hBZ26PgcnICDAJNxSi9uQbgNPK</string>
+    <string name="parse_client_key">gVxIoD4NaoKS4oysOAxl4ggA8Xc92BWsi9hOVioB</string>
+    <string name="google_analytics_tracking_id">UA-58925833-1</string>
 
 </resources>

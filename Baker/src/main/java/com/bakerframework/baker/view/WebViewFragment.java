@@ -59,7 +59,7 @@ public class WebViewFragment extends Fragment {
     private FrameLayout customViewContainer;
     private WebChromeClient.CustomViewCallback customViewCallback;
     private View customView;
-    public CustomChromeClient chromeClient = new CustomChromeClient();
+    public final CustomChromeClient chromeClient = new CustomChromeClient();
     private IssueActivity activity;
 
 	@Override
@@ -165,9 +165,8 @@ public class WebViewFragment extends Fragment {
                                 }
                             }
                         }
-                    } catch (MalformedURLException ex) {
+                    } catch (MalformedURLException | UnsupportedEncodingException ex) {
                         Log.d(">>>URL_DATA", ex.getMessage());
-                    } catch (UnsupportedEncodingException ex) {
                     }
                 }
 

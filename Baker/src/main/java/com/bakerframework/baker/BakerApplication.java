@@ -26,7 +26,6 @@
  **/
 package com.bakerframework.baker;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -34,18 +33,15 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.bakerframework.baker.handler.PluginManager;
 import com.bakerframework.baker.model.IssueCollection;
 import com.bakerframework.baker.play.ApiPurchaseVerifier;
 import com.bakerframework.baker.play.LicenceManager;
-import com.google.android.gms.analytics.GoogleAnalytics;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.bakerframework.baker.settings.Configuration;
 import com.path.android.jobqueue.JobManager;
-import com.path.android.jobqueue.config.Configuration;
 import com.path.android.jobqueue.log.CustomLogger;
 
 import org.solovyev.android.checkout.Billing;
@@ -57,13 +53,10 @@ import org.solovyev.android.checkout.PurchaseVerifier;
 import static org.solovyev.android.checkout.ProductTypes.IN_APP;
 import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-public class BakerApplication extends Application implements AnalyticsEvents {
+public class BakerApplication extends Application {
     private static BakerApplication instance;
     private JobManager jobManager;
+    private PluginManager pluginManager;
 
     public BakerApplication() {
         instance = this;
@@ -76,11 +69,13 @@ public class BakerApplication extends Application implements AnalyticsEvents {
     // Billing support
     private final Billing billing = new Billing(this, new Billing.DefaultConfiguration() {
 
+        @NonNull
         @Override
         public PurchaseVerifier getPurchaseVerifier() {
             return new ApiPurchaseVerifier();
         }
 
+        @NonNull
         @Override
         public String getPublicKey() {
             return "remote";
@@ -100,23 +95,17 @@ public class BakerApplication extends Application implements AnalyticsEvents {
     private LicenceManager licenceManager;
     private int applicationMode = 1;
 
-    public enum TrackerName {
-        GLOBAL_TRACKER
-    }
-
-    private HashMap<TrackerName, Tracker> mTrackers = new HashMap<>();
-
     @Override
     public void onCreate(){
-        super.onCreate();
         configureJobManager();
+        pluginManager = new PluginManager();
         preferences = getSharedPreferences("baker.app", 0);
         issueCollection = new IssueCollection();
         licenceManager = new LicenceManager();
     }
 
     private void configureJobManager() {
-        Configuration configuration = new Configuration.Builder(this)
+        com.path.android.jobqueue.config.Configuration configuration = new com.path.android.jobqueue.config.Configuration.Builder(this)
                 .customLogger(new CustomLogger() {
                     private static final String TAG = "JOBS";
                     @Override
@@ -153,51 +142,31 @@ public class BakerApplication extends Application implements AnalyticsEvents {
         return jobManager;
     }
 
-    public IssueCollection getIssueCollection() {
-        return issueCollection;
+    public PluginManager getPluginManager() {
+        return pluginManager;
     }
 
-    public SharedPreferences getPreferences() {
-        return preferences;
+    public IssueCollection getIssueCollection() {
+        return issueCollection;
     }
 
     public LicenceManager getLicenceManager() {
         return licenceManager;
     }
 
-    public Billing getBilling() {
-        return billing;
-    }
-
-    public void initializeCheckout(List<String> productIds) {
-        List<String> subscriptionIds = new ArrayList<>();
-        subscriptionIds.add(getString(R.string.google_play_subscription_id));
-        checkout = Checkout.forApplication(billing, Products.create().add(IN_APP, productIds).add(SUBSCRIPTION, subscriptionIds));
-    }
-
     public Checkout getCheckout() {
+        if(checkout == null) {
+            checkout = Checkout.forApplication(billing, Products.create().add(IN_APP, issueCollection.getIssueProductIds()).add(SUBSCRIPTION, Configuration.getSubscriptionProductIds()));
+            checkout.start();
+        }
         return checkout;
     }
 
-    public int getApplicationMode() {
-        return applicationMode;
-    }
     public void setApplicationMode(int applicationMode) {
         this.applicationMode = applicationMode;
     }
 
     // Helper methods
-
-    public boolean checkPlayServices(Activity activity) {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, activity, 9000).show();
-            }
-            return false;
-        }
-        return true;
-    }
 
     public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) instance.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -256,52 +225,6 @@ public class BakerApplication extends Application implements AnalyticsEvents {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(field, value);
         editor.apply();
-    }
-
-    // Event handling
-
-    @Override
-    public void sendEvent(String category, String action, String label) {
-        Tracker tracker = this.getTracker(TrackerName.GLOBAL_TRACKER);
-
-        Log.d(this.getClass().getName(), "Sending event to Google Analytics with Category: "
-                + category
-                + ", Action: " + action
-                + ", Label: " + label);
-
-        tracker.send(new HitBuilders.EventBuilder()
-                .setCategory(category)
-                .setAction(action)
-                .setLabel(label)
-                .build());
-    }
-
-    @Override
-    public void sendTimingEvent(String category, long value, String name, String label) {
-        Tracker tracker = this.getTracker(TrackerName.GLOBAL_TRACKER);
-
-        Log.d(this.getClass().getName(), "Sending user timing event to Google Analytics with Category: "
-                + category
-                + ", Value: " + value
-                + ", Name: " + name
-                + ", Label: " + label);
-
-        // Build and send timing.
-        tracker.send(new HitBuilders.TimingBuilder()
-                .setCategory(category)
-                .setValue(value)
-                .setVariable(name)
-                .setLabel(label)
-                .build());
-    }
-
-    synchronized Tracker getTracker(TrackerName trackerId) {
-        if (!mTrackers.containsKey(trackerId)) {
-            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
-            Tracker tracker = (trackerId == TrackerName.GLOBAL_TRACKER) ? analytics.newTracker(R.xml.global_tracker) : null;
-            mTrackers.put(trackerId, tracker);
-        }
-        return mTrackers.get(trackerId);
     }
 
     public static BakerApplication getInstance() {

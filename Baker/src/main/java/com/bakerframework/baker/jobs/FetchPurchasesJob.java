@@ -28,26 +28,26 @@ package com.bakerframework.baker.jobs;
 
 import android.util.Log;
 
-import com.bakerframework.baker.events.DownloadManifestCompleteEvent;
-import com.bakerframework.baker.events.DownloadManifestErrorEvent;
+import com.bakerframework.baker.events.FetchPurchasesCompleteEvent;
+import com.bakerframework.baker.events.FetchPurchasesErrorEvent;
+import com.bakerframework.baker.handler.ApiRequestHandler;
 import com.bakerframework.baker.handler.DownloadHandler;
+import com.bakerframework.baker.settings.Configuration;
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
 
-import java.io.File;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
-public class DownloadManifestJob extends Job {
+public class FetchPurchasesJob extends Job {
     private final String url;
-    private final File targetFile;
     private boolean completed;
     private DownloadHandler downloadHandler;
 
-    public DownloadManifestJob(String url, File targetFile) {
-        super(new Params(Priority.LOW).setPersistent(false));
+    public FetchPurchasesJob(String url) {
+        super(new Params(Priority.LOW).requireNetwork().setPersistent(false));
         this.url= url;
-        this.targetFile = targetFile;
         this.completed = false;
     }
 
@@ -58,22 +58,30 @@ public class DownloadManifestJob extends Job {
 
     @Override
     public void onRun() throws Throwable {
-        Log.d("DownloadManifestJob", "DOWNLOADING FILE: " + url);
+        Log.d("FetchPurchasesJob", "fetching purchases from " + url);
+        String purchasesResult = "";
 
-        // Download file
-        downloadHandler = new DownloadHandler(this.url);
-        downloadHandler.download(this.targetFile);
+        // Build request handler
+        ApiRequestHandler apiRequestHandler = new ApiRequestHandler(Configuration.getPurchasesUrl());
 
-        // Complete job
+        // Post purchase verification request
+        boolean success = apiRequestHandler.get();
         completed = true;
-        EventBus.getDefault().post(new DownloadManifestCompleteEvent());
+
+        if(success) {
+            FetchPurchasesResponse fetchPurchasesResponse = apiRequestHandler.getResponseObject(FetchPurchasesResponse.class);
+            EventBus.getDefault().post(new FetchPurchasesCompleteEvent(fetchPurchasesResponse));
+        }else{
+            EventBus.getDefault().post(new FetchPurchasesErrorEvent(new Exception(apiRequestHandler.getResponseText())));
+        }
+
     }
 
     @Override
     protected boolean shouldReRunOnThrowable(Throwable throwable) {
-        Log.e("DownloadManifestJob", throwable.getLocalizedMessage());
+        Log.e("FetchPurchasesJob", throwable.getLocalizedMessage());
         completed = true;
-        EventBus.getDefault().post(new DownloadManifestErrorEvent(throwable));
+        EventBus.getDefault().post(new FetchPurchasesErrorEvent(throwable));
         return false;
     }
 
@@ -90,4 +98,8 @@ public class DownloadManifestJob extends Job {
         this.completed = true;
     }
 
+    public class FetchPurchasesResponse {
+        public List<String> issues;
+        public boolean subscribed;
+    }
 }

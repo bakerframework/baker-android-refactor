@@ -123,10 +123,6 @@ public class ParseBookJsonJob extends Job {
         return completed;
     }
 
-    public void cancel() {
-
-    }
-
     private class MissingPropertyException extends Exception {
         private final String property;
 

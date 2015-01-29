@@ -111,10 +111,11 @@ public class IssueCardView extends LinearLayout {
         super(context);
     }
 
+
     /**
      * Initialize the view
      */
-    public void init(final Context context, AttributeSet attrs) {
+    public void init(final Context context) {
 
         // Prepare and inflate layout
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -149,17 +150,14 @@ public class IssueCardView extends LinearLayout {
             }
         });
 
-        // Initialize download button click handler
+        // Initialize purchase button click handler
         uiBuyIssueButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) { purchaseIssue(); }
         });
 
         // Initialize download button click handler
         uiDownloadIssueButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            setUIState(UI_STATE_DOWNLOAD);
-            issue.startDownloadIssueJob();
-            }
+            public void onClick(View v) { downloadIssue(); }
         });
 
         // Initialize read button click handler
@@ -183,12 +181,6 @@ public class IssueCardView extends LinearLayout {
         redraw();
 
     }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-    }
-
 
     public void redraw() {
         uiTitleText.setText(issue.getTitle());
@@ -227,16 +219,23 @@ public class IssueCardView extends LinearLayout {
 
     private void purchaseIssue() {
         if (!issue.isPurchased()) {
-            final ActivityCheckout checkout = ((ShelfActivity) parentActivity).getCheckout();
+            final ActivityCheckout checkout = ((ShelfActivity) parentActivity).getShelfCheckout();
             checkout.whenReady(new Checkout.ListenerAdapter() {
                 @Override
                 public void onReady(@NonNull BillingRequests requests) {
                     if(issue.getSku() != null) {
                         requests.purchase(issue.getSku(), Configuration.getUserId(), checkout.getPurchaseFlow());
+                        BakerApplication.getInstance().getPluginManager().onIssuePurchaseClicked(issue);
                     }
                 }
             });
         }
+    }
+
+    private void downloadIssue() {
+        setUIState(UI_STATE_DOWNLOAD);
+        issue.startDownloadIssueJob();
+        BakerApplication.getInstance().getPluginManager().onIssueDownloadClicked(issue);
     }
 
     /**
@@ -255,6 +254,7 @@ public class IssueCardView extends LinearLayout {
                         // Create and trigger archive task
                         ArchiveIssueJob archiveIssueJob = new ArchiveIssueJob(issue);
                         BakerApplication.getInstance().getJobManager().addJobInBackground(archiveIssueJob);
+                        BakerApplication.getInstance().getPluginManager().onIssueArchiveClicked(issue);
                     }
                 }).show();
     }
@@ -265,6 +265,7 @@ public class IssueCardView extends LinearLayout {
     private void readIssue() {
         ParseBookJsonJob parseBookJsonJob = new ParseBookJsonJob(issue);
         BakerApplication.getInstance().getJobManager().addJobInBackground(parseBookJsonJob);
+        BakerApplication.getInstance().getPluginManager().onIssueReadClicked(issue);
     }
 
     /**
@@ -337,7 +338,7 @@ public class IssueCardView extends LinearLayout {
         setMeasuredDimension(getMeasuredWidth(), getMeasuredHeight());
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ExtractIssueCompleteEvent event) {
         if(event.getIssue() == issue) {
             setUIState(UI_STATE_READY);
@@ -345,7 +346,7 @@ public class IssueCardView extends LinearLayout {
         }
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ExtractIssueErrorEvent event) {
         if(event.getIssue() == issue) {
             setUIState(UI_STATE_INITIAL);
@@ -354,7 +355,7 @@ public class IssueCardView extends LinearLayout {
         }
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ExtractIssueProgressEvent event) {
         if(event.getIssue() == issue) {
             uiProgressText.setText(parentActivity.getString(R.string.msg_issue_extracting) + ": " + String.valueOf(event.getProgress()) + "%");
@@ -363,21 +364,15 @@ public class IssueCardView extends LinearLayout {
     }
 
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueCompleteEvent event) {
         if(event.getIssue() == issue) {
-            if (parentActivity.getResources().getBoolean(R.bool.ga_enable) && parentActivity.getResources().getBoolean(R.bool.ga_register_issue_download_event)) {
-                BakerApplication.getInstance().sendEvent(
-                        parentActivity.getString(R.string.ga_issues_category),
-                        parentActivity.getString(R.string.ga_issue_download),
-                        issue.getName());
-            }
             // Trigger unzipping
             extractZip();
         }
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueErrorEvent event) {
         if(event.getIssue() == issue) {
             setUIState(UI_STATE_ERROR);
@@ -385,7 +380,7 @@ public class IssueCardView extends LinearLayout {
         }
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueProgressEvent event) {
         if(event.getIssue() == issue) {
             uiProgressText.setText(parentActivity.getString(R.string.msg_issue_downloading) + ": " + event.getProgress() + "% (" + String.valueOf(event.getBytesSoFar() / 1048576) + " MB)");
@@ -393,14 +388,14 @@ public class IssueCardView extends LinearLayout {
         }
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(IssueDataUpdatedEvent event) {
         if(event.getIssue() == issue) {
             redraw();
         }
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ArchiveIssueCompleteEvent event) {
         if(event.getIssue() == issue) {
             readable = false;

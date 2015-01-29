@@ -31,7 +31,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -39,14 +38,15 @@ import android.view.animation.AnimationUtils;
 
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
+import com.bakerframework.baker.events.IssueCollectionErrorEvent;
+import com.bakerframework.baker.events.IssueCollectionLoadedEvent;
 import com.bakerframework.baker.model.IssueCollection;
-import com.bakerframework.baker.model.IssueCollectionListener;
 
 import com.bakerframework.baker.play.LicenceManagerDelegate;
 
-import java.util.List;
+import de.greenrobot.event.EventBus;
 
-public class SplashActivity extends Activity implements IssueCollectionListener, LicenceManagerDelegate {
+public class SplashActivity extends Activity implements LicenceManagerDelegate {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +56,9 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
         // Animate logo
         animateLogo();
 
+        // Register as event listener
+        EventBus.getDefault().register(this);
+
         // Licence check
         if(getResources().getBoolean(R.bool.enable_licence_check)) {
             // Check for valid application licence (loadIssueCollection will be called afterwards
@@ -64,6 +67,9 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
         }else{
             loadIssueCollection();
         }
+
+        // Plugin Callback
+        BakerApplication.getInstance().getPluginManager().onSplashActivityCreated(this);
 
 	}
 
@@ -77,74 +83,23 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
     }
 
     public void loadIssueCollection() {
-
-        // Prepare issue collection
         final IssueCollection issueCollection = BakerApplication.getInstance().getIssueCollection();
-        issueCollection.addListener(SplashActivity.this);
 
         if (BakerApplication.getInstance().isNetworkConnected()) {
+            // Online Mode: Reload issue collection
             BakerApplication.getInstance().setApplicationMode(BakerApplication.APPLICATION_MODE_ONLINE);
-            // Reload issue collection if internet connection is available
             issueCollection.reload();
         }else{
+            // Offline Mode: Load issue collection from cache
             BakerApplication.getInstance().setApplicationMode(BakerApplication.APPLICATION_MODE_OFFLINE);
-            if(issueCollection.isCacheAvailable()) {
-                issueCollection.processManifestFileFromCache();
-            }else{
-                onIssueCollectionLoadError();
-            }
+            issueCollection.processManifestFileFromCache();
         }
-
-    }
-
-    @Override
-    public void onIssueCollectionLoaded() {
-
-        // Remove listener
-        BakerApplication.getInstance().getIssueCollection().removeListener(this);
-
-        // Set up checkout
-        final IssueCollection issueCollection = BakerApplication.getInstance().getIssueCollection();
-        List<String> productIds = issueCollection.getSkuList();
-        BakerApplication.getInstance().initializeCheckout(productIds);
-
-        // Wait for a little while for the shelf to load
-        CountDownTimer timer = new CountDownTimer(getResources().getInteger(R.integer.splash_time_out), 1000) {
-            @Override
-            public void onTick(long l) {
-
-            }
-
-            @Override
-            public void onFinish() {
-                // Launch shelf activity
-                Intent i = new Intent(SplashActivity.this, ShelfActivity.class);
-                startActivity(i);
-
-                // Close Splash
-                SplashActivity.this.finish();
-            }
-        };
-        timer.start();
-
-    }
-
-    @Override
-    public void onIssueCollectionLoadError() {
-        // No internet connection and no cached file
-        new AlertDialog.Builder(this)
-            .setTitle(this.getString(R.string.msg_exit))
-            .setMessage(this.getString(R.string.err_application_no_internet))
-            .setPositiveButton(this.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    SplashActivity.this.finish();
-                }
-            })
-            .show();
     }
 
     @Override
     protected void onDestroy() {
+        // Register as event listener
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 
@@ -176,6 +131,32 @@ public class SplashActivity extends Activity implements IssueCollectionListener,
                 .setTitle(getString(R.string.msg_exit))
                 .setMessage(getString(R.string.err_application_no_internet))
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        SplashActivity.this.finish();
+                    }
+                })
+                .show();
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(IssueCollectionLoadedEvent event) {
+
+        // Launch shelf activity
+        Intent i = new Intent(SplashActivity.this, ShelfActivity.class);
+        startActivity(i);
+
+        // Close Splash
+        SplashActivity.this.finish();
+
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(IssueCollectionErrorEvent event) {
+        // No internet connection and no cached file
+        new AlertDialog.Builder(this)
+                .setTitle(this.getString(R.string.msg_exit))
+                .setMessage(this.getString(R.string.err_application_no_internet))
+                .setPositiveButton(this.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         SplashActivity.this.finish();
                     }

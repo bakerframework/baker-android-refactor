@@ -1,11 +1,19 @@
+package com.bakerframework.baker.plugin;
+
+import android.app.Activity;
+
+import com.bakerframework.baker.model.Issue;
+
+import org.solovyev.android.checkout.Sku;
+
 /**
  * Copyright (c) 2013-2014. Francisco Contreras, Holland Salazar.
  * Copyright (c) 2015. Tobias Strebitzer, Francisco Contreras, Holland Salazar.
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- *
+ * <p/>
  * Redistributions of source code must retain the above copyright notice, this list of
  * conditions and the following disclaimer.
  * Redistributions in binary form must reproduce the above copyright notice, this list of
@@ -23,10 +31,19 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- **/
-package com.bakerframework.baker;
-
-public interface AnalyticsEvents {
-    public void sendEvent(final String category, final String action, final String label);
-    public void sendTimingEvent(final String category, final long value, final String name, final String label);
+ */
+public interface BakerPlugin {
+    // Activity Events
+    public void onSplashActivityCreated(Activity activity);
+    public void onShelfActivityCreated(Activity activity);
+    public void onIssueActivityCreated(Activity activity);
+    // Shelf / Issue events
+    public void onIssueDownloadClicked(Issue issue);
+    public void onIssueArchiveClicked(Issue issue);
+    public void onIssueReadClicked(Issue issue);
+    // Issue Navigation events
+    public void onIssuePageOpened(Issue issue, String pageTitle, int pageIndex);
+    // Purchase events
+    public void onIssuePurchaseClicked(Issue issue);
+    public void onSubscribeClicked(Sku subscription);
 }

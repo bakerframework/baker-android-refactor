@@ -41,7 +41,7 @@ import java.util.List;
 import de.greenrobot.event.EventBus;
 
 public class Issue {
-    private String name;
+    private final String name;
     private String productId;
     private String title;
     private String info;

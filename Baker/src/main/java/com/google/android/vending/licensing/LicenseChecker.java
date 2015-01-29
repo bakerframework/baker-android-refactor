@@ -67,14 +67,14 @@ public class LicenseChecker implements ServiceConnection {
 
     private ILicensingService mService;
 
-    private PublicKey mPublicKey;
+    private final PublicKey mPublicKey;
     private final Context mContext;
     private final Policy mPolicy;
     /**
      * A handler for running tasks on a background thread. We don't want license
      * processing to block the UI thread.
      */
-    private Handler mHandler;
+    private final Handler mHandler;
     private final String mPackageName;
     private final String mVersionCode;
     private final Set<LicenseValidator> mChecksInProgress = new HashSet<LicenseValidator>();
@@ -197,7 +197,7 @@ public class LicenseChecker implements ServiceConnection {
 
     private class ResultListener extends ILicenseResultListener.Stub {
         private final LicenseValidator mValidator;
-        private Runnable mOnTimeout;
+        private final Runnable mOnTimeout;
 
         public ResultListener(LicenseValidator validator) {
             mValidator = validator;

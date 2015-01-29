@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2014. Francisco Contreras, Holland Salazar.
  * Copyright (c) 2015. Tobias Strebitzer, Francisco Contreras, Holland Salazar.
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- *
+ * <p/>
  * Redistributions of source code must retain the above copyright notice, this list of
  * conditions and the following disclaimer.
  * Redistributions in binary form must reproduce the above copyright notice, this list of
@@ -23,46 +23,17 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- **/
-package com.bakerframework.baker.widget;
+ */
+package com.bakerframework.baker.events;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.os.Build;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.AttributeSet;
-import android.widget.AdapterView;
+public class FetchPurchasesErrorEvent {
+    private final Throwable throwable;
 
-import com.bakerframework.baker.R;
-
-public class SwipeRefreshScrollLayout extends SwipeRefreshLayout {
-
-    AdapterView adapterView;
-    final int adapterViewId;
-
-    public SwipeRefreshScrollLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SwipeRefreshScrollLayout, 0, 0);
-        adapterViewId = styledAttributes.getResourceId(R.styleable.SwipeRefreshScrollLayout_adapter_view, -1);
-        styledAttributes.recycle ();
-
-        // Set refresh indicator colors
-        setColorSchemeColors(Color.RED, Color.BLUE, Color.RED, Color.BLUE);
-
+    public FetchPurchasesErrorEvent(Throwable throwable) {
+        this.throwable = throwable;
     }
 
-    @Override
-    protected void onFinishInflate () {
-        super.onFinishInflate ();
-        adapterView = (AdapterView) findViewById (adapterViewId);
+    public Throwable getThrowable() {
+        return throwable;
     }
-
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    @Override
-    public boolean canChildScrollUp() {
-        return adapterView.canScrollVertically (-1);
-    }
-
 }

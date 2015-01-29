@@ -29,11 +29,13 @@ package com.bakerframework.baker.handler;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
@@ -42,20 +44,41 @@ import java.net.URL;
 
 public class DownloadHandler {
     private final String url;
-    private final File targetFile;
+    private File targetFile;
     private boolean completed = false;
     private int percentComplete;
     private HttpURLConnection connection = null;
+    private long totalBytes;
+    private InputStream inputStream;
 
-    public DownloadHandler(String url, File targetFile) {
+    public DownloadHandler(String url) {
         this.url = url;
-        this.targetFile = targetFile;
         this.percentComplete = 0;
     }
 
-    public void run() throws Exception {
+    public void download(File targetFile) throws Exception {
+        this.targetFile = targetFile;
         try {
-            this.processDownload();
+            createTargetFile();
+            prepareDownload();
+            downloadToFile();
+        }catch (ConnectException e) {
+            throw new Exception(BakerApplication.getInstance().getString(R.string.err_download_task_connect));
+        }catch (MalformedURLException e) {
+            throw new Exception(BakerApplication.getInstance().getString(R.string.err_download_task_malformed_url));
+        }catch (FileNotFoundException e) {
+            throw new Exception(BakerApplication.getInstance().getString(R.string.err_download_task_file_not_found));
+        }catch (IOException e) {
+            throw new Exception(BakerApplication.getInstance().getString(R.string.err_download_task_io));
+        }finally {
+            this.cleanup();
+        }
+    }
+
+    public String read() throws Exception {
+        try {
+            prepareDownload();
+            return readAsString();
         }catch (ConnectException e) {
             throw new Exception(BakerApplication.getInstance().getString(R.string.err_download_task_connect));
         }catch (MalformedURLException e) {
@@ -77,10 +100,7 @@ public class DownloadHandler {
         return completed;
     }
 
-    private void processDownload() throws Exception {
-
-        // Create target directory
-        createTargetFile();
+    private void prepareDownload() throws Exception {
 
         // Prepare Download
         URL url = new URL(this.url);
@@ -88,8 +108,13 @@ public class DownloadHandler {
         connection.setUseCaches(true);
 
         // Prepare streams
-        long totalBytes = connection.getContentLength();
-        InputStream inputStream = connection.getInputStream();
+        totalBytes = connection.getContentLength();
+        inputStream = connection.getInputStream();
+
+    }
+
+    private void downloadToFile() throws IOException {
+        // Download to file
         OutputStream output = new FileOutputStream(targetFile);
 
         // Transfer variables
@@ -123,16 +148,24 @@ public class DownloadHandler {
 
         // Close output
         output.close();
+    }
 
+    private String readAsString() throws IOException {
+
+        // Download to string
+        StringBuilder sb = new StringBuilder();
+        String line;
+        BufferedReader br = new BufferedReader( new InputStreamReader(inputStream));
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+        }
+
+        return sb.toString();
     }
 
     private boolean deleteTargetFile() {
         if(targetFile != null && targetFile.exists()) {
-            if(!targetFile.delete()) {
-                return false;
-            }else{
-                return true;
-            }
+            return targetFile.delete();
         }else{
             return false;
         }

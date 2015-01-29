@@ -44,7 +44,7 @@ public class LicenceManager {
             -46, 65, 30, -128, -103, -57, 74, -64, 51, 88, -95,
             -45, 77, -117, -36, -113, -11, 32, -64, 89
     };
-    private LicenseCheckerCallback licenseCheckerCallback;
+    private final LicenseCheckerCallback licenseCheckerCallback;
     private LicenceManagerDelegate delegate;
 
     public LicenceManager() {

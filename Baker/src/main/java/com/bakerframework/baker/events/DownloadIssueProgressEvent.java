@@ -29,7 +29,7 @@ package com.bakerframework.baker.events;
 import com.bakerframework.baker.model.Issue;
 
 public class DownloadIssueProgressEvent {
-    private Issue issue;
+    private final Issue issue;
     private final int progress;
     private final long bytesSoFar;
     private final long totalBytes;

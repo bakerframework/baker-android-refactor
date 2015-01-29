@@ -38,54 +38,32 @@ import java.util.List;
 import java.util.Locale;
 
 public class BookJson {
-
 	private String hpub;
-
 	private String magazineName;
-	
 	private String title;
-
 	private List<String> authors;
-
     private List<String> creators;
-
 	private Date date;
-
 	private String url;
-
 	private String cover;
-
 	private String orientation;
-
 	private boolean zoomable;
-
 	private String background;
-
 	private boolean verticalBounce;
-
 	private int indexHeight;
-
 	private boolean mediaDisplay;
-
 	private String pageNumberColors;
-
 	private String rendering;
-
 	private boolean pageTurnTap;
-
-    /**
-     * We set it empty by default (not null), because we will use it anyways.
-     */
     private String liveUrl;
-
 	private List<String> contents;
 	
 	public BookJson() {
 		this.hpub = "1";
 		this.date = new Date();
-		this.authors = new ArrayList<String>();
-		this.creators = new ArrayList<String>();
-		this.contents = new ArrayList<String>();
+		this.authors = new ArrayList<>();
+		this.creators = new ArrayList<>();
+		this.contents = new ArrayList<>();
 		this.title = "";
 		this.url = "";
 		this.cover = "";
@@ -256,7 +234,7 @@ public class BookJson {
         this.fromJson(new JSONObject(jsonString));
     }
 
-    public void fromJson(JSONObject json) throws JSONException, ParseException {
+    public void fromJson(JSONObject json) throws JSONException {
         if (json.has("liveUrl")) {
             this.liveUrl = json.getString("liveUrl");
         }
@@ -267,29 +245,9 @@ public class BookJson {
 		this.url = json.optString("url", "");
 		this.cover = json.optString("cover", "");
         this.orientation = json.optString("orientation", "PORTRAIT");
-        // this.date = sdfInput.parse(json.getString("date"));
-        // this.zoomable = json.getBoolean("zoomable");
-        // this.background = json.getString("-baker-background");
-        // this.verticalBounce = json.getBoolean("-baker-vertical-bounce");
-        // this.indexHeight = json.getInt("-baker-index-height");
-        // this.mediaDisplay = json.getBoolean("-baker-media-autoplay");
-        // this.pageNumberColors = json.getString("-baker-page-numbers-color");
-        // this.rendering = json.getString("-baker-rendering");
-        // this.pageTurnTap = json.getBoolean("-baker-page-turn-tap");
-        // JSONArray authors = new JSONArray(json.getString("author"));
-        // JSONArray creators = new JSONArray(json.getString("creator"));
-        // this.authors = new ArrayList<String>();
-        // this.creators = new ArrayList<String>();
-        // for (int i = 0; i < authors.length(); i++) {
-        // 	this.authors.add(authors.getString(i));
-        // }
-
-        // for (int i = 0; i < creators.length(); i++) {
-        // 	this.creators.add(creators.getString(i));
-        // }
 
         // Parse contents
-        this.contents = new ArrayList<String>();
+        this.contents = new ArrayList<>();
         JSONArray contents = new JSONArray(json.getString("contents"));
 		for (int i = 0; i < contents.length(); i++) {
 			this.contents.add(contents.getString(i));

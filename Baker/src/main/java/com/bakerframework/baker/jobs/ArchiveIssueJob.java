@@ -29,19 +29,12 @@ package com.bakerframework.baker.jobs;
 import android.util.Log;
 
 import com.bakerframework.baker.events.ArchiveIssueCompleteEvent;
-import com.bakerframework.baker.events.ExtractIssueCompleteEvent;
-import com.bakerframework.baker.events.ExtractIssueProgressEvent;
 import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.settings.Configuration;
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
 
-import org.zeroturnaround.zip.ZipUtil;
-import org.zeroturnaround.zip.commons.FileUtils;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 import de.greenrobot.event.EventBus;
 

@@ -28,7 +28,6 @@ package com.bakerframework.baker.activity;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -53,6 +52,7 @@ import android.widget.Toast;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.model.BookJson;
+import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.view.CustomWebView;
 import com.bakerframework.baker.view.CustomWebViewPager;
@@ -87,14 +87,6 @@ public class IssueActivity extends FragmentActivity {
     public final static String MODAL_URL = "com.giniem.gindpubs.MODAL_URL";
     public final static String ORIENTATION = "com.giniem.gindpubs.ORIENTATION";
 
-    private Resources resources;
-
-    private int previousIndex = -1;
-    private Long startedTime = 0L;
-    private boolean hasElapsedTime = false;
-    private String metaBakerPageName = "";
-    private String metaBakerPageCategory = "";
-
     private String orientation;
 
     private boolean STANDALONE_MODE = false;
@@ -111,10 +103,11 @@ public class IssueActivity extends FragmentActivity {
         return this.pager;
     }
 
+    private Issue issue;
+
     @Override
     protected void onDestroy() {
         Log.d(this.getClass().getName(), "Called onDestroy method.");
-
         WebViewFragment fragment = (WebViewFragment) webViewPagerAdapter.instantiateItem(pager, pager.getCurrentItem());
         fragment.getWebView().destroy();
         super.onDestroy();
@@ -138,6 +131,10 @@ public class IssueActivity extends FragmentActivity {
 
 		Intent intent = getIntent();
 
+        // Get issue
+        String issueName = intent.getStringExtra(Configuration.ISSUE_NAME);
+        issue = BakerApplication.getInstance().getIssueCollection().getIssueByName(issueName);
+
 		try {
             STANDALONE_MODE = intent.getBooleanExtra(Configuration.ISSUE_STANDALONE, false);
             RETURN_TO_SHELF = intent.getBooleanExtra(Configuration.ISSUE_RETURN_TO_SHELF, true);
@@ -153,7 +150,7 @@ public class IssueActivity extends FragmentActivity {
             }
 
 			jsonBook = new BookJson();
-            jsonBook.setIssueName(intent.getStringExtra(Configuration.ISSUE_NAME));
+            jsonBook.setIssueName(issueName);
             Log.d(this.getClass().toString(), "THE RAW BOOK.JSON IS: " + intent.getStringExtra(Configuration.BOOK_JSON_KEY));
             jsonBook.fromJsonString(intent.getStringExtra(Configuration.BOOK_JSON_KEY));
 
@@ -173,7 +170,8 @@ public class IssueActivity extends FragmentActivity {
 					Toast.LENGTH_LONG).show();
 		}
 
-        resources = getResources();
+        // Plugin Callback
+        BakerApplication.getInstance().getPluginManager().onIssueActivityCreated(this);
 	}
 
     private void detectFirstOrLastPage() {
@@ -324,8 +322,8 @@ public class IssueActivity extends FragmentActivity {
             URL url = new URL(htmlPath);
             File file = new File(url.getPath());
             Document document = Jsoup.parse(file, null);
-            Elements metas = document.select("meta");
-            for (Element meta : metas) {
+            Elements metaElements = document.select("meta");
+            for (Element meta : metaElements) {
                 if (meta.hasAttr("name") && meta.attr("name").equals("baker-page-name")) {
                     if (meta.hasAttr("content")) {
                         values.put("baker-page-name", meta.attr("content"));
@@ -383,58 +381,18 @@ public class IssueActivity extends FragmentActivity {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-
-                if (hasElapsedTime) {
-                    Long timeElapsed = System.currentTimeMillis() - startedTime;
-                    if (timeElapsed > resources.getInteger(R.integer.ga_page_view_time_elapsed))
-                        ((BakerApplication) IssueActivity.this.getApplication()).sendTimingEvent(
-                                metaBakerPageCategory,
-                                timeElapsed,
-                                getString(R.string.ga_issue_page_view),
-                                metaBakerPageName);
-
-                    ((BakerApplication) IssueActivity.this.getApplication()).sendEvent(
-                            metaBakerPageCategory,
-                            getString(R.string.ga_issue_page_view),
-                            metaBakerPageName);
-
-                    startedTime = 0L;
-                    hasElapsedTime = false;
-                    previousIndex = -1;
-                    metaBakerPageName = "";
-                    metaBakerPageCategory = "";
-                }
-
                 Log.d(this.getClass().getName(), "Loading page at index: " + position);
-
                 detectFirstOrLastPage();
 
-                if (resources.getBoolean(R.bool.ga_enable) && resources.getBoolean(R.bool.ga_register_page_view_event)) {
-
-                    String page = finalPath + book.getMagazineName() + File.separator + book.getContents().get(position);
-                    Map<String, String> tags = getBakerMetaTags(page);
-
-                    if (tags.containsKey("baker-page-name")) {
-                        String name = tags.get("baker-page-name");
-                        String category = tags.containsKey("baker-page-category") ? tags.get("baker-page-category") : getString(R.string.ga_issues_category);
-
-                        name = (name.isEmpty()) ? book.getContents().get(position) : name;
-                        category = (category.isEmpty()) ? getString(R.string.ga_issues_category) : category;
-
-                        if (resources.getBoolean(R.bool.ga_register_page_view_time_elapsed_event)) {
-                            startedTime = System.currentTimeMillis();
-                            hasElapsedTime = true;
-                            previousIndex = position;
-                            metaBakerPageName = name;
-                            metaBakerPageCategory = category;
-                        } else {
-                            ((BakerApplication) IssueActivity.this.getApplication()).sendEvent(
-                                    category,
-                                    getString(R.string.ga_issue_page_view),
-                                    name);
-                        }
-                    }
+                // Send event to plugins
+                String page = finalPath + book.getMagazineName() + File.separator + book.getContents().get(position);
+                Map<String, String> tags = getBakerMetaTags(page);
+                if (tags.containsKey("baker-page-name")) {
+                    String name = tags.get("baker-page-name");
+                    name = (name.isEmpty()) ? book.getContents().get(position) : name;
+                    BakerApplication.getInstance().getPluginManager().onIssuePageOpened(issue, name, position);
                 }
+
             }
         });
 

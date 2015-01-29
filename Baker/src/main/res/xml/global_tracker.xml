@@ -7,13 +7,16 @@
     <bool name="ga_autoActivityTracking">true</bool>
 
     <!-- Screen names on the reports -->
-    <screenName name="com.google.android.gms.analytics.samples.mobileplayground.ScreenviewFragment">
-        Baker ScreenView
+    <screenName name="com.bakerframework.baker.activity.SplashActivity">
+        Baker Splash View
     </screenName>
-    <screenName name="com.google.android.gms.analytics.samples.mobileplayground.EcommerceFragment">
-        Baker EcommerceView
+    <screenName name="com.bakerframework.baker.activity.ShelfActivity">
+        Baker Shelf View
     </screenName>
-
-    <!--  Tracking ID -->
-    <string name="ga_trackingId">UA-XXXXXXXX-X</string>
+    <screenName name="com.bakerframework.baker.activity.IssueActivity">
+        Baker Issue View
+    </screenName>
+    <screenName name="com.bakerframework.baker.activity.InfoActivity">
+        Baker Info View
+    </screenName>
 </resources>

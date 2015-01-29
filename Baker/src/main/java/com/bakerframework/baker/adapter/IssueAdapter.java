@@ -43,13 +43,12 @@ import java.util.List;
 
 public class IssueAdapter extends ArrayAdapter {
 
-    private Activity context;
+    private final Activity context;
     private List<Issue> issues = Collections.emptyList();
     private List<Issue> filteredIssues = Collections.emptyList();
     private String category = null;
-    private IssueCollection issueCollection;
-    private boolean filterChanged = false;
-    private HashMap<Issue,IssueCardView> issueCardViewCache = new HashMap<>();
+    private final IssueCollection issueCollection;
+    private final HashMap<Issue,IssueCardView> issueCardViewCache = new HashMap<>();
 
     private class IssueDateComparator implements Comparator<Issue> {
         @Override
@@ -87,7 +86,6 @@ public class IssueAdapter extends ArrayAdapter {
         this.issues = issueCollection.getIssues();
         sortByDate();
         processFilters();
-        filterChanged = true;
         if(notify) { notifyDataSetChanged(); }
     }
 
@@ -95,10 +93,10 @@ public class IssueAdapter extends ArrayAdapter {
 
         if(category == IssueCollection.ALL_CATEGORIES_STRING) {
             // Reset filtered issues
-            filteredIssues = new ArrayList<Issue>(issues);
+            filteredIssues = new ArrayList<>(issues);
         }else{
             // Process category filter
-            filteredIssues = new ArrayList<Issue>();
+            filteredIssues = new ArrayList<>();
             for(Issue issue : issues) {
                 if(issue.isInCategory(category)) {
                     filteredIssues.add(issue);
@@ -154,7 +152,7 @@ public class IssueAdapter extends ArrayAdapter {
             return issueCardViewCache.get(issue);
         }else{
             IssueCardView issueCardView = new IssueCardView(context, issue);
-            issueCardView.init(context, null);
+            issueCardView.init(context);
             issueCardViewCache.put(issue, issueCardView);
             return issueCardView;
         }

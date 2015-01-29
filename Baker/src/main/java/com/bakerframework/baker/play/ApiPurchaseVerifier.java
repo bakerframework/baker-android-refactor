@@ -26,67 +26,72 @@
  **/
 package com.bakerframework.baker.play;
 
-import com.bakerframework.baker.settings.Configuration;
-import com.google.gson.Gson;
+import android.support.annotation.NonNull;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import com.bakerframework.baker.handler.ApiRequestHandler;
+import com.bakerframework.baker.settings.Configuration;
+
 import org.solovyev.android.checkout.BasePurchaseVerifier;
 import org.solovyev.android.checkout.Purchase;
 import org.solovyev.android.checkout.RequestListener;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ApiPurchaseVerifier extends BasePurchaseVerifier {
 
     public ApiPurchaseVerifier() {
-
+        super();
     }
 
     @Override
-    protected void doVerify(List<Purchase> purchases, RequestListener<List<Purchase>> listRequestListener) {
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpPost request = new HttpPost(Configuration.getPurchaseConfirmationUrl());
+    protected void doVerify(@NonNull final List<Purchase> purchases, @NonNull final RequestListener<List<Purchase>> listener) {
 
-        try {
-            // Build parameters
-            Gson gson = new Gson();
-            String payload = "{\"payload\":" + gson.toJson(purchases) + ",\"payload_user_id\":\"" + Configuration.getUserId() + "\",\"source\":\"android-" + Configuration.getAppVersion() + "\"}";
+        // Prepare params
+        Purchase purchase = purchases.get(0);
+        boolean isSubscription = Configuration.getSubscriptionProductIds().contains(purchase.sku);
+        String purchaseType = isSubscription ? "subscription" : "product";
 
-            StringEntity params = new StringEntity(payload);
-            request.addHeader("content-type", "application/json;charset=UTF-8");
-            request.setEntity(params);
+        // Post purchase verification request
+        ApiRequestHandler apiRequestHandler = new ApiRequestHandler(Configuration.getPurchaseConfirmationUrl(purchaseType));
+        PurchasesVerificationPayload purchasesVerificationPayload = new PurchasesVerificationPayload(purchase);
+        boolean result = apiRequestHandler.post(purchasesVerificationPayload);
 
-            // Execute HTTP Post Request
-            HttpResponse response = httpclient.execute(request);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode == 204) {
-                // Server validated all purchases: trigger success
-                listRequestListener.onSuccess(purchases);
-            }else{
-                // Server throws an error: trigger error
-                String errorMessage = EntityUtils.toString(response.getEntity(), "UTF-8");
-                listRequestListener.onError(statusCode, new PurchaseVerificationException(errorMessage));
-            }
-        } catch (ClientProtocolException e) {
-            listRequestListener.onError(400, e);
-        } catch (IOException e) {
-            listRequestListener.onError(400, e);
+        // Trigger success
+        if(result) {
+            listener.onSuccess(purchases);
+        }else{
+            listener.onError(apiRequestHandler.getStatusCode(), new PurchaseVerificationException(apiRequestHandler.getResponseText()));
         }
 
     }
 
     private class PurchaseVerificationException extends Exception {
-        public PurchaseVerificationException() { super(); }
-        public PurchaseVerificationException(String message) { super(message); }
-        public PurchaseVerificationException(String message, Throwable cause) { super(message, cause); }
-        public PurchaseVerificationException(Throwable cause) { super(cause); }
+        public PurchaseVerificationException(String message) {
+            super(message);
+        }
     }
 
+    private class PurchasesVerificationPayload {
+        public final String data;
+        public final String order_id;
+        public final String package_name;
+        public final String payload;
+        public final String signature;
+        public final String sku;
+        public final String state;
+        public final String token;
+        public final long time;
+
+        public PurchasesVerificationPayload(Purchase purchase) {
+            this.data = purchase.data;
+            this.order_id = purchase.orderId;
+            this.package_name = purchase.packageName;
+            this.payload = purchase.payload;
+            this.signature = purchase.signature;
+            this.sku = purchase.sku;
+            this.state = purchase.state.toString();
+            this.token = purchase.token;
+            this.time = purchase.time;
+        }
+    }
 }

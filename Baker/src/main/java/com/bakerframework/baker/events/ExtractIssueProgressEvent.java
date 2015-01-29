@@ -29,8 +29,8 @@ package com.bakerframework.baker.events;
 import com.bakerframework.baker.model.Issue;
 
 public class ExtractIssueProgressEvent {
-    private Issue issue;
-    private int progress;
+    private final Issue issue;
+    private final int progress;
 
     public ExtractIssueProgressEvent(Issue issue, int progress) {
         this.progress = progress;

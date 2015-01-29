@@ -44,7 +44,9 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Configuration {
@@ -76,10 +78,19 @@ public class Configuration {
     // File and directory handling settings
     public static final String MAGAZINES_FILES_DIR = "issues";
 
+    public static List<String> subscriptionProductIds;
+
     /**
      * Empty constructor not to be used since the class is utils only.
      */
 	private Configuration() {}
+
+    public static List<String> getSubscriptionProductIds() {
+        if(subscriptionProductIds == null) {
+            subscriptionProductIds = Arrays.asList(BakerApplication.getInstance().getResources().getStringArray(R.array.google_play_subscription_ids));
+        }
+        return subscriptionProductIds;
+    }
 
     public static String getAppVersion() {
         PackageInfo pInfo;
@@ -89,9 +100,7 @@ public class Configuration {
         } catch (PackageManager.NameNotFoundException e) {
             return "0";
         }
-
     }
-
 
     public static String getManifestUrl() {
         return BakerApplication.getInstance().getString(R.string.newstand_manifest_url)
@@ -100,10 +109,18 @@ public class Configuration {
                 .replace(":user_id", getUserId());
     }
 
-    public static String getPurchaseConfirmationUrl() {
+    public static String getPurchasesUrl() {
+        return BakerApplication.getInstance().getString(R.string.purchases_url)
+                .replace(":app_id", BakerApplication.getInstance().getString(R.string.app_id))
+                .replace(":device_type", "ANDROID")
+                .replace(":user_id", getUserId());
+    }
+
+    public static String getPurchaseConfirmationUrl(String purchase_type) {
         return BakerApplication.getInstance().getString(R.string.purchase_confirmation_url)
                 .replace(":app_id", BakerApplication.getInstance().getString(R.string.app_id))
                 .replace(":device_type", "ANDROID")
+                .replace(":purchase_type", purchase_type)
                 .replace(":user_id", getUserId());
     }
 

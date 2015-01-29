@@ -46,8 +46,8 @@ import de.greenrobot.event.EventBus;
 
 public class ExtractIssueJob extends Job {
     private final Issue issue;
-    private File zipFile;
-    private File outputDirectory;
+    private final File zipFile;
+    private final File outputDirectory;
     private boolean completed;
 
     public ExtractIssueJob(Issue issue) {
@@ -110,7 +110,7 @@ public class ExtractIssueJob extends Job {
     }
 
     public void cancel() {
-
+        // @TODO: Cancel extract action
     }
 
     private class MonitorFileInputStream extends FileInputStream {

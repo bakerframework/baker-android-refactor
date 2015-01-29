@@ -57,13 +57,13 @@ public class DownloadIssueJob extends Job {
     @Override
     public void onRun() throws Throwable {
         // Download file
-         downloadHandler = new DownloadHandler(issue.getUrl(), issue.getHpubFile()) {
+         downloadHandler = new DownloadHandler(issue.getUrl()) {
             @Override
             public void onDownloadProgress(int percentComplete, long bytesSoFar, long totalBytes) {
                 EventBus.getDefault().post(new DownloadIssueProgressEvent(issue, percentComplete, bytesSoFar, totalBytes));
             }
         };
-        downloadHandler.run();
+        downloadHandler.download(issue.getHpubFile());
 
         // Complete job
         completed = true;

@@ -61,8 +61,8 @@ import android.support.v4.widget.DrawerLayout;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.adapter.IssueAdapter;
-import com.bakerframework.baker.events.ArchiveIssueCompleteEvent;
 import com.bakerframework.baker.events.DownloadIssueErrorEvent;
+import com.bakerframework.baker.events.IssueCollectionLoadedEvent;
 import com.bakerframework.baker.events.ParseBookJsonCompleteEvent;
 import com.bakerframework.baker.events.ParseBookJsonErrorEvent;
 import com.bakerframework.baker.model.*;
@@ -77,17 +77,17 @@ import org.json.JSONException;
 import org.solovyev.android.checkout.ActivityCheckout;
 import org.solovyev.android.checkout.BillingRequests;
 import org.solovyev.android.checkout.Checkout;
-import org.solovyev.android.checkout.Inventory;
 import org.solovyev.android.checkout.Purchase;
 import org.solovyev.android.checkout.RequestListener;
 import org.solovyev.android.checkout.ResponseCodes;
+import org.solovyev.android.checkout.Sku;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
-public class ShelfActivity extends ActionBarActivity implements IssueCollectionListener, SwipeRefreshLayout.OnRefreshListener {
+public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     public static final int STANDALONE_MAGAZINE_ACTIVITY_FINISH = 1;
 
@@ -103,12 +103,10 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     // Billing
     @NonNull
-    private final ActivityCheckout checkout = Checkout.forActivity(this, BakerApplication.getInstance().getCheckout());
+    private final ActivityCheckout shelfCheckout = Checkout.forActivity(this, BakerApplication.getInstance().getCheckout());
     @NonNull
-    private Inventory inventory;
-    @NonNull
-    public ActivityCheckout getCheckout() {
-        return checkout;
+    public ActivityCheckout getShelfCheckout() {
+        return shelfCheckout;
     }
 
     // Jobs
@@ -137,14 +135,8 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         jobManager = BakerApplication.getInstance().getJobManager();
         EventBus.getDefault().register(this);
 
-        // Prepare google analytics
-        if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_app_open_event)) {
-            ((BakerApplication) this.getApplication()).sendEvent(getString(R.string.ga_application_category), getString(R.string.ga_application_open), getString(R.string.ga_application_open_label));
-        }
-
         // Initialize issue collection
         issueCollection = BakerApplication.getInstance().getIssueCollection();
-        issueCollection.addListener(this);
 
         // Initialize issue adapter for shelf view
         issueAdapter = new IssueAdapter(this, issueCollection);
@@ -176,18 +168,16 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         // Continue downloads
         unzipPendingPackages();
 
-        // Initialize checkout
-        checkout.start();
         // you only need this if this activity starts purchase process
-        checkout.createPurchaseFlow(new PurchaseListener());
-        // you only need this if this activity needs information about purchases/SKUs
-        inventory = checkout.loadInventory();
-        // As issueCollection has already been loaded in splash, we trigger the callback here manually
-        onIssueCollectionLoaded();
+        shelfCheckout.start();
+        shelfCheckout.createPurchaseFlow(new PurchaseListener());
 
+        // Plugin Callback
+        BakerApplication.getInstance().getPluginManager().onShelfActivityCreated(this);
     }
 
     private class PurchaseListener extends BaseRequestListener<Purchase> {
+
         @Override
         public void onSuccess(@NonNull Purchase purchase) {
             onPurchased();
@@ -213,6 +203,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     }
 
     private abstract class BaseRequestListener<Request> implements RequestListener<Request> {
+
         @Override
         public void onError(int response, @NonNull Exception e) {
             // @TODO: add alert dialog or logging
@@ -220,28 +211,10 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         }
     }
 
-    private class InventoryLoadedListener implements Inventory.Listener {
-        @Override
-        public void onLoaded(@NonNull Inventory.Products inventoryProducts) {
-            BakerApplication.getInstance().getIssueCollection().updatePricesFromProducts(inventoryProducts);
-            issueAdapter.updateIssues();
-        }
-    }
-
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     protected void setupSwipeLayout() {
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        /* @TODO: Handle network / play services error on application resume
-        if(!BakerApplication.getInstance().checkPlayServices(this)) {
-            finish();
-        }
-        */
     }
 
     @Override
@@ -254,11 +227,10 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // Show / Hide subscription menu
-        if(!getString(R.string.google_play_subscription_id).isEmpty()) {
+        if(getResources().getStringArray(R.array.google_play_subscription_ids).length > 0) {
             menu.getItem(0).setVisible(true);
         }
         return super.onPrepareOptionsMenu(menu);
-
     }
 
     @Override
@@ -281,28 +253,45 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
             }
             return true;
         } else if (itemId == R.id.action_subscribe) {
-            if(issueCollection.getSubscriptionSku() != null) {
-                final ActivityCheckout checkout = this.getCheckout();
-                checkout.whenReady(new Checkout.ListenerAdapter() {
+            final List<Sku> subscriptionSkus = issueCollection.getSubscriptionSkus();
+            if(subscriptionSkus == null || subscriptionSkus.size() == 0) {
+                return false;
+            }else if(subscriptionSkus.size() > 1) {
+                final String[] subscriptionItems = new String[subscriptionSkus.size()];
+                for(int i = 0; i < subscriptionSkus.size(); i++) {
+                    subscriptionItems[i] = subscriptionSkus.get(i).title;
+                }
+
+                // No internet connection and no cached file
+                new AlertDialog.Builder(this)
+                        .setTitle("Choose a subscription")
+                        .setItems(subscriptionItems, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, final int which) {
+                                shelfCheckout.whenReady(new Checkout.ListenerAdapter() {
+                                    @Override
+                                    public void onReady(@NonNull BillingRequests requests) {
+                                        onSubscriptionClicked(requests, subscriptionSkus.get(which));
+                                    }
+                                });
+                            }
+                        }).show();
+            }else{
+                shelfCheckout.whenReady(new Checkout.ListenerAdapter() {
                     @Override
                     public void onReady(@NonNull BillingRequests requests) {
-                        requests.purchase(issueCollection.getSubscriptionSku(), null, checkout.getPurchaseFlow());
+                        onSubscriptionClicked(requests, subscriptionSkus.get(0));
                     }
                 });
-                return true;
-            }else{
-                Toast.makeText(this, "Subscriptions are currently not available!", Toast.LENGTH_LONG).show();
-                return false;
             }
+            return true;
         } else {
             return super.onContextItemSelected(item);
         }
     }
 
-    @Override
-    public void onIssueCollectionLoaded() {
-        presentIssues();
-        inventory.load().whenLoaded(new InventoryLoadedListener());
+    private void onSubscriptionClicked(BillingRequests requests, Sku subscriptionSku) {
+        requests.purchase(subscriptionSku, Configuration.getUserId(), shelfCheckout.getPurchaseFlow());
+        BakerApplication.getInstance().getPluginManager().onSubscribeClicked(subscriptionSku);
     }
 
     public void presentIssues() {
@@ -314,11 +303,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
         // Update shelf view adapter
         issueAdapter.updateIssues();
-    }
-
-    @Override
-    public void onIssueCollectionLoadError() {
-
     }
 
     private void loadBackground() {
@@ -355,7 +339,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
     private void updateCategoryDrawer(List<String> categories, int position) {
         Log.d(this.getClass().getName(), "CATEGORIES: " + categories.size() + "; POSITION: " + position);
         if(categories.size() == 0) {
-            ((Button) findViewById(R.id.category_toggle)).setVisibility(View.GONE);
+            findViewById(R.id.category_toggle).setVisibility(View.GONE);
         }else{
             drawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, categories));
             drawerList.setItemChecked(position, true);
@@ -438,7 +422,6 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
 
     @Override
     public void onBackPressed() {
-        /* @TODO: Check if any downloading or unpacking process is currently running */
         final List<Issue> downloadingIssues = issueCollection.getDownloadingIssues();
         if (downloadingIssues.size() > 0) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -510,7 +493,7 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         drawerLayout.closeDrawer(drawerList);
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueErrorEvent event) {
         // Restore purchases
         if(!issueCollection.isLoading()) {
@@ -519,28 +502,20 @@ public class ShelfActivity extends ActionBarActivity implements IssueCollectionL
         Toast.makeText(getApplicationContext(), getString(R.string.err_download_task_io), Toast.LENGTH_SHORT).show();
     }
 
-
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ParseBookJsonCompleteEvent event) {
-        // Track google analytics event
-        if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_issue_read_event)) {
-            BakerApplication.getInstance().sendEvent(getString(R.string.ga_issues_category), getString(R.string.ga_issue_open), event.getIssue().getName());
-        }
         // View magazine
         viewMagazine(event.getBookJson());
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ParseBookJsonErrorEvent event) {
         Toast.makeText(this, "The book.json was not found for issue " + event.getIssue().getName(), Toast.LENGTH_LONG).show();
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
-    public void onEventMainThread(ArchiveIssueCompleteEvent event) {
-        if (getResources().getBoolean(R.bool.ga_enable) && getResources().getBoolean(R.bool.ga_register_issue_delete_event)) {
-            BakerApplication.getInstance().sendEvent(getString(R.string.ga_issues_category), getString(R.string.ga_issue_delete), event.getIssue().getName());
-        }
+    @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(IssueCollectionLoadedEvent event) {
+        presentIssues();
     }
-
 
 }

@@ -68,10 +68,10 @@ public class APKExpansionPolicy implements Policy {
     private long mRetryCount;
     private long mLastResponseTime = 0;
     private int mLastResponse;
-    private PreferenceObfuscator mPreferences;
-    private Vector<String> mExpansionURLs = new Vector<String>();
-    private Vector<String> mExpansionFileNames = new Vector<String>();
-    private Vector<Long> mExpansionFileSizes = new Vector<Long>();
+    private final PreferenceObfuscator mPreferences;
+    private final Vector<String> mExpansionURLs = new Vector<String>();
+    private final Vector<String> mExpansionFileNames = new Vector<String>();
+    private final Vector<Long> mExpansionFileSizes = new Vector<Long>();
 
     /**
      * The design of the protocol supports n files. Currently the market can

@@ -64,7 +64,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 
     public String messageType;
 
-    public boolean testing = false;
+    public final boolean testing = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -131,11 +131,9 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
                                 }
                             } else {
                                 processFinishedCode = 3;
-                                return;
                             }
                         } else {
                             processFinishedCode = 2;
-                            return;
                         }
 
                     }

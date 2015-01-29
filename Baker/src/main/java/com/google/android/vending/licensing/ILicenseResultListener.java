@@ -65,7 +65,7 @@ return super.onTransact(code, data, reply, flags);
 }
 private static class Proxy implements ILicenseResultListener
 {
-private IBinder mRemote;
+private final IBinder mRemote;
 Proxy(IBinder remote)
 {
 mRemote = remote;

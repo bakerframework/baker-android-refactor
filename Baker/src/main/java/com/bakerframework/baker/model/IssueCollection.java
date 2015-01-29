@@ -26,14 +26,19 @@
  **/
 package com.bakerframework.baker.model;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.events.DownloadManifestCompleteEvent;
 import com.bakerframework.baker.events.DownloadManifestErrorEvent;
+import com.bakerframework.baker.events.FetchPurchasesCompleteEvent;
+import com.bakerframework.baker.events.FetchPurchasesErrorEvent;
+import com.bakerframework.baker.events.IssueCollectionLoadedEvent;
 import com.bakerframework.baker.helper.FileHelper;
 import com.bakerframework.baker.jobs.DownloadManifestJob;
+import com.bakerframework.baker.jobs.FetchPurchasesJob;
 import com.bakerframework.baker.settings.Configuration;
 
 import org.json.JSONArray;
@@ -43,8 +48,6 @@ import org.solovyev.android.checkout.Inventory;
 import org.solovyev.android.checkout.Sku;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -62,24 +65,26 @@ import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
 
 public class IssueCollection {
 
-    private HashMap<String, Issue> issueMap;
+    private final HashMap<String, Issue> issueMap;
     private List<String> categories;
 
-    private Sku subscriptionSku;
+    private List<Sku> subscriptionSkus;
 
     // Tasks management
     private DownloadManifestJob downloadManifestJob;
+    private FetchPurchasesJob fetchPurchasesJob;
 
     // Data Processing
-    String JSON_ENCODING = "utf-8";
-    SimpleDateFormat SDF_INPUT = new SimpleDateFormat(BakerApplication.getInstance().getString(R.string.format_input_date), Locale.US);
-    SimpleDateFormat SDF_OUTPUT = new SimpleDateFormat(BakerApplication.getInstance().getString(R.string.format_output_date), Locale.US);
+    final String JSON_ENCODING = "utf-8";
+    final SimpleDateFormat SDF_INPUT = new SimpleDateFormat(BakerApplication.getInstance().getString(R.string.format_input_date), Locale.US);
+    final SimpleDateFormat SDF_OUTPUT = new SimpleDateFormat(BakerApplication.getInstance().getString(R.string.format_output_date), Locale.US);
 
     // Categories
     public static final String ALL_CATEGORIES_STRING = "All Categories";
 
-    // Event callbacks
-    private ArrayList<IssueCollectionListener> listeners = new ArrayList<>();
+    // Billing
+    @NonNull
+    private Inventory inventory;
 
     public IssueCollection() {
         // Initialize issue map
@@ -92,18 +97,18 @@ public class IssueCollection {
     }
 
 
-    public Sku getSubscriptionSku() {
-        return subscriptionSku;
+    public List<Sku> getSubscriptionSkus() {
+        return subscriptionSkus;
     }
 
-    public List<String> getSkuList() {
-        List<String> skuList = new ArrayList<>();
+    public List<String> getIssueProductIds() {
+        List<String> issueProductIdList = new ArrayList<>();
         for(Issue issue : getIssues()) {
             if(issue.getProductId() != null && !issue.getProductId().equals("")) {
-                skuList.add(issue.getProductId());
+                issueProductIdList.add(issue.getProductId());
             }
         }
-        return skuList;
+        return issueProductIdList;
     }
 
     public List<Issue> getIssues() {
@@ -115,8 +120,12 @@ public class IssueCollection {
     }
 
     public Issue getIssueBySku(Sku sku) {
+        return getIssueByProductId(sku.id);
+    }
+
+    public Issue getIssueByProductId(String productId) {
         for(Issue issue : getIssues()) {
-            if(issue.getProductId() != null && issue.getProductId().equals(sku.id)) {
+            if(issue.getProductId() != null && issue.getProductId().equals(productId)) {
                 return issue;
             }
         }
@@ -124,17 +133,7 @@ public class IssueCollection {
     }
 
     public boolean isLoading() {
-        return downloadManifestJob != null && !downloadManifestJob.isCompleted();
-    }
-
-    // Event listeners
-
-    public void addListener(IssueCollectionListener listener) {
-        this.listeners.add(listener);
-    }
-
-    public void removeListener(IssueCollectionListener listener) {
-        this.listeners.remove(listener);
+        return (downloadManifestJob != null && !downloadManifestJob.isCompleted()) || (fetchPurchasesJob != null && !fetchPurchasesJob.isCompleted());
     }
 
     // Reload data from backend
@@ -161,10 +160,10 @@ public class IssueCollection {
             // Process categories
             categories = extractAllCategories();
 
-            // Trigger issues loaded event
-            for (IssueCollectionListener listener : listeners) {
-                listener.onIssueCollectionLoaded();
-            }
+            // you only need this if this activity needs information about purchases/SKUs
+            inventory = BakerApplication.getInstance().getCheckout().loadInventory();
+            inventory.whenLoaded(new InventoryLoadedListener());
+            inventory.load();
 
         } catch (JSONException e) {
             Log.e(this.getClass().getName(), "processing error (invalid json): " + e);
@@ -275,41 +274,45 @@ public class IssueCollection {
         return getCachedFile().exists() && getCachedFile().isFile();
     }
 
-    public void updatePricesFromProducts(Inventory.Products inventoryProducts) {
+    public void updatePrices(Inventory.Products inventoryProducts, List<String> productIds) {
 
-        // Handle single issue purchases
-        boolean hasSubscription = false;
-        final Inventory.Product subscriptionProductCollection = inventoryProducts.get(SUBSCRIPTION);
-        if (subscriptionProductCollection.supported) {
-
-            for (Sku sku : subscriptionProductCollection.getSkus()) {
-                if(sku.id.equals(BakerApplication.getInstance().getString(R.string.google_play_subscription_id))) {
-                    hasSubscription = inventoryProducts.get(SUBSCRIPTION).isPurchased(sku);
-                    subscriptionSku = sku;
+        // Update google-play subscriptions
+        if(inventoryProducts != null) {
+            boolean hasSubscription = false;
+            subscriptionSkus = new ArrayList<>();
+            final Inventory.Product subscriptionProductCollection = inventoryProducts.get(SUBSCRIPTION);
+            if (subscriptionProductCollection.supported) {
+                for (Sku sku : subscriptionProductCollection.getSkus()) {
+                    subscriptionSkus.add(sku);
                 }
             }
-        }
 
-        // Handle single issue purchases
-        final Inventory.Product inAppProductCollection = inventoryProducts.get(IN_APP);
-        if (inAppProductCollection.supported) {
-            // Update issue prices
-            for (Sku sku : inAppProductCollection.getSkus()) {
-                Issue issue = getIssueBySku(sku);
-                if(issue != null) {
-                    // Check for subscription
-                    if(hasSubscription) {
-                        issue.setPurchased(true);
-                    }else{
+            // Update google-play purchased issues
+            final Inventory.Product inAppProductCollection = inventoryProducts.get(IN_APP);
+            if (inAppProductCollection.supported) {
+                // Update issue prices
+                for (Sku sku : inAppProductCollection.getSkus()) {
+                    Issue issue = getIssueBySku(sku);
+                    if(issue != null) {
+                        // Check for subscription
                         issue.setPurchased(inAppProductCollection.isPurchased(sku));
+                        issue.setSku(sku);
                     }
-                    issue.setSku(sku);
                 }
+            } else {
+                Log.e(getClass().getName(), "Error: " + R.string.err_purchase_not_possible);
             }
-        } else {
-            Log.e(getClass().getName(), "Error: " + R.string.err_purchase_not_possible);
         }
 
+        // Update backend-purchased issues
+        if(productIds != null) {
+            for (String productId : productIds) {
+                Issue issue = getIssueByProductId(productId);
+                if(issue != null) {
+                    issue.setPurchased(true);
+                }
+            }
+        }
     }
 
     public List<String> extractAllCategories() {
@@ -354,6 +357,18 @@ public class IssueCollection {
         }
     }
 
+    public Issue getIssueByName(String issueName) {
+        return issueMap.get(issueName);
+    }
+
+    private class InventoryLoadedListener implements Inventory.Listener {
+        @Override
+        public void onLoaded(@NonNull Inventory.Products inventoryProducts) {
+            // Load existing purchases from backend
+            fetchPurchasesJob = new FetchPurchasesJob(Configuration.getManifestUrl());
+            BakerApplication.getInstance().getJobManager().addJobInBackground(fetchPurchasesJob);
+        }
+    }
 
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadManifestCompleteEvent event) {
@@ -362,8 +377,35 @@ public class IssueCollection {
 
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadManifestErrorEvent event) {
+        Log.i("IssueCollection", "DownloadManifestErrorEvent");
+        processManifestFile(getCachedFile());
+    }
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(FetchPurchasesCompleteEvent event) {
+
+        // Set purchased issues
+        updatePrices(inventory.getProducts(), event.getFetchPurchasesResponse().issues);
+
+        // Trigger issues loaded event
+        EventBus.getDefault().post(new IssueCollectionLoadedEvent());
 
     }
 
+
+    // @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(FetchPurchasesErrorEvent event) {
+
+        // Set purchased issues
+        updatePrices(inventory.getProducts(), null);
+
+        // Trigger issues loaded event
+        EventBus.getDefault().post(new IssueCollectionLoadedEvent());
+
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
 
 }
