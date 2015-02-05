@@ -18,8 +18,8 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <permission android:name="com.magloft.demo.permission.C2D_MESSAGE" android:protectionLevel="signature" />
-    <uses-permission android:name="com.magloft.demo.permission.C2D_MESSAGE" />
+    <!--^permission_c2d--><permission android:name="com.magloft.demo.permission.C2D_MESSAGE" android:protectionLevel="signature" /><!--$permission_c2d-->
+    <!--^uses_permission_c2d--><uses-permission android:name="com.magloft.demo.permission.C2D_MESSAGE" /><!--$uses_permission_c2d-->
 
     <application
         android:allowBackup="true"
@@ -93,7 +93,7 @@
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-                <category android:name="com.magloft.demo" />
+                <!--^gcm_category_name--><category android:name="com.magloft.demo" /><!--$gcm_category_name-->
             </intent-filter>
         </receiver>
     </application>

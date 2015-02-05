@@ -1,4 +1,49 @@
 require 'yaml'
+require_relative 'setup/helper'
+
+include Setup::Helper
+
+# setup tasks
+namespace :setup do
+  
+  task :app do
+    
+    # initialize api
+    init_rest()
+    
+    @access_token = ask("MagLoft Access Token")
+    
+    # get user info
+    user_id = @access_token.split("$").first
+    user = api_get(:portal, 'me')
+    
+    # get magazine
+    magazines = api_get(:portal, 'magazines')
+    magazine = ask_resource_choice("Select a magazine", magazines, 'app_id', 'title')
+    
+    # get magazine and user properties
+    magazine_properties = api_get(:portal, "magazines/#{magazine["id"]}/properties")
+    # user_properties = api_get(:portal, "users/#{user_id}/properties")
+    
+    # android manifest
+    file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{magazine["app_id"]}\" />")
+    file_inject("baker/src/main/AndroidManifest.xml", "permission_c2d", "<permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />")
+    file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" />")    
+    
+    # strings
+    file_inject("baker/src/main/res/values/strings.xml", "app_id", "<string name=\"app_id\">#{magazine["app_id"]}</string>")
+    file_inject("baker/src/main/res/values/strings.xml", "app_name", "<string name=\"app_name\">#{magazine["title"]}</string>")
+    file_inject("baker/src/main/res/values/strings.xml", "parse_application_id", "<string name=\"parse_application_id\">#{magazine["parse_application_id"]}</string>")
+    file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\">#{magazine["parse_master_key"]}</string>")
+    file_inject("baker/src/main/res/values/strings.xml", "google_analytics_tracking_id", "<string name=\"google_analytics_tracking_id\">#{magazine_properties["google_tracking_code"]}</string>")
+    subscriptions = []
+    subscriptions.push("<item>#{magazine["app_id"]}.subscription.#{magazine_properties["dbm_subscription_duration"]}</item>")  if magazine_properties["dbm_subscription_price"] != "0"
+    subscriptions.push("<item>#{magazine["app_id"]}.subscription.#{magazine_properties["dbm_subscription_duration_2"]}</item>")  if magazine_properties["dbm_subscription_price_2"] != "0"
+    file_inject("baker/src/main/res/values/strings.xml", "google_play_subscription_ids", "<string-array name=\"google_play_subscription_ids\">#{subscriptions.join("")}</string-array>")
+    
+  end
+  
+end
 
 device_presets = {
   ldpi_s:   {width:  240, height:  320, dpi: 120},

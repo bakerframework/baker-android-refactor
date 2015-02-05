@@ -2,19 +2,15 @@
 <resources>
 
     <!-- App Configuration -->
-    <string name="app_id">com.highvoltage.highvoltage</string>
-    <string name="app_name">High Voltage</string>
+    <!--^app_id--><string name="app_id">com.magloft.demo</string><!--$app_id-->
+    <!--^app_name--><string name="app_name">Magloft Demo</string><!--$app_name-->
     <string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>
     <string name="purchase_confirmation_url">http://www.magloft.com/api/app/v1/android/verify/:purchase_type/:app_id/:user_id</string>
     <string name="purchases_url">http://www.magloft.com/api/app/v1/android/purchases/:app_id/:user_id</string>
 
     <!-- Google Play Configuration / In App Billing -->
     <string name="google_play_license_key"></string>
-    <string-array name="google_play_subscription_ids">
-        <item>com.magloft.demo.subscription.weekly</item>
-        <item>com.magloft.demo.subscription.monthly</item>
-        <item>com.magloft.demo.subscription.yearly</item>
-    </string-array>
+    <!--^google_play_subscription_ids--><string-array name="google_play_subscription_ids"></string-array><!--$google_play_subscription_ids-->
 
     <!-- UI Messages, Labels and Texts -->
     <string name="msg_exit">Exit</string>
@@ -107,8 +103,8 @@
     </string-array>
 
     <!-- Plugin configuration -->
-    <string name="parse_application_id"></string>
-    <string name="parse_client_key"></string>
-    <string name="google_analytics_tracking_id"></string>
+    <!--^parse_application_id--><string name="parse_application_id"></string><!--$parse_application_id-->
+    <!--^parse_client_key--><string name="parse_client_key"></string><!--$parse_client_key-->
+    <!--^google_analytics_tracking_id--><string name="google_analytics_tracking_id"></string><!--$google_analytics_tracking_id-->
 
 </resources>
