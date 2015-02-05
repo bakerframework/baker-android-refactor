@@ -5,11 +5,11 @@
     <string name="app_id">com.magloft.demo</string>
     <string name="app_name">Baker App</string>
     <string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>
-    <string name="purchase_confirmation_url">http://192.168.1.33:3000/api/app/v1/android/verify/:purchase_type/:app_id/:user_id</string>
-    <string name="purchases_url">http://192.168.1.33:3000/api/app/v1/android/purchases/:app_id/:user_id</string>
+    <string name="purchase_confirmation_url">http://www.magloft.com/manifest/api/app/v1/android/verify/:purchase_type/:app_id/:user_id</string>
+    <string name="purchases_url">http://www.magloft.com/manifest/api/app/v1/android/purchases/:app_id/:user_id</string>
 
     <!-- Google Play Configuration / In App Billing -->
-    <string name="google_play_license_key">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn1nhtTc4bXLLONB6p3MgRj9aW8t9RRlv36dWFuWl6sDQE78WL8hzgjxGdqSQWsZuXQHF6b2drQk/pCApVHgt6bFOLKbT40p6BUn5tHQxLVcPzZbZOJA50nq8XLNvWCR46NSqtkdEqAUBD70AbyL3yA+nRmJNs1662+oll7bTEPvD/6IR9rbFI2ehny06fN3bl6p7pNCadBttc/+pHXvWZd1BSnEJqk+KC0HWFCjzTmlhBttm5GJaudpP4ZqNUF1ytCFT/VBC0vJsqtm1tePC1MWU5GXYOzGacNyGe8r3u7UooS9p8eFhpDdGemZjrZSWat6eaS30GfnkeMvVNNLiqwIDAQAB</string>
+    <string name="google_play_license_key"></string>
     <string-array name="google_play_subscription_ids">
         <item>com.magloft.demo.subscription.weekly</item>
         <item>com.magloft.demo.subscription.monthly</item>
@@ -107,8 +107,8 @@
     </string-array>
 
     <!-- Plugin configuration -->
-    <string name="parse_application_id">tWgLCcdZdGBvl1hBZ26PgcnICDAJNxSi9uQbgNPK</string>
-    <string name="parse_client_key">gVxIoD4NaoKS4oysOAxl4ggA8Xc92BWsi9hOVioB</string>
-    <string name="google_analytics_tracking_id">UA-58925833-1</string>
+    <string name="parse_application_id"></string>
+    <string name="parse_client_key"></string>
+    <string name="google_analytics_tracking_id"></string>
 
 </resources>
