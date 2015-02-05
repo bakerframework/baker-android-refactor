@@ -2,8 +2,8 @@
 <resources>
 
     <!-- App Configuration -->
-    <string name="app_id">com.magloft.demo</string>
-    <string name="app_name">Baker App</string>
+    <string name="app_id">com.highvoltage.highvoltage</string>
+    <string name="app_name">High Voltage</string>
     <string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>
     <string name="purchase_confirmation_url">http://www.magloft.com/api/app/v1/android/verify/:purchase_type/:app_id/:user_id</string>
     <string name="purchases_url">http://www.magloft.com/api/app/v1/android/purchases/:app_id/:user_id</string>
