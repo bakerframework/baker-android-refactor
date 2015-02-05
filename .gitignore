@@ -34,3 +34,4 @@ build/
 # Project specific
 secret.yml
 Baker/manifest-merger-release-report.txt
+/*.iml
