@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="110dp"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:weightSum="100"
-    android:paddingLeft="20dp"
-    android:paddingTop="20dp"
-    android:paddingRight="20dp">
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingRight="16dp">
 
     <ImageView
         android:id="@+id/cover_image"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
-        android:layout_weight="30"
+        android:layout_weight="45"
         android:contentDescription="@string/msg_thumb_description"
         android:adjustViewBounds="true"
         android:scaleType="fitEnd"
-        android:padding="0dp" />
+        android:background="@drawable/cover_shadow"
+        android:paddingLeft="20px"
+        android:paddingTop="20px"
+        android:paddingRight="20px"
+        android:paddingBottom="20px"/>
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_weight="70"
+        android:layout_weight="55"
         android:layout_height="fill_parent"
         android:layout_marginLeft="10dp"
+        android:paddingLeft="0dp"
+        android:paddingTop="12px"
+        android:paddingRight="10dp"
+        android:paddingBottom="0dp"
         android:orientation="vertical">
 
         <TextView
@@ -33,8 +41,10 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:fontFamily="sans-serif-light"
+            android:layout_marginBottom="4sp"
             android:textColor="#000000"
-            android:textSize="15sp" />
+            android:textSize="17sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/info_text"
@@ -42,10 +52,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:lines="2"
+            android:lines="3"
             android:fontFamily="sans-serif-light"
             android:textColor="#9C9C9C"
-            android:textSize="13sp" />
+            android:textSize="15sp"
+            android:lineSpacingExtra="3sp"
+            android:elegantTextHeight="true" />
 
         <TextView
             android:id="@+id/date_text"
@@ -56,7 +68,7 @@
             android:singleLine="true"
             android:fontFamily="sans-serif-light"
             android:textColor="#AF160E"
-            android:textSize="13sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/size_text"
@@ -67,7 +79,7 @@
             android:singleLine="true"
             android:fontFamily="Helvetica-Bold"
             android:textColor="#AF160E"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:id="@+id/idle_actions_container"
