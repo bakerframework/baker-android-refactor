@@ -43,6 +43,23 @@ namespace :setup do
     
   end
   
+  task :clean, [:app_id] do |_, args|
+    args.with_defaults(:app_id => "com.magloft.demo")
+    
+    # android manifest
+    file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{args[:app_id]}\" />")
+    file_inject("baker/src/main/AndroidManifest.xml", "permission_c2d", "<permission android:name=\"#{args[:app_id]}.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />")
+    file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{args[:app_id]}.permission.C2D_MESSAGE\" />")
+    
+    # strings
+    file_inject("baker/src/main/res/values/strings.xml", "app_id", "<string name=\"app_id\">#{args[:app_id]}</string>")
+    file_inject("baker/src/main/res/values/strings.xml", "app_name", "<string name=\"app_name\">#{args[:app_id]}</string>")
+    file_inject("baker/src/main/res/values/strings.xml", "parse_application_id", "<string name=\"parse_application_id\"></string>")
+    file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\"></string>")
+    file_inject("baker/src/main/res/values/strings.xml", "google_analytics_tracking_id", "<string name=\"google_analytics_tracking_id\"></string>")
+    file_inject("baker/src/main/res/values/strings.xml", "google_play_subscription_ids", "<string-array name=\"google_play_subscription_ids\"></string-array>")    
+  end
+  
 end
 
 device_presets = {
