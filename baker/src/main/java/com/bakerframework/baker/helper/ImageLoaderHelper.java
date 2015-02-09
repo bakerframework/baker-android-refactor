@@ -34,6 +34,8 @@ import com.bakerframework.baker.R;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 
 public class ImageLoaderHelper {
 
@@ -46,12 +48,18 @@ public class ImageLoaderHelper {
                 return ImageLoader.getInstance();
             }
             DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
-                    .showStubImage(R.drawable.loading)
+                    .showImageOnLoading(R.drawable.loading)
                     .showImageForEmptyUri(R.drawable.loading)
-                    .showImageOnFail(R.drawable.loading).cacheInMemory()
-                    .cacheOnDisc().bitmapConfig(Bitmap.Config.RGB_565)
+                    .showImageOnFail(R.drawable.loading)
+                    .cacheInMemory(true)
+                    .cacheOnDisk(true)
+                    .displayer(new FadeInBitmapDisplayer(1000))
+                    .bitmapConfig(Bitmap.Config.RGB_565)
+                    .imageScaleType(ImageScaleType.EXACTLY)
                     .build();
             ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
+                    .memoryCacheExtraOptions(480, 320)
+                    .diskCacheExtraOptions(480, 320, null)
                     .defaultDisplayImageOptions(defaultOptions).build();
             ImageLoader.getInstance().init(config);
             return ImageLoader.getInstance();
