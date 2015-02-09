@@ -52,8 +52,8 @@ public class ShelfView extends GridView {
 
         int width = metrics.widthPixels;
 
-        // Each issue card needs at lease 450px width to display correctly
-        int columnCount = ((int) Math.max(Math.floor(width / 450), 1));
+        // Each issue card needs at lease 550px width to display correctly
+        int columnCount = ((int) Math.max(Math.floor(width / 550), 1));
         setNumColumns(columnCount);
 
     }
