@@ -31,7 +31,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -139,7 +138,9 @@ public class IssueCardView extends LinearLayout {
         uiDownloadIssueButton = (Button) findViewById(R.id.download_issue_button);
 
         // Download cover (if not exist)
+
         ImageLoaderHelper.getImageLoader(context).displayImage(issue.getCover(), uiCoverImage);
+
 
         // Initialize cover click handler
         uiCoverImage.setOnClickListener(new OnClickListener() {
@@ -233,9 +234,13 @@ public class IssueCardView extends LinearLayout {
     }
 
     private void downloadIssue() {
-        setUIState(UI_STATE_DOWNLOAD);
-        issue.startDownloadIssueJob();
-        BakerApplication.getInstance().getPluginManager().onIssueDownloadClicked(issue);
+        if (BakerApplication.getInstance().isNetworkConnected()) {
+            setUIState(UI_STATE_DOWNLOAD);
+            issue.startDownloadIssueJob();
+            BakerApplication.getInstance().getPluginManager().onIssueDownloadClicked(issue);
+        }else {
+            ((ShelfActivity) this.parentActivity).openConnectionDialog();
+        }
     }
 
     /**
@@ -246,8 +251,8 @@ public class IssueCardView extends LinearLayout {
         builder.setTitle(R.string.msg_confirmation)
                 .setMessage(R.string.msg_confirmation_delete_text)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setNegativeButton(R.string.lbl_no, null)
-                .setPositiveButton(R.string.lbl_yes, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.msg_no, null)
+                .setPositiveButton(R.string.msg_yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // Update UI
                         setUIState(UI_STATE_ARCHIVE);

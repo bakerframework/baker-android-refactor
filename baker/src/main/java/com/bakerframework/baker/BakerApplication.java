@@ -165,13 +165,22 @@ public class BakerApplication extends Application {
     public void setApplicationMode(int applicationMode) {
         this.applicationMode = applicationMode;
     }
+    public int getApplicationMode() {
+        return this.applicationMode;
+    }
 
     // Helper methods
 
     public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) instance.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
-        return (ni != null);
+        if(ni != null) {
+            BakerApplication.getInstance().setApplicationMode(BakerApplication.APPLICATION_MODE_ONLINE);
+            return true;
+        }else{
+            BakerApplication.getInstance().setApplicationMode(BakerApplication.APPLICATION_MODE_OFFLINE);
+            return false;
+        }
     }
 
     public int getVersion() {

@@ -29,6 +29,7 @@ package com.bakerframework.baker.activity;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -176,6 +177,23 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
         BakerApplication.getInstance().getPluginManager().onShelfActivityCreated(this);
     }
 
+    public void openConnectionDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.msg_no_connection_title))
+                .setMessage(getString(R.string.msg_no_connection_message))
+                .setPositiveButton(getString(R.string.msg_yes), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        ShelfActivity.this.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                    }
+                })
+                .setNegativeButton(getString(R.string.msg_no), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        swipeRefreshLayout.setRefreshing(false);
+                        dialog.cancel();
+                    }
+                }).show();
+    }
+
     private class PurchaseListener extends BaseRequestListener<Purchase> {
 
         @Override
@@ -185,10 +203,8 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
 
         private void onPurchased() {
             // let's update purchase information in local inventory
-            if(!issueCollection.isLoading()) {
-                issueCollection.reload();
-            }
             Toast.makeText(getApplicationContext(), getString(R.string.msg_purchase_complete), Toast.LENGTH_SHORT).show();
+            ShelfActivity.this.onRefresh();
         }
 
         @Override
@@ -248,40 +264,40 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
             return true;
         } else if (itemId == R.id.action_refresh) {
             swipeRefreshLayout.setRefreshing(true);
-            if(!issueCollection.isLoading()) {
-                issueCollection.reload();
-            }
+            this.onRefresh();
             return true;
         } else if (itemId == R.id.action_subscribe) {
-            final List<Sku> subscriptionSkus = issueCollection.getSubscriptionSkus();
-            if(subscriptionSkus == null || subscriptionSkus.size() == 0) {
-                return false;
-            }else if(subscriptionSkus.size() > 1) {
-                final String[] subscriptionItems = new String[subscriptionSkus.size()];
-                for(int i = 0; i < subscriptionSkus.size(); i++) {
-                    subscriptionItems[i] = subscriptionSkus.get(i).title;
-                }
-
-                // No internet connection and no cached file
-                new AlertDialog.Builder(this)
-                        .setTitle("Choose a subscription")
-                        .setItems(subscriptionItems, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, final int which) {
-                                shelfCheckout.whenReady(new Checkout.ListenerAdapter() {
-                                    @Override
-                                    public void onReady(@NonNull BillingRequests requests) {
-                                        onSubscriptionClicked(requests, subscriptionSkus.get(which));
-                                    }
-                                });
-                            }
-                        }).show();
-            }else{
-                shelfCheckout.whenReady(new Checkout.ListenerAdapter() {
-                    @Override
-                    public void onReady(@NonNull BillingRequests requests) {
-                        onSubscriptionClicked(requests, subscriptionSkus.get(0));
+            if (BakerApplication.getInstance().isNetworkConnected()) {
+                final List<Sku> subscriptionSkus = issueCollection.getSubscriptionSkus();
+                if(subscriptionSkus == null || subscriptionSkus.size() == 0) {
+                    return false;
+                }else if(subscriptionSkus.size() > 1) {
+                    final String[] subscriptionItems = new String[subscriptionSkus.size()];
+                    for(int i = 0; i < subscriptionSkus.size(); i++) {
+                        subscriptionItems[i] = subscriptionSkus.get(i).title;
                     }
-                });
+                    new AlertDialog.Builder(this)
+                            .setTitle("Choose a subscription")
+                            .setItems(subscriptionItems, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, final int which) {
+                                    shelfCheckout.whenReady(new Checkout.ListenerAdapter() {
+                                        @Override
+                                        public void onReady(@NonNull BillingRequests requests) {
+                                            onSubscriptionClicked(requests, subscriptionSkus.get(which));
+                                        }
+                                    });
+                                }
+                            }).show();
+                }else{
+                    shelfCheckout.whenReady(new Checkout.ListenerAdapter() {
+                        @Override
+                        public void onReady(@NonNull BillingRequests requests) {
+                            onSubscriptionClicked(requests, subscriptionSkus.get(0));
+                        }
+                    });
+                }
+            }else {
+                this.openConnectionDialog();
             }
             return true;
         } else {
@@ -428,13 +444,13 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
             builder
                 .setTitle(this.getString(R.string.msg_exit))
                 .setMessage(this.getString(R.string.msg_closing_app))
-                .setPositiveButton(this.getString(R.string.lbl_yes), new DialogInterface.OnClickListener() {
+                .setPositiveButton(this.getString(R.string.msg_yes), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         issueCollection.cancelDownloadingIssues(downloadingIssues);
                         ShelfActivity.super.onBackPressed();
                     }
                 })
-                .setNegativeButton(this.getString(R.string.lbl_no), null)
+                .setNegativeButton(this.getString(R.string.msg_no), null)
                 .show();
         } else {
             super.onBackPressed();
@@ -451,7 +467,13 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
 
     @Override
     public void onRefresh() {
-        issueCollection.reload();
+        if (BakerApplication.getInstance().isNetworkConnected()) {
+            if(!issueCollection.isLoading()) {
+                issueCollection.reload();
+            }
+        }else {
+            this.openConnectionDialog();
+        }
     }
 
     @Override
@@ -496,9 +518,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueErrorEvent event) {
         // Restore purchases
-        if(!issueCollection.isLoading()) {
-            issueCollection.reload();
-        }
+        this.onRefresh();
         Toast.makeText(getApplicationContext(), getString(R.string.err_download_task_io), Toast.LENGTH_SHORT).show();
     }
 

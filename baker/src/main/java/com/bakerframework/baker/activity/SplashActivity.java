@@ -87,11 +87,9 @@ public class SplashActivity extends Activity implements LicenceManagerDelegate {
 
         if (BakerApplication.getInstance().isNetworkConnected()) {
             // Online Mode: Reload issue collection
-            BakerApplication.getInstance().setApplicationMode(BakerApplication.APPLICATION_MODE_ONLINE);
             issueCollection.reload();
         }else{
             // Offline Mode: Load issue collection from cache
-            BakerApplication.getInstance().setApplicationMode(BakerApplication.APPLICATION_MODE_OFFLINE);
             issueCollection.processManifestFileFromCache();
         }
     }

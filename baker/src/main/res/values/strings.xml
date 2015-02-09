@@ -3,7 +3,7 @@
 
     <!-- App Configuration -->
     <!--^app_id--><string name="app_id">com.magloft.demo</string><!--$app_id-->
-    <!--^app_name--><string name="app_name">Magloft Demo</string><!--$app_name-->
+    <!--^app_name--><string name="app_name">com.magloft.demo</string><!--$app_name-->
     <string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>
     <string name="purchase_confirmation_url">http://www.magloft.com/api/app/v1/android/verify/:purchase_type/:app_id/:user_id</string>
     <string name="purchases_url">http://www.magloft.com/api/app/v1/android/purchases/:app_id/:user_id</string>
@@ -23,10 +23,12 @@
     <string name="msg_confirmation_delete_text">Are you sure you want to archive this issue?</string>
     <string name="msg_purchase_complete">Thank you for purchasing this issue!</string>
     <string name="msg_standalone_no_issues">No issues found.</string>
+    <string name="msg_no_connection_message">Looks like you don\'t have a working internet connection. Do you want to open your network settings?</string>
+    <string name="msg_no_connection_title">No internet connection</string>
+    <string name="msg_yes">Yes</string>
+    <string name="msg_no">No</string>
 
     <!-- Button Labels -->
-    <string name="lbl_yes">Yes</string>
-    <string name="lbl_no">No</string>
     <string name="lbl_action_settings">Settings</string>
     <string name="lbl_action_info">Info</string>
     <string name="lbl_action_refresh">Refresh</string>

@@ -161,9 +161,14 @@ public class IssueCollection {
             categories = extractAllCategories();
 
             // you only need this if this activity needs information about purchases/SKUs
-            inventory = BakerApplication.getInstance().getCheckout().loadInventory();
-            inventory.whenLoaded(new InventoryLoadedListener());
-            inventory.load();
+            if(BakerApplication.getInstance().isNetworkConnected()) {
+                inventory = BakerApplication.getInstance().getCheckout().loadInventory();
+                inventory.whenLoaded(new InventoryLoadedListener());
+                inventory.load();
+            }else{
+                // Trigger issues loaded event
+                EventBus.getDefault().post(new IssueCollectionLoadedEvent());
+            }
 
         } catch (JSONException e) {
             Log.e(this.getClass().getName(), "processing error (invalid json): " + e);
