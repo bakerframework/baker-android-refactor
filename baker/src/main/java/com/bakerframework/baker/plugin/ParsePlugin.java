@@ -8,6 +8,7 @@ import com.bakerframework.baker.R;
 import com.bakerframework.baker.model.Issue;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
+import com.parse.ParseCrashReporting;
 import com.parse.ParseException;
 import com.parse.ParsePush;
 import com.parse.SaveCallback;
@@ -46,6 +47,10 @@ import java.util.Map;
 public class ParsePlugin implements BakerPlugin {
 
     public ParsePlugin() {
+
+        // Enable crash reporting?
+        ParseCrashReporting.enable(BakerApplication.getInstance());
+
         // Application id, client key
         Parse.initialize(BakerApplication.getInstance(), BakerApplication.getInstance().getString(R.string.parse_application_id), BakerApplication.getInstance().getString(R.string.parse_client_key));
         ParsePush.subscribeInBackground("", new SaveCallback() {
