@@ -26,20 +26,23 @@ namespace :setup do
     # user_properties = api_get(:portal, "users/#{user_id}/properties")
     
     # android manifest
-    file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{magazine["app_id"]}\" />")
-    file_inject("baker/src/main/AndroidManifest.xml", "permission_c2d", "<permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />")
-    file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" />")    
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{magazine["app_id"]}\" />")
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "permission_c2d", "<permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />")
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" />")    
+    
+    # build.gradle
+    gradle_property("gradle.properties", "application-id", magazine["app_id"])
     
     # strings
-    file_inject("baker/src/main/res/values/strings.xml", "app_id", "<string name=\"app_id\">#{magazine["app_id"]}</string>")
-    file_inject("baker/src/main/res/values/strings.xml", "app_name", "<string name=\"app_name\">#{magazine["title"]}</string>")
-    file_inject("baker/src/main/res/values/strings.xml", "parse_application_id", "<string name=\"parse_application_id\">#{magazine["parse_application_id"]}</string>")
-    file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\">#{magazine["parse_master_key"]}</string>")
-    file_inject("baker/src/main/res/values/strings.xml", "google_analytics_tracking_id", "<string name=\"google_analytics_tracking_id\">#{magazine_properties["google_tracking_code"]}</string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "app_id", "<string name=\"app_id\">#{magazine["app_id"]}</string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "app_name", "<string name=\"app_name\">#{magazine["title"]}</string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "parse_application_id", "<string name=\"parse_application_id\">#{magazine["parse_application_id"]}</string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\">#{magazine["parse_master_key"]}</string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "google_analytics_tracking_id", "<string name=\"google_analytics_tracking_id\">#{magazine_properties["google_tracking_code"]}</string>")
     subscriptions = []
     subscriptions.push("<item>#{magazine["app_id"]}.subscription.#{magazine_properties["dbm_subscription_duration"]}</item>")  if magazine_properties["dbm_subscription_price"] != "0"
     subscriptions.push("<item>#{magazine["app_id"]}.subscription.#{magazine_properties["dbm_subscription_duration_2"]}</item>")  if magazine_properties["dbm_subscription_price_2"] != "0"
-    file_inject("baker/src/main/res/values/strings.xml", "google_play_subscription_ids", "<string-array name=\"google_play_subscription_ids\">#{subscriptions.join("")}</string-array>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "google_play_subscription_ids", "<string-array name=\"google_play_subscription_ids\">#{subscriptions.join("")}</string-array>")
     
   end
   
@@ -47,17 +50,20 @@ namespace :setup do
     args.with_defaults(:app_id => "com.magloft.demo")
     
     # android manifest
-    file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{args[:app_id]}\" />")
-    file_inject("baker/src/main/AndroidManifest.xml", "permission_c2d", "<permission android:name=\"#{args[:app_id]}.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />")
-    file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{args[:app_id]}.permission.C2D_MESSAGE\" />")
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{args[:app_id]}\" />")
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "permission_c2d", "<permission android:name=\"#{args[:app_id]}.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />")
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{args[:app_id]}.permission.C2D_MESSAGE\" />")
+    
+    # build.gradle
+    gradle_property("gradle.properties", "application-id", "com.magloft.demo")
     
     # strings
-    file_inject("baker/src/main/res/values/strings.xml", "app_id", "<string name=\"app_id\">#{args[:app_id]}</string>")
-    file_inject("baker/src/main/res/values/strings.xml", "app_name", "<string name=\"app_name\">#{args[:app_id]}</string>")
-    file_inject("baker/src/main/res/values/strings.xml", "parse_application_id", "<string name=\"parse_application_id\"></string>")
-    file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\"></string>")
-    file_inject("baker/src/main/res/values/strings.xml", "google_analytics_tracking_id", "<string name=\"google_analytics_tracking_id\"></string>")
-    file_inject("baker/src/main/res/values/strings.xml", "google_play_subscription_ids", "<string-array name=\"google_play_subscription_ids\"></string-array>")    
+    xml_file_inject("baker/src/main/res/values/strings.xml", "app_id", "<string name=\"app_id\">#{args[:app_id]}</string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "app_name", "<string name=\"app_name\">#{args[:app_id]}</string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "parse_application_id", "<string name=\"parse_application_id\"></string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\"></string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "google_analytics_tracking_id", "<string name=\"google_analytics_tracking_id\"></string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "google_play_subscription_ids", "<string-array name=\"google_play_subscription_ids\"></string-array>")    
   end
   
 end

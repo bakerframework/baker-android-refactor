@@ -4,14 +4,31 @@ module Setup
   module Helper
     API_URL = "http://www.magloft.com"
 
-    def file_inject(file, variable, value)
+    def xml_file_inject(file, variable, value)
       puts "-- injecting #{variable} into #{file.split("/").last}"
       start_token = "<!--\\^#{variable}-->"
       end_token = "<!--\\$#{variable}-->"
       contents = File.open(file).read
       regexp = /#{start_token}(.*)#{end_token}/m
-      result = regexp.match(contents)
       contents.gsub!(regexp, "<!--^#{variable}-->#{value}<!--$#{variable}-->")
+      File.open(file, 'w') { |file| file.write(contents) }
+    end
+    
+    def gradle_property(file, key, value)
+      contents = File.open(file).read
+      regexp = /^(#{key}=.*)$/
+      contents.gsub!(regexp, "#{key}=#{value}")
+      File.open(file, 'w') { |file| file.write(contents) }
+    end
+    
+    def gradle_file_inject(file, variable, value)
+      puts "-- injecting #{variable} into #{file.split("/").last}"
+      start_token = "\\/\\*\\^#{variable}\\*\\/"
+      end_token = "\\/\\*\\$#{variable}\\*\\/"
+      contents = File.open(file).read
+      regexp = /#{start_token}(.*)#{end_token}/m
+      result = regexp.match(contents)
+      contents.gsub!(regexp, "/*^#{variable}*/#{value}/*$#{variable}*/")
       File.open(file, 'w') { |file| file.write(contents) }
     end
     
