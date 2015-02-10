@@ -35,6 +35,7 @@ import com.bakerframework.baker.events.DownloadManifestCompleteEvent;
 import com.bakerframework.baker.events.DownloadManifestErrorEvent;
 import com.bakerframework.baker.events.FetchPurchasesCompleteEvent;
 import com.bakerframework.baker.events.FetchPurchasesErrorEvent;
+import com.bakerframework.baker.events.IssueCollectionErrorEvent;
 import com.bakerframework.baker.events.IssueCollectionLoadedEvent;
 import com.bakerframework.baker.helper.FileHelper;
 import com.bakerframework.baker.jobs.DownloadManifestJob;
@@ -147,7 +148,11 @@ public class IssueCollection {
     }
 
     public void processManifestFileFromCache() {
-        processManifestFile(getCachedFile());
+        if(isCacheAvailable()) {
+            processManifestFile(getCachedFile());
+        }else{
+            EventBus.getDefault().post(new IssueCollectionErrorEvent(new Exception("No cached file available")));
+        }
     }
 
     private void processManifestFile(File file)  {
@@ -383,7 +388,11 @@ public class IssueCollection {
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadManifestErrorEvent event) {
         Log.i("IssueCollection", "DownloadManifestErrorEvent");
-        processManifestFile(getCachedFile());
+        if(isCacheAvailable()) {
+            processManifestFile(getCachedFile());
+        }else{
+            EventBus.getDefault().post(new IssueCollectionErrorEvent(new Exception("No cached file available")));
+        }
     }
 
     // @SuppressWarnings("UnusedDeclaration")
