@@ -33,13 +33,13 @@ namespace :setup do
     xml_file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" />")    
     
     # build.gradle
-    gradle_property("gradle.properties", "application-id", magazine["app_id"])
+    gradle_property("gradle.properties", "application-id", magazine["app_id"])    
     
     # strings
     xml_file_inject("baker/src/main/res/values/strings.xml", "app_id", "<string name=\"app_id\">#{magazine["app_id"]}</string>")
     xml_file_inject("baker/src/main/res/values/strings.xml", "app_name", "<string name=\"app_name\">#{magazine["title"]}</string>")
     xml_file_inject("baker/src/main/res/values/strings.xml", "parse_application_id", "<string name=\"parse_application_id\">#{magazine["parse_application_id"]}</string>")
-    xml_file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\">#{magazine["parse_master_key"]}</string>")
+    xml_file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\">#{magazine["parse_client_key"]}</string>")
     xml_file_inject("baker/src/main/res/values/strings.xml", "google_analytics_tracking_id", "<string name=\"google_analytics_tracking_id\">#{magazine_properties["google_tracking_code"]}</string>")
     subscriptions = []
     subscriptions.push("<item>#{magazine["app_id"]}.subscription.#{magazine_properties["dbm_subscription_duration"]}</item>")  if magazine_properties["dbm_subscription_price"] != "0"
