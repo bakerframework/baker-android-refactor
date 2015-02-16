@@ -54,7 +54,7 @@
             android:ellipsize="end"
             android:lines="3"
             android:fontFamily="sans-serif-light"
-            android:textColor="#9C9C9C"
+            android:textColor="#333333"
             android:textSize="15sp"
             android:lineSpacingExtra="3sp"
             android:elegantTextHeight="true" />
