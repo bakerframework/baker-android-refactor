@@ -6,12 +6,14 @@ include Setup::Helper
 # setup tasks
 namespace :setup do
   
-  task :app do
+  task :app, [:access_token] do |_, args|
+    args.with_defaults(:access_token => false)
     
     # initialize api
     init_rest()
     
-    @access_token = ask("MagLoft Access Token")
+    # retrieve access key
+    @access_token = args[:access_token] || ask("MagLoft Access Token")
     
     # get user info
     user_id = @access_token.split("$").first
