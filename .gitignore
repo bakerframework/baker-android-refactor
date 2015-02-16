@@ -33,5 +33,6 @@ build/
 
 # Project specific
 secret.yml
-Baker/manifest-merger-release-report.txt
+baker/manifest-merger-release-report.txt
+baker/src/main/assets/books/*/*
 /*.iml
