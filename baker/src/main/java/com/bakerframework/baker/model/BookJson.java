@@ -26,10 +26,16 @@
  **/
 package com.bakerframework.baker.model;
 
+import com.bakerframework.baker.BakerApplication;
+import com.bakerframework.baker.R;
+import com.bakerframework.baker.helper.FileHelper;
+import com.bakerframework.baker.settings.Configuration;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -234,6 +240,24 @@ public class BookJson {
         this.fromJson(new JSONObject(jsonString));
     }
 
+    public boolean fromIssue(Issue issue) {
+
+        JSONObject jsonObject = issue.getBookJsonObject();
+
+        // Validate book json
+        try {
+            this.validateJson(jsonObject);
+            this.fromJson(jsonObject);
+        } catch (JSONException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+        this.setIssueName(issue.getName());
+
+        return true;
+    }
+
     public void fromJson(JSONObject json) throws JSONException {
         if (json.has("liveUrl")) {
             this.liveUrl = json.getString("liveUrl");
@@ -296,4 +320,36 @@ public class BookJson {
 		
 		return result;
 	}
+
+    private void validateJson(final JSONObject json) throws Exception {
+        for (String property : getRequiredProperties()) {
+            if (!json.has(property)) {
+                throw new MissingPropertyException(property);
+            }
+        }
+        JSONArray contents = new JSONArray(json.getString("contents"));
+        if (contents.length() < 0) {
+            throw new MissingContentException();
+        }
+    }
+
+    private String[] getRequiredProperties() {
+        return new String[]{"contents"};
+    }
+
+    private class MissingPropertyException extends Exception {
+        private final String property;
+
+        public MissingPropertyException(String property) {
+            this.property = property;
+        }
+
+        public String getProperty() {
+            return property;
+        }
+    }
+
+    private class MissingContentException extends Exception {
+
+    }
 }

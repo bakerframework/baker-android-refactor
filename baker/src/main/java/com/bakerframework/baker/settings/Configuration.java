@@ -254,4 +254,18 @@ public class Configuration {
         return (directory.delete());
     }
 
+    // Standalone Mode
+
+    public static boolean isStandaloneMode() {
+        return BakerApplication.getInstance().getResources().getBoolean(R.bool.run_as_standalone);
+    }
+
+    public static boolean shouldReadStandaloneFromCustomDirectory() {
+        return BakerApplication.getInstance().getResources().getBoolean(R.bool.sa_read_from_custom_directory);
+    }
+
+    public static String getStandaloneBooksDirectory() {
+        return BakerApplication.getInstance().getResources().getString(R.string.sa_books_directory);
+    }
+
 }

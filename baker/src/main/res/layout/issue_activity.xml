@@ -10,6 +10,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MagazineActivity" >
 
+    <FrameLayout
+        android:id="@+id/loadingView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"/>
+
     <com.bakerframework.baker.view.CustomWebViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/pager"

@@ -1,5 +1,7 @@
 package com.bakerframework.baker.helper;
 
+import com.bakerframework.baker.BakerApplication;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Copyright (c) 2013-2014. Francisco Contreras, Holland Salazar.
@@ -55,6 +58,22 @@ public class FileHelper {
         }
     }
 
+    public static String getContentsFromInputStream(InputStream stream) {
+        try {
+            byte[] buffer = new byte[1024];
+            StringBuilder data = new StringBuilder("");
+            while (stream.read(buffer) != -1) {
+                data.append(new String(buffer));
+            }
+            stream.close();
+            return data.toString();
+        } catch (FileNotFoundException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     public static JSONArray getJsonArrayFromFile(File file) {
         try {
             return new JSONArray(getContentsFromFile(file));
@@ -70,5 +89,19 @@ public class FileHelper {
             return null;
         }
     }
+
+    public static JSONObject getJsonObjectFromAsset(String assetPath) {
+        try {
+            InputStream inputStream = BakerApplication.getInstance().getAssets().open(assetPath);
+            String fileContents = getContentsFromInputStream(inputStream);
+            inputStream.close();
+            return new JSONObject(fileContents);
+        } catch (IOException e) {
+            return null;
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
 
 }

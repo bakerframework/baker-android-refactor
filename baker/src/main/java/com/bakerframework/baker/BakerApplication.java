@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
@@ -38,6 +39,8 @@ import android.util.Log;
 
 import com.bakerframework.baker.handler.PluginManager;
 import com.bakerframework.baker.model.IssueCollection;
+import com.bakerframework.baker.model.LocalIssueCollection;
+import com.bakerframework.baker.model.RemoteIssueCollection;
 import com.bakerframework.baker.play.ApiPurchaseVerifier;
 import com.bakerframework.baker.play.LicenceManager;
 import com.bakerframework.baker.settings.Configuration;
@@ -100,7 +103,11 @@ public class BakerApplication extends Application {
         configureJobManager();
         pluginManager = new PluginManager();
         preferences = getSharedPreferences("baker.app", 0);
-        issueCollection = new IssueCollection();
+        if(Configuration.isStandaloneMode()) {
+            issueCollection = new LocalIssueCollection();
+        }else{
+            issueCollection = new RemoteIssueCollection();
+        }
         licenceManager = new LicenceManager();
     }
 
@@ -155,8 +162,8 @@ public class BakerApplication extends Application {
     }
 
     public Checkout getCheckout() {
-        if(checkout == null) {
-            checkout = Checkout.forApplication(billing, Products.create().add(IN_APP, issueCollection.getIssueProductIds()).add(SUBSCRIPTION, Configuration.getSubscriptionProductIds()));
+        if(checkout == null && !Configuration.isStandaloneMode()) {
+            checkout = Checkout.forApplication(billing, Products.create().add(IN_APP, ((RemoteIssueCollection) issueCollection).getIssueProductIds()).add(SUBSCRIPTION, Configuration.getSubscriptionProductIds()));
             checkout.start();
         }
         return checkout;

@@ -41,8 +41,10 @@ import com.bakerframework.baker.R;
 import com.bakerframework.baker.events.IssueCollectionErrorEvent;
 import com.bakerframework.baker.events.IssueCollectionLoadedEvent;
 import com.bakerframework.baker.model.IssueCollection;
+import com.bakerframework.baker.model.RemoteIssueCollection;
 
 import com.bakerframework.baker.play.LicenceManagerDelegate;
+import com.bakerframework.baker.settings.Configuration;
 
 import de.greenrobot.event.EventBus;
 
@@ -84,14 +86,7 @@ public class SplashActivity extends Activity implements LicenceManagerDelegate {
 
     public void loadIssueCollection() {
         final IssueCollection issueCollection = BakerApplication.getInstance().getIssueCollection();
-
-        if (BakerApplication.getInstance().isNetworkConnected()) {
-            // Online Mode: Reload issue collection
-            issueCollection.reload();
-        }else{
-            // Offline Mode: Load issue collection from cache
-            issueCollection.processManifestFileFromCache();
-        }
+        issueCollection.load();
     }
 
     @Override

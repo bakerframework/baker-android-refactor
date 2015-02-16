@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Set to true if you want Baker to run as standalone app, loading the issues files from "assets/books"-->
-    <bool name="run_as_standalone">false</bool>
 
     <!-- When opening Baker for the very first time, show the users some features so they know how to use the app. -->
     <bool name="ut_enable_tutorial">true</bool>
 
     <!-- Enable Licence Checker. For testing you need to set "License Test Response" to "LICENCED" in "Settings" > "Account Details" of your Google Play Development Console. -->
     <bool name="enable_licence_check">false</bool>
+
+    <!-- Set to true if you want Baker to run as standalone app, loading the issues files from "assets/books"-->
+    <bool name="run_as_standalone">false</bool>
+    <bool name="sa_read_from_custom_directory">false</bool>
+
 </resources>

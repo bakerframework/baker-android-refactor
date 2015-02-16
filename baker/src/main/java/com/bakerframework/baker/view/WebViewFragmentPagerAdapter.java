@@ -49,8 +49,7 @@ public class WebViewFragmentPagerAdapter extends FragmentStatePagerAdapter {
 		super(fm);
 	}
 
-	public WebViewFragmentPagerAdapter(FragmentManager fm, BookJson book,
-			final String magazinePath, IssueActivity _issueActivity) {
+	public WebViewFragmentPagerAdapter(FragmentManager fm, BookJson book, final String magazinePath, IssueActivity _issueActivity) {
 		super(fm);
         this.issueActivity = _issueActivity;
 		if (null == book) {
@@ -68,13 +67,12 @@ public class WebViewFragmentPagerAdapter extends FragmentStatePagerAdapter {
 	@Override
 	public Fragment getItem(int i) {
         Bundle args = new Bundle();
-
-        String page = this.magazinePath + book.getMagazineName() + File.separator
-                + book.getContents().get(i);
+        String page = this.magazinePath + book.getMagazineName() + File.separator + book.getContents().get(i);
         Log.d(this.getClass().getName(), "Loading page " + page);
-        args.putString(WebViewFragment.ARG_OBJECT, page);
-
-        return Fragment.instantiate(issueActivity, WebViewFragment.class.getName(), args);
+        args.putString("object", page);
+        Fragment pageFragment = Fragment.instantiate(issueActivity, WebViewFragment.class.getName(), args);
+        Log.i("WebViewFragmentPager", "instantiaze pageFragment for page " + page);
+        return pageFragment;
 	}
 
 	@Override

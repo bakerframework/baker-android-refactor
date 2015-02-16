@@ -67,7 +67,7 @@ import com.bakerframework.baker.events.IssueCollectionLoadedEvent;
 import com.bakerframework.baker.events.ParseBookJsonCompleteEvent;
 import com.bakerframework.baker.events.ParseBookJsonErrorEvent;
 import com.bakerframework.baker.model.*;
-import com.bakerframework.baker.model.IssueCollection;
+import com.bakerframework.baker.model.RemoteIssueCollection;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.settings.SettingsActivity;
 import com.bakerframework.baker.view.IssueCardView;
@@ -103,9 +103,8 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     private ListView drawerList;
 
     // Billing
-    @NonNull
-    private final ActivityCheckout shelfCheckout = Checkout.forActivity(this, BakerApplication.getInstance().getCheckout());
-    @NonNull
+    private ActivityCheckout shelfCheckout;
+
     public ActivityCheckout getShelfCheckout() {
         return shelfCheckout;
     }
@@ -113,18 +112,12 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     // Jobs
     JobManager jobManager;
 
-    /**
-     * Used when running in standalone mode based on the run_as_standalone setting in booleans.xml.
-     */
-    private boolean STANDALONE_MODE = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Initialize preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        STANDALONE_MODE = getResources().getBoolean(R.bool.run_as_standalone);
 
         // Initialize tutorial
         if(Configuration.getPrefFirstTimeRun()) {
@@ -169,9 +162,12 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
         // Continue downloads
         unzipPendingPackages();
 
-        // you only need this if this activity starts purchase process
-        shelfCheckout.start();
-        shelfCheckout.createPurchaseFlow(new PurchaseListener());
+        // Checkout
+        if(!Configuration.isStandaloneMode()) {
+            shelfCheckout = Checkout.forActivity(this, BakerApplication.getInstance().getCheckout());
+            shelfCheckout.start();
+            shelfCheckout.createPurchaseFlow(new PurchaseListener());
+        }
 
         // Plugin Callback
         BakerApplication.getInstance().getPluginManager().onShelfActivityCreated(this);
@@ -268,7 +264,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
             return true;
         } else if (itemId == R.id.action_subscribe) {
             if (BakerApplication.getInstance().isNetworkConnected()) {
-                final List<Sku> subscriptionSkus = issueCollection.getSubscriptionSkus();
+                final List<Sku> subscriptionSkus = ((RemoteIssueCollection) issueCollection).getSubscriptionSkus();
                 if(subscriptionSkus == null || subscriptionSkus.size() == 0) {
                     return false;
                 }else if(subscriptionSkus.size() > 1) {
@@ -353,8 +349,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     }
 
     private void updateCategoryDrawer(List<String> categories, int position) {
-        Log.d(this.getClass().getName(), "CATEGORIES: " + categories.size() + "; POSITION: " + position);
-        if(categories.size() == 0) {
+        if(categories == null || categories.size() == 0) {
             findViewById(R.id.category_toggle).setVisibility(View.GONE);
         }else{
             drawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, categories));
@@ -383,12 +378,11 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
         actionBar.setCustomView(R.layout.shelf_actionbar);
     }
 
-    public void viewMagazine(final BookJson book) {
+    public void viewIssue(final BookJson book) {
         Intent intent = new Intent(this, IssueActivity.class);
         try {
             intent.putExtra(Configuration.BOOK_JSON_KEY, book.toJSON().toString());
             intent.putExtra(Configuration.ISSUE_NAME, book.getMagazineName());
-            intent.putExtra(Configuration.ISSUE_STANDALONE, STANDALONE_MODE);
             startActivityForResult(intent, STANDALONE_MAGAZINE_ACTIVITY_FINISH);
         } catch (JSONException e) {
             Toast.makeText(this, "The book.json is invalid.",
@@ -468,9 +462,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     @Override
     public void onRefresh() {
         if (BakerApplication.getInstance().isNetworkConnected()) {
-            if(!issueCollection.isLoading()) {
-                issueCollection.reload();
-            }
+            issueCollection.load();
         }else {
             this.openConnectionDialog();
         }
@@ -525,7 +517,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ParseBookJsonCompleteEvent event) {
         // View magazine
-        viewMagazine(event.getBookJson());
+        viewIssue(event.getBookJson());
     }
 
     @SuppressWarnings("UnusedDeclaration")

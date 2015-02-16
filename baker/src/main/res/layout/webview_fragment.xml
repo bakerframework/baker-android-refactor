@@ -1,0 +1,26 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="0dp">
+
+    <RelativeLayout
+        android:id="@+id/nonVideoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.bakerframework.baker.view.VideoEnabledWebView
+            android:id="@+id/pageWebView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbarThumbVertical="@drawable/baker_scrollbar_vertical"
+            android:scrollbarThumbHorizontal="@drawable/baker_scrollbar_horizontal"/>
+    </RelativeLayout>
+
+    <!-- View where the video will be shown when video goes fullscreen -->
+    <RelativeLayout
+        android:id="@+id/videoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </RelativeLayout>
+
+</FrameLayout>

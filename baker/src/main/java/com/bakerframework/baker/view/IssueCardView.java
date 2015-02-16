@@ -137,10 +137,8 @@ public class IssueCardView extends LinearLayout {
         uiArchiveIssueButton = (Button) findViewById(R.id.archive_issue_button);
         uiDownloadIssueButton = (Button) findViewById(R.id.download_issue_button);
 
-        // Download cover (if not exist)
-
+        // Download cover
         ImageLoaderHelper.getImageLoader(context).displayImage(issue.getCover(), uiCoverImage);
-
 
         // Initialize cover click handler
         uiCoverImage.setOnClickListener(new OnClickListener() {

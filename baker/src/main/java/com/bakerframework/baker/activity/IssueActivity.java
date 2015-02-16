@@ -51,6 +51,7 @@ import android.widget.Toast;
 
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
+import com.bakerframework.baker.helper.FileHelper;
 import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.settings.Configuration;
@@ -67,6 +68,7 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -89,7 +91,6 @@ public class IssueActivity extends FragmentActivity {
 
     private String orientation;
 
-    private boolean STANDALONE_MODE = false;
     private boolean RETURN_TO_SHELF = false;
     private boolean ENABLE_BACK_NEXT_BUTTONS = false;
     private boolean ENABLE_DOUBLE_TAP = true;
@@ -124,10 +125,9 @@ public class IssueActivity extends FragmentActivity {
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		// Remove notification bar
-		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		setContentView(R.layout.html_pager);
+		setContentView(R.layout.issue_activity);
 
 		Intent intent = getIntent();
 
@@ -136,13 +136,11 @@ public class IssueActivity extends FragmentActivity {
         issue = BakerApplication.getInstance().getIssueCollection().getIssueByName(issueName);
 
 		try {
-            STANDALONE_MODE = intent.getBooleanExtra(Configuration.ISSUE_STANDALONE, false);
             RETURN_TO_SHELF = intent.getBooleanExtra(Configuration.ISSUE_RETURN_TO_SHELF, true);
             ENABLE_DOUBLE_TAP = intent.getBooleanExtra(Configuration.ISSUE_ENABLE_DOUBLE_TAP, true);
             ENABLE_BACK_NEXT_BUTTONS = intent.getBooleanExtra(Configuration.ISSUE_ENABLE_BACK_NEXT_BUTTONS, false);
             ENABLE_TUTORIAL = intent.getBooleanExtra(Configuration.ISSUE_ENABLE_TUTORIAL, false);
 
-            Log.d(this.getClass().getName(), "Will run in standalone mode: " + STANDALONE_MODE);
             if (!RETURN_TO_SHELF) {
                 setResult(ShelfActivity.STANDALONE_MAGAZINE_ACTIVITY_FINISH);
             } else {
@@ -320,8 +318,16 @@ public class IssueActivity extends FragmentActivity {
         Log.d(this.getClass().getName(), "Trying to parse: " + htmlPath);
         try {
             URL url = new URL(htmlPath);
-            File file = new File(url.getPath());
-            Document document = Jsoup.parse(file, null);
+
+            Document document;
+            if(issue.isStandalone()) {
+                InputStream inputStream = BakerApplication.getInstance().getAssets().open(htmlPath);
+                document = Jsoup.parse(FileHelper.getContentsFromInputStream(inputStream));
+            }else{
+                File file = new File(url.getPath());
+                document = Jsoup.parse(file, null);
+            }
+
             Elements metaElements = document.select("meta");
             for (Element meta : metaElements) {
                 if (meta.hasAttr("name") && meta.attr("name").equals("baker-page-name")) {
@@ -349,7 +355,7 @@ public class IssueActivity extends FragmentActivity {
 
         String path = "file://" + Configuration.getMagazinesDirectory() + File.separator;
 
-        if (STANDALONE_MODE) {
+        if (Configuration.isStandaloneMode()) {
             path = "file:///android_asset".concat(File.separator)
                     .concat(getString(R.string.path_standalone_books_directory)).concat(File.separator);
         } else if (ENABLE_TUTORIAL) {
@@ -384,15 +390,14 @@ public class IssueActivity extends FragmentActivity {
                 Log.d(this.getClass().getName(), "Loading page at index: " + position);
                 detectFirstOrLastPage();
 
-                // Send event to plugins
-                String page = finalPath + book.getMagazineName() + File.separator + book.getContents().get(position);
-                Map<String, String> tags = getBakerMetaTags(page);
-                if (tags.containsKey("baker-page-name")) {
-                    String name = tags.get("baker-page-name");
-                    name = (name.isEmpty()) ? book.getContents().get(position) : name;
-                    BakerApplication.getInstance().getPluginManager().onIssuePageOpened(issue, name, position);
-                }
-
+                // // Send event to plugins
+                // String page = finalPath + book.getMagazineName() + File.separator + book.getContents().get(position);
+                // Map<String, String> tags = getBakerMetaTags(page);
+                // if (tags.containsKey("baker-page-name")) {
+                //     String name = tags.get("baker-page-name");
+                //     name = (name.isEmpty()) ? book.getContents().get(position) : name;
+                //     BakerApplication.getInstance().getPluginManager().onIssuePageOpened(issue, name, position);
+                // }
             }
         });
 

@@ -66,20 +66,9 @@ public class ParseBookJsonJob extends Job {
     public void onRun() throws Throwable {
         Log.i("ParseBookJsonJob", "start");
 
-        // Prepare directory;
-        File bookJsonDirectory = new File(Configuration.getMagazinesDirectory(), issue.getName());
-        File bookJsonFile = new File(bookJsonDirectory, BakerApplication.getInstance().getString(R.string.path_book));
-
-        // Read book json
-        JSONObject jsonObject = FileHelper.getJsonObjectFromFile(bookJsonFile);
-
-        // Validate book json
-        this.validateJson(jsonObject);
-
         // Create json result
         BookJson bookJson = new BookJson();
-        bookJson.fromJson(jsonObject);
-        bookJson.setIssueName(this.issue.getName());
+        bookJson.fromIssue(issue);
 
         // Post complete event
         completed = true;
@@ -99,21 +88,7 @@ public class ParseBookJsonJob extends Job {
         return false;
     }
 
-    private void validateJson(final JSONObject json) throws Exception {
-        for (String property : getRequiredProperties()) {
-            if (!json.has(property)) {
-                throw new MissingPropertyException(property);
-            }
-        }
-        JSONArray contents = new JSONArray(json.getString("contents"));
-        if (contents.length() < 0) {
-            throw new MissingContentException();
-        }
-    }
 
-    private String[] getRequiredProperties() {
-        return new String[]{"contents"};
-    }
 
     public Issue getIssue() {
         return issue;
@@ -121,22 +96,6 @@ public class ParseBookJsonJob extends Job {
 
     public boolean isCompleted() {
         return completed;
-    }
-
-    private class MissingPropertyException extends Exception {
-        private final String property;
-
-        public MissingPropertyException(String property) {
-            this.property = property;
-        }
-
-        public String getProperty() {
-            return property;
-        }
-    }
-
-    private class MissingContentException extends Exception {
-
     }
 
 }

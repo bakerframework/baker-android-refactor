@@ -29,13 +29,18 @@ package com.bakerframework.baker.model;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.events.IssueDataUpdatedEvent;
+import com.bakerframework.baker.helper.FileHelper;
 import com.bakerframework.baker.jobs.DownloadIssueJob;
 import com.bakerframework.baker.jobs.ExtractIssueJob;
 import com.bakerframework.baker.settings.Configuration;
 
+import org.json.JSONObject;
 import org.solovyev.android.checkout.Sku;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -46,6 +51,7 @@ public class Issue {
     private String title;
     private String info;
     private String date;
+    private Date objDate;
     private List<String> categories;
     private Integer size;
     private String cover;
@@ -94,6 +100,13 @@ public class Issue {
     }
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public Date getObjDate() {
+        return objDate;
+    }
+    public void setObjDate(Date objDate) {
+        this.objDate= objDate;
     }
 
     public List<String> getCategories() {
@@ -214,7 +227,7 @@ public class Issue {
     }
 
     public boolean isExtracted() {
-        return !isExtracting() && !getHpubFile().exists() && getBookJsonFile().exists() && getBookJsonFile().isFile();
+        return !isExtracting() && !getHpubFile().exists() && isBookJsonFilePresent();
     }
 
     public void startExtractIssueJob() {
@@ -230,6 +243,18 @@ public class Issue {
 
     public File getBookJsonFile() {
         return new File(getBookJsonPath());
+    }
+
+    public boolean isBookJsonFilePresent() {
+        if(isStandalone()) {
+            try {
+                return Arrays.asList(BakerApplication.getInstance().getAssets().list("books/" + name)).contains("book.json");
+            } catch (IOException e) {
+                return false;
+            }
+        }else{
+            return getBookJsonFile().exists() && getBookJsonFile().isFile();
+        }
     }
 
     public String getHpubPath() {
@@ -248,6 +273,17 @@ public class Issue {
 
     public boolean isInCategory(String category) {
         return categories.contains(category);
+    }
+
+    public JSONObject getBookJsonObject() {
+        if(isStandalone()) {
+            return FileHelper.getJsonObjectFromAsset("books" + File.separator + name + File.separator + "book.json");
+        }else{
+            File bookJsonDirectory = new File(Configuration.getMagazinesDirectory(), getName());
+            File bookJsonFile = new File(bookJsonDirectory, BakerApplication.getInstance().getString(R.string.path_book));
+            return FileHelper.getJsonObjectFromFile(bookJsonFile);
+        }
+
     }
 
 }

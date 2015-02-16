@@ -33,6 +33,7 @@ import android.widget.ArrayAdapter;
 
 import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.model.IssueCollection;
+import com.bakerframework.baker.model.RemoteIssueCollection;
 import com.bakerframework.baker.view.IssueCardView;
 
 import java.util.ArrayList;
@@ -53,14 +54,14 @@ public class IssueAdapter extends ArrayAdapter {
     private class IssueDateComparator implements Comparator<Issue> {
         @Override
         public int compare(Issue i1, Issue i2) {
-            return i1.getDate().compareTo(i2.getDate());
+            return i1.getObjDate().compareTo(i2.getObjDate());
         }
     }
 
     public IssueAdapter(Activity context, IssueCollection issueCollection) {
         super(context, 0);
         this.context = context;
-        this.category = IssueCollection.ALL_CATEGORIES_STRING;
+        this.category = RemoteIssueCollection.ALL_CATEGORIES_STRING;
         this.issueCollection = issueCollection;
     }
 
@@ -75,7 +76,11 @@ public class IssueAdapter extends ArrayAdapter {
     }
 
     public int getCategoryIndex() {
-        return issueCollection.getCategories().indexOf(category);
+        if(issueCollection.getCategories() == null) {
+            return 0;
+        }else{
+            return issueCollection.getCategories().indexOf(category);
+        }
     }
 
     public void updateIssues() {
@@ -91,7 +96,7 @@ public class IssueAdapter extends ArrayAdapter {
 
     public void processFilters() {
 
-        if(category == IssueCollection.ALL_CATEGORIES_STRING) {
+        if(category == RemoteIssueCollection.ALL_CATEGORIES_STRING) {
             // Reset filtered issues
             filteredIssues = new ArrayList<>(issues);
         }else{
