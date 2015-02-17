@@ -29,16 +29,19 @@ namespace :setup do
     end
     puts "-- selecting magazine: #{magazine["app_id"]}"
     
+    # generate friendly app id
+    friendly_app_id = magazine["app_id"].gsub(/\-/, '')
+    
     # get magazine and user properties
     magazine_properties = api_get(:portal, "magazines/#{magazine["id"]}/properties")
     
     # android manifest
-    xml_file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{magazine["app_id"]}\" />")
-    xml_file_inject("baker/src/main/AndroidManifest.xml", "permission_c2d", "<permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />")
-    xml_file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{magazine["app_id"]}.permission.C2D_MESSAGE\" />")    
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{friendly_app_id}\" />")
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "permission_c2d", "<permission android:name=\"#{friendly_app_id}.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />")
+    xml_file_inject("baker/src/main/AndroidManifest.xml", "uses_permission_c2d", "<uses-permission android:name=\"#{friendly_app_id}.permission.C2D_MESSAGE\" />")    
     
     # build.gradle
-    gradle_property("gradle.properties", "application-id", magazine["app_id"])
+    gradle_property("gradle.properties", "application-id", friendly_app_id)
     
     # strings
     xml_file_inject("baker/src/main/res/values/strings.xml", "app_id", "<string name=\"app_id\">#{magazine["app_id"]}</string>")
@@ -47,12 +50,12 @@ namespace :setup do
     xml_file_inject("baker/src/main/res/values/strings.xml", "parse_client_key", "<string name=\"parse_client_key\">#{magazine["parse_client_key"]}</string>")
     xml_file_inject("baker/src/main/res/values/strings.xml", "google_analytics_tracking_id", "<string name=\"google_analytics_tracking_id\">#{magazine_properties["google_tracking_code"]}</string>")
     subscriptions = []
-    subscriptions.push("<item>#{magazine["app_id"]}.sub.#{magazine_properties["dbm_subscription_duration"]}</item>")  if magazine_properties["dbm_subscription_price"] != "0"
+    subscriptions.push("<item>#{friendly_app_id}.sub.#{magazine_properties["dbm_subscription_duration"]}</item>")  if magazine_properties["dbm_subscription_price"] != "0"
     if not magazine_properties["dbm_subscription_duration_2"].nil? and 
        not magazine_properties["dbm_subscription_price_2"].nil? and 
        not magazine_properties["dbm_subscription_trial_period_2"].nil? and 
        not magazine_properties["dbm_subscription_opt_in_offer_2"].nil?
-      subscriptions.push("<item>#{magazine["app_id"]}.sub.#{magazine_properties["dbm_subscription_duration_2"]}</item>")  if magazine_properties["dbm_subscription_price_2"] != "0"
+      subscriptions.push("<item>#{friendly_app_id}.sub.#{magazine_properties["dbm_subscription_duration_2"]}</item>")  if magazine_properties["dbm_subscription_price_2"] != "0"
     end
     
     xml_file_inject("baker/src/main/res/values/strings.xml", "google_play_subscription_ids", "<string-array name=\"google_play_subscription_ids\">#{subscriptions.join("")}</string-array>")
