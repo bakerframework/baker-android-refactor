@@ -1,5 +1,6 @@
 require 'JSON'
 require 'RMagick'
+include Magick
 require "open-uri"
 
 module Setup
@@ -85,8 +86,38 @@ module Setup
     def place_cdn_image(key, targets)
       puts "-- placing asset #{key}"
       image = download_cdn_image(key)
-      targets.each do |target|  
-        image.resize_to_fill!(target[:width], target[:height])  if target[:width] or target[:height]
+      targets.each do |target|
+        case target[:transform]
+        when :icon
+          # calculate sizes
+          icon_width = target[:width] - target[:padding] * 2
+          icon_height = target[:height] - target[:padding] * 2
+          
+          # create canvas
+          canvas = Image.new(target[:width], target[:height]) {self.background_color = 'transparent'}
+          
+          # create resized and transformed image
+          icon_image = image.resize(icon_width, icon_height)
+          icon_image.border!(0, 0, 'white')
+          icon_image.alpha Magick::DeactivateAlphaChannel
+          
+          # apply round corner mask
+          mask = Image.new(target[:width], target[:height]) {self.background_color = 'transparent'}
+          Draw.new.stroke('none').stroke_width(0).fill('white').roundrectangle(target[:padding], target[:padding], target[:width] - target[:padding]-1, target[:height] - target[:padding]-1, target[:radius], target[:radius]).draw(mask)
+          
+          # create shadow
+          shadow = mask.shadow(0,0,target[:shadow])
+          shadow = shadow.colorize(1, 1, 1, "gray45")
+
+          # compose image
+          canvas.composite!(icon_image, target[:padding], target[:padding], Magick::AddCompositeOp)
+          canvas.composite!(mask, 0, 0, Magick::CopyOpacityCompositeOp)
+          canvas.composite!(shadow, -target[:shadow]*2, -target[:shadow], Magick::DstOverCompositeOp)
+          
+          image = canvas
+        else
+          image.resize_to_fill!(target[:width], target[:height])  if target[:width] or target[:height]
+        end
         image.write(target[:path])
       end
     end

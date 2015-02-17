@@ -68,14 +68,18 @@ namespace :setup do
       css_file_inject("baker/src/main/assets/background.html", "shelf_background", "background: #{magazine_properties["shelf_background_solid_color"]};")
     end
     
-    # App icons / Launcher
+    # App Logo
     place_cdn_image(magazine_properties["asset_large_app_icon"], [
       {path: "baker/src/main/assets/img/logo.png", width: 1024, height: 1024},
       {path: "baker/src/main/res/drawable-xxhdpi/logo.png", width: 648, height: 648},
       {path: "baker/src/main/res/drawable-xhdpi/logo.png", width: 432, height: 432},
       {path: "baker/src/main/res/drawable-hdpi/logo.png", width: 324, height: 324},
-      {path: "baker/src/main/res/drawable-mdpi/logo.png", width: 216, height: 216},
-      {path: "baker/src/main/res/drawable-xxhdpi/ic_launcher.png", width: 144, height: 144},
+      {path: "baker/src/main/res/drawable-mdpi/logo.png", width: 216, height: 216}
+    ])
+    
+    # App Icons / Launcher
+    place_cdn_image(magazine_properties["asset_large_app_icon"], [
+      {path: "baker/src/main/res/drawable-xxhdpi/ic_launcher.png", width: 144, height: 144, transform: :icon, radius: 8, shadow: 2, padding: 8},
       {path: "baker/src/main/res/drawable-xhdpi/ic_launcher.png", width: 96, height: 96},
       {path: "baker/src/main/res/drawable-hdpi/ic_launcher.png", width: 72, height: 72},
       {path: "baker/src/main/res/drawable-mdpi/ic_launcher.png", width: 48, height: 48}
