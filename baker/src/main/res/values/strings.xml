@@ -108,5 +108,10 @@
     <!--^parse_application_id--><string name="parse_application_id"></string><!--$parse_application_id-->
     <!--^parse_client_key--><string name="parse_client_key"></string><!--$parse_client_key-->
     <!--^google_analytics_tracking_id--><string name="google_analytics_tracking_id"></string><!--$google_analytics_tracking_id-->
+    
+
+    <!-- Standalone Mode -->
+    <string name="sa_books_directory">books</string>
+    <string name="loading_video">Loading...</string>
 
 </resources>
