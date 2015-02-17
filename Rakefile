@@ -22,12 +22,15 @@ namespace :setup do
     
     # get magazine
     magazines = api_get(:portal, 'magazines')
-    magazine = ask_resource_choice("Select a magazine", magazines, 'app_id', 'title')
-    # magazine = magazines[0]
+    if magazines.length == 1
+      magazine = magazines[0]
+    else
+      magazine = ask_resource_choice("Select a magazine", magazines, 'app_id', 'title')
+    end
+    puts "-- selecting magazine: #{magazine["app_id"]}"
     
     # get magazine and user properties
     magazine_properties = api_get(:portal, "magazines/#{magazine["id"]}/properties")
-    # user_properties = api_get(:portal, "users/#{user_id}/properties")
     
     # android manifest
     xml_file_inject("baker/src/main/AndroidManifest.xml", "gcm_category_name", "<category android:name=\"#{magazine["app_id"]}\" />")
@@ -88,10 +91,12 @@ namespace :setup do
       place_cdn_image(magazine_properties["asset_shelf_header_full_sized_image"], [
         {path: "baker/src/main/assets/img/header.png", width: 2048, height: 430}
       ])
+      css_file_inject("baker/src/main/assets/header.html", "header_background_size", "cover")
     else
       place_cdn_image(magazine_properties["asset_shelf_header_centered_logo"], [
         {path: "baker/src/main/assets/img/header.png", width: 1024, height: 1024}
       ])
+      css_file_inject("baker/src/main/assets/header.html", "header_background_size", "contain")
     end
     
   end
