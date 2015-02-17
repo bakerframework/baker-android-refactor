@@ -22,8 +22,8 @@ namespace :setup do
     
     # get magazine
     magazines = api_get(:portal, 'magazines')
-    # magazine = ask_resource_choice("Select a magazine", magazines, 'app_id', 'title')
-    magazine = magazines[0]
+    magazine = ask_resource_choice("Select a magazine", magazines, 'app_id', 'title')
+    # magazine = magazines[0]
     
     # get magazine and user properties
     magazine_properties = api_get(:portal, "magazines/#{magazine["id"]}/properties")
