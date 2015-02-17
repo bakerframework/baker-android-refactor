@@ -1,4 +1,5 @@
 require 'yaml'
+require 'pry'
 require_relative 'setup/helper'
 
 include Setup::Helper
@@ -21,7 +22,8 @@ namespace :setup do
     
     # get magazine
     magazines = api_get(:portal, 'magazines')
-    magazine = ask_resource_choice("Select a magazine", magazines, 'app_id', 'title')
+    # magazine = ask_resource_choice("Select a magazine", magazines, 'app_id', 'title')
+    magazine = magazines[0]
     
     # get magazine and user properties
     magazine_properties = api_get(:portal, "magazines/#{magazine["id"]}/properties")
@@ -45,6 +47,42 @@ namespace :setup do
     subscriptions.push("<item>#{magazine["app_id"]}.subscription.#{magazine_properties["dbm_subscription_duration"]}</item>")  if magazine_properties["dbm_subscription_price"] != "0"
     subscriptions.push("<item>#{magazine["app_id"]}.subscription.#{magazine_properties["dbm_subscription_duration_2"]}</item>")  if magazine_properties["dbm_subscription_price_2"] != "0"
     xml_file_inject("baker/src/main/res/values/strings.xml", "google_play_subscription_ids", "<string-array name=\"google_play_subscription_ids\">#{subscriptions.join("")}</string-array>")
+    
+    if magazine_properties["shelf_background_type"] == "asset_shelf_background_pattern"
+      place_cdn_image(magazine_properties["asset_shelf_background_pattern"], [
+        {path: "baker/src/main/assets/img/shelf-bg.png"}
+      ])
+      css_file_inject("baker/src/main/assets/background.html", "shelf_background", "background: url(img/shelf-bg.png) center center repeat;")
+    elsif magazine_properties["shelf_background_type"] == "shelf_background_gradien_color"
+      css_file_inject("baker/src/main/assets/background.html", "shelf_background", "background: linear-gradient(#{magazine_properties["shelf_background_gradient_color_1"]}, #{magazine_properties["shelf_background_gradient_color_2"]});")
+    else
+      css_file_inject("baker/src/main/assets/background.html", "shelf_background", "background: #{magazine_properties["shelf_background_solid_color"]};")
+    end
+    
+    # App icons / Launcher
+    place_cdn_image(magazine_properties["asset_large_app_icon"], [
+      {path: "baker/src/main/assets/img/logo.png", width: 1024, height: 1024},
+      {path: "baker/src/main/res/drawable-xxhdpi/ic_launcher.png", width: 144, height: 144},
+      {path: "baker/src/main/res/drawable-xhdpi/ic_launcher.png", width: 96, height: 96},
+      {path: "baker/src/main/res/drawable-hdpi/ic_launcher.png", width: 72, height: 72},
+      {path: "baker/src/main/res/drawable-mdpi/ic_launcher.png", width: 48, height: 48}
+    ])
+    
+    # Info dialog / Feature Graphic
+    place_cdn_image(magazine_properties["asset_feature_graphic"], [
+      {path: "baker/src/main/assets/img/splash.png", width: 1024, height: 500}
+    ])
+
+    # Header images
+    if magazine_properties["shelf_header_type"] == "asset_shelf_header_full_sized_image"
+      place_cdn_image(magazine_properties["asset_shelf_header_full_sized_image"], [
+        {path: "baker/src/main/assets/img/header.png", width: 2048, height: 430}
+      ])
+    else
+      place_cdn_image(magazine_properties["asset_shelf_header_centered_logo"], [
+        {path: "baker/src/main/assets/img/header.png", width: 1024, height: 1024}
+      ])
+    end
     
   end
   

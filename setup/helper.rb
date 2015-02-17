@@ -1,4 +1,6 @@
 require 'JSON'
+require 'RMagick'
+require "open-uri"
 
 module Setup
   module Helper
@@ -21,7 +23,7 @@ module Setup
       File.open(file, 'w') { |file| file.write(contents) }
     end
     
-    def gradle_file_inject(file, variable, value)
+    def css_file_inject(file, variable, value)
       puts "-- injecting #{variable} into #{file.split("/").last}"
       start_token = "\\/\\*\\^#{variable}\\*\\/"
       end_token = "\\/\\*\\$#{variable}\\*\\/"
@@ -72,6 +74,21 @@ module Setup
       JSON.parse(response)
     rescue Exception => e
       abort "Error accessing your magloft account: #{e.message}"
+    end
+    
+    def download_cdn_image(key)
+      image = Magick::ImageList.new  
+      image.from_blob(open("http://cdn.magloft.com/#{key}").read)
+      image
+    end
+    
+    def place_cdn_image(key, targets)
+      puts "-- placing asset #{key}"
+      image = download_cdn_image(key)
+      targets.each do |target|  
+        image.resize_to_fill!(target[:width], target[:height])  if target[:width] or target[:height]
+        image.write(target[:path])
+      end
     end
     
   end
