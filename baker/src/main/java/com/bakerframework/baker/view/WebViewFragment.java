@@ -27,13 +27,27 @@
 package com.bakerframework.baker.view;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.bakerframework.baker.R;
+import com.bakerframework.baker.activity.IssueActivity;
+import com.bakerframework.baker.settings.Configuration;
+
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class WebViewFragment extends Fragment {
@@ -45,7 +59,7 @@ public class WebViewFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 		// The last two arguments ensure LayoutParams are inflated properly.
-		View rootView = inflater.inflate(R.layout.webview_fragment, container, false);
+		View rootView = inflater.inflate(R.layout.web_view_fragment, container, false);
 		Bundle args = getArguments();
 
 		webView = (VideoEnabledWebView) rootView.findViewById(R.id.pageWebView);
@@ -55,7 +69,100 @@ public class WebViewFragment extends Fragment {
         ViewGroup videoLayout = (ViewGroup) rootView.findViewById(R.id.videoLayout);
         View loadingView = inflater.inflate(R.layout.view_loading_video, null);
         webChromeClient = new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, webView);
-        webView.setWebViewClient(new VideoEnabledWebViewClient(this));
+        webView.setWebChromeClient(webChromeClient);
+        webChromeClient.setOnToggledFullscreen(new VideoEnabledWebChromeClient.ToggledFullscreenCallback() {
+            @Override
+            public void toggledFullscreen(boolean fullscreen) {
+                // Your code to handle the full-screen change, for example showing and hiding the title bar. Example:
+                if (fullscreen) {
+                    WindowManager.LayoutParams attrs = getActivity().getWindow().getAttributes();
+                    attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                    attrs.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+                    getActivity().getWindow().setAttributes(attrs);
+                    if (android.os.Build.VERSION.SDK_INT >= 14) {
+                        //noinspection all
+                        getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+                    }
+                }else{
+                    WindowManager.LayoutParams attrs = getActivity().getWindow().getAttributes();
+                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+                    getActivity().getWindow().setAttributes(attrs);
+                    if (android.os.Build.VERSION.SDK_INT >= 14) {
+                        //noinspection all
+                        getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                    }
+                }
+
+            }
+        });
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String stringUrl) {
+
+                // mailto links will be handled by the OS.
+                if (stringUrl.startsWith("mailto:")) {
+                    Uri uri = Uri.parse(stringUrl);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    WebViewFragment.this.startActivity(intent);
+                } else {
+                    try {
+                        URL url = new URL(stringUrl);
+
+                        // We try to remove the referrer string to avoid passing it to the server in case the URL is an external link.
+                        String referrer = "";
+                        if (url.getQuery() != null) {
+                            Map<String, String> variables = Configuration.splitUrlQueryString(url);
+                            String finalQueryString = "";
+                            for (Map.Entry<String, String> entry : variables.entrySet()) {
+                                if (entry.getKey().equals("referrer")) {
+                                    referrer = entry.getValue();
+                                } else {
+                                    finalQueryString += entry.getKey() + "=" + entry.getValue() + "&";
+                                }
+                            }
+                            if (!finalQueryString.isEmpty()) {
+                                finalQueryString = "?" + finalQueryString.substring(0, finalQueryString.length() - 1);
+                            }
+                            stringUrl = stringUrl.replace("?" + url.getQuery(), finalQueryString);
+                        }
+                        // Remove referrer from query string
+                        if (!url.getProtocol().equals("file")) {
+                            if (referrer.equals(WebViewFragment.this.getActivity().getString(R.string.url_external_referrer))) {
+                                Uri uri = Uri.parse(stringUrl);
+                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                WebViewFragment.this.startActivity(intent);
+                            } else if (referrer.equals(WebViewFragment.this.getActivity().getString(R.string.url_baker_referrer))) {
+                                ((IssueActivity) WebViewFragment.this.getActivity()).openLinkInModal(stringUrl);
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            stringUrl = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+                            int index = ((IssueActivity) WebViewFragment.this.getActivity()).getJsonBook().getContents().indexOf(stringUrl);
+                            if (index != -1) {
+                                Log.d(this.getClass().toString(), "Index to load: " + index + ", page: " + stringUrl);
+                                ((IssueActivity) WebViewFragment.this.getActivity()).getPager().setCurrentItem(index);
+                                view.setVisibility(View.GONE);
+                            } else {
+                                // If the file DOES NOT exist, we won't load it.
+                                File htmlFile = new File(url.getPath());
+                                if (htmlFile.exists()) {
+                                    return false;
+                                }
+                            }
+                        }
+                    } catch (MalformedURLException | UnsupportedEncodingException ex) {
+                        Log.d(">>>URL_DATA", ex.getMessage());
+                    }
+                }
+
+                return true;
+            }
+
+
+        });
         webView.loadUrl(args.getString("object"));
 
 		return rootView;
@@ -74,9 +181,7 @@ public class WebViewFragment extends Fragment {
 	}
 
 	public boolean inCustomView() {
-        // @TODO: disable double-tap when in custom view
-        // return (customView != null);
-        return false;
+        return (webChromeClient.isVideoFullscreen());
     }
 
     public void hideCustomView() {

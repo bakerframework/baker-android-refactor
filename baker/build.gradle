@@ -69,5 +69,4 @@ dependencies {
     compile 'org.zeroturnaround:zt-zip:1.8'
     compile 'com.parse.bolts:bolts-android:1.+'
     compile fileTree(dir: 'libs', include: 'Parse-*.jar')
-    compile fileTree(dir: 'libs', include: 'ParseCrashReporting-*.jar')
 }

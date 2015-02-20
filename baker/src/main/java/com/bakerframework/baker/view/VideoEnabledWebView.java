@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import java.util.Map;
@@ -66,6 +67,9 @@ public class VideoEnabledWebView extends WebView {
     public void initializeSettings() {
         // enable javascript
         this.getSettings().setJavaScriptEnabled(true);
+
+        // enable plugins
+        this.getSettings().setPluginState(WebSettings.PluginState.ON);
 
         // set zoom enabled/disabled
         this.getSettings().setSupportZoom(true);

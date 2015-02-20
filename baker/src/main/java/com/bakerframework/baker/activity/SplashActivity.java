@@ -134,6 +134,9 @@ public class SplashActivity extends Activity implements LicenceManagerDelegate {
     // @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(IssueCollectionLoadedEvent event) {
 
+        // Unregister event listener
+        EventBus.getDefault().unregister(this);
+
         // Launch shelf activity
         Intent i = new Intent(SplashActivity.this, ShelfActivity.class);
         startActivity(i);

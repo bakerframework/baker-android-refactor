@@ -378,6 +378,7 @@ public class IssueCardView extends LinearLayout {
     @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(DownloadIssueErrorEvent event) {
         if(event.getIssue() == issue) {
+            uiProgressText.setText(getContext().getString(R.string.err_download_task_io));
             setUIState(UI_STATE_ERROR);
             Toast.makeText(this.parentActivity, getContext().getString(R.string.err_download_task_io), Toast.LENGTH_LONG).show();
         }

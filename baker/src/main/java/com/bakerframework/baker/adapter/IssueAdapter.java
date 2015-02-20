@@ -27,6 +27,7 @@
 package com.bakerframework.baker.adapter;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -54,7 +55,11 @@ public class IssueAdapter extends ArrayAdapter {
     private class IssueDateComparator implements Comparator<Issue> {
         @Override
         public int compare(Issue i1, Issue i2) {
-            return i1.getObjDate().compareTo(i2.getObjDate());
+            if(i1.getObjDate() != null) {
+                return i1.getObjDate().compareTo(i2.getObjDate());
+            }else{
+                return 0;
+            }
         }
     }
 
