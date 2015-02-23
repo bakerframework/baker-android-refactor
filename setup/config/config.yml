@@ -1,0 +1,132 @@
+---
+user:
+  access_token: 800$a4010bf9dd12e7e3
+  id: 800
+  firstname: Chelsea
+  lastname: Schwartz
+  email: chelsea@iamhighvoltage.com
+magazine:
+  id: 557
+  title: High Voltage
+  app_id: com.highvoltage.highvoltage
+  itunes_shared_secret: 117f0e9467c64119b20943f2d51b9f99
+  google_play_license_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn1nhtTc4bXLLONB6p3MgRj9aW8t9RRlv36dWFuWl6sDQE78WL8hzgjxGdqSQWsZuXQHF6b2drQk/pCApVHgt6bFOLKbT40p6BUn5tHQxLVcPzZbZOJA50nq8XLNvWCR46NSqtkdEqAUBD70AbyL3yA+nRmJNs1662+oll7bTEPvD/6IR9rbFI2ehny06fN3bl6p7pNCadBttc/+pHXvWZd1BSnEJqk+KC0HWFCjzTmlhBttm5GJaudpP4ZqNUF1ytCFT/VBC0vJsqtm1tePC1MWU5GXYOzGacNyGe8r3u7UooS9p8eFhpDdGemZjrZSWat6eaS30GfnkeMvVNNLiqwIDAQAB
+  parse_application_id: UFQlgAIMT4tKodbNk3wXfP0lDgHtYVUBmegfzufv
+  parse_rest_api_key: UAt5mE44m291g0fC5nWFDRKErhpYoarRpSkME8Z1
+  parse_master_key: bjOg0CJpHXrT5sLeGYYIV215E7V1WZWBXxiKbRPB
+  parse_client_key: 
+  publishing_mode: dbm
+  screenshot_status: not_ready
+  development_mode: true
+  is_active: true
+properties:
+  shelf_header_type: asset_shelf_header_full_sized_image
+  launch_image_type: asset_launch_image_centered_logo
+  shelf_background_type: asset_shelf_background_pattern
+  asset_shelf_header_centered_logo: 
+  asset_shelf_header_full_sized_image: secure/key/jpg/65d9ccb9-c4c8-4b22-8cc3-26c07efe3f34/key.jpg
+  asset_launch_image_centered_logo: 
+  asset_launch_image_full_sized_image: secure/key/jpg/2a4fa82c-8804-4ffe-92c3-0b19eb6c989a/key.jpg
+  shelf_background_solid_color: '#FF0000'
+  shelf_background_gradient_color_1: white
+  shelf_background_gradient_color_2: black
+  asset_shelf_background_pattern: secure/key/jpg/ce5ac85a-6212-455b-b23f-45bbee763a95/key.jpg
+  asset_xcode_packed_images_url: http://cdn.magloft.com/magazine/51f599a2-c4a1-4f74-a28b-35ed46657132/xcode_assets.zip
+  asset_feature_graphic: secure/key/png/117f683b-9c94-4b6a-ad0d-70b920dc8bec/key.png
+  created_folder: 'true'
+  download_magazine_app: 'true'
+  extract_rename_app: 'true'
+  app_title: 
+  dbm_basic_aso_description: |-
+    What began as a music publication in 2003 has turned into the ultimate fan destination. We cover anything you can be a fan of from film to music to books and much more. Basically, we just want to help you discover (and geek out about) your new favorite fandom!
+
+    Past cover stories have included Imagine Dragons, The Darkness, Fun., Fitz & The Tantrums, Semi Precious Weapons, OK Go and more.
+  dbm_basic_keywords: Music, Entertainment, Lifestyle, Nerd Culture, Fandom, Magazine
+  dbm_basic_info_tab_description: High Voltage is an independent publication  established
+    in 2003. We publish a new issue every quarter (so, every three months). Our content
+    reflects all types of lifestyle and entertainment. If you're enjoying our back
+    catalog; consider buying a print subscription to have each new issue delivered
+    to your front door!
+  dbm_basic_support_url: https://magloft.zendesk.com/hc/en-us
+  dbm_basic_marketing_url: 
+  dbm_basic_privacy_url: http://www.magloft.com/publications/557/privacy
+  dbm_basic_category_primary: Entertainment
+  dbm_basic_category_secondary: Music
+  dbm_basic_app_rating_0: none
+  dbm_basic_app_rating_1: none
+  dbm_basic_app_rating_2: none
+  dbm_basic_app_rating_3: none
+  dbm_basic_app_rating_4: none
+  dbm_basic_app_rating_5: none
+  dbm_basic_app_rating_6: none
+  dbm_basic_app_rating_7: none
+  dbm_basic_app_rating_8: none
+  dbm_basic_app_rating_9: none
+  dbm_basic_app_rating_10: none
+  dbm_basic_app_rating_gambling: 
+  dbm_basic_app_rating_web: 
+  dbm_basic_app_rating_kids: 
+  dbm_subscription_duration: year.1
+  dbm_subscription_price: '9'
+  dbm_subscription_trial_period: two
+  dbm_subscription_opt_in_offer: two
+  dbm_subscription_duration_2: month.3
+  dbm_subscription_price_2: '3'
+  dbm_subscription_trial_period_2: one
+  dbm_subscription_opt_in_offer_2: one
+  dbm_facebook_app_name: 
+  dbm_facebook_app_id: 
+  parse_own_account: 'true'
+  parse_email: holla@iamhighvoltage.com
+  parse_password: HVd!gital938
+  google_tracking_code: UA-58771432-1
+  apple_username: 
+  apple_password: 
+  app_display_name: 
+  app_description: 
+  app_publish_date: 
+  dev_certificate: 'true'
+  prod_certificate: 'true'
+  dev_push_certificate: 'true'
+  prod_push_certificate: 'true'
+  dist_prov_profile: 'true'
+  rename_project: 'true'
+  add_developer_account_xcode: 'true'
+  run_magazine_xcode: 'true'
+  publishing_mode: dbm
+  diy_itc_app_details: 'true'
+  diy_itc_availability_pricing: 'true'
+  diy_itc_version_details: 'true'
+  diy_itc_enable_newsstand: 'true'
+  diy_itc_copy_atom_feed: 'true'
+  diy_parse_application_id_xcode: 
+  diy_parse_client_key_xcode: 
+  diy_parse_dev_push_cert_uploaded: 
+  diy_parse_prod_push_cert_uploaded: 
+  diy_parse_push_tested: 
+  diy_analytics_tracking_code: 
+  diy_analytics_added_ga_xcode: 
+  diy_images_all_images_uploaded: 
+  diy_images_asset_catalog_added_xcode: 
+  diy_publish_iap_ready_to_submit: 
+  diy_publish_app_prepare_for_upload: 
+  diy_publish_app_ready_for_upload: 
+  diy_publish_prov_profile_distribution: 
+  diy_publish_signing_identity_distribution: 
+  diy_publish_destination_ios_device: 
+  diy_publish_archive_application: 
+  diy_publish_validate_archive: 
+  diy_publish_submit_app_store: 
+  asset_large_app_icon: secure/key/png/04311bd8-182e-4aaa-a42a-7a70e92bd86e/key.png
+  asset_default_cover_art: 
+  asset_launch_image_landscape: secure/publication_key/b41fa40e-10b9-4cca-8156-8756a3c94817/HV-launchpad-landscape3b.jpg
+  asset_launch_image_portrait: secure/publication_key/85383904-9bba-4766-906a-6db1a7eb3f02/HV-launchpad-portrait1b.jpg
+  asset_magazine_icon: 
+  asset_shelf_background_landscape: secure/publication_key/fff0df26-cba2-408d-85cc-78e624828779/HV-shelfbackground-landscape2.jpg
+  asset_shelf_background_portrait: secure/publication_key/39108933-4d76-45c6-997f-e913209bd6ad/HV-shelfbackground-portrait2.jpg
+  diy_price_create_subscription: 'true'
+  diy_price_add_subscription_xcode: 'true'
+  diy_price_create_prod_id: 'true'
+  diy_price_add_prod_issues: 'true'
+  diy_price_test_magazine_products: 'true'
+  generated_screenshot_count: '0'

@@ -1,6 +1,11 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    addressable (2.3.6)
+    autoparse (0.3.3)
+      addressable (>= 2.3.1)
+      extlib (>= 0.9.15)
+      multi_json (>= 1.0.0)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     byebug (3.5.1)
@@ -11,10 +16,29 @@ GEM
     columnize (0.9.0)
     debug_inspector (0.0.2)
     debugger-linecache (1.2.0)
+    extlib (0.9.16)
+    faraday (0.9.0)
+      multipart-post (>= 1.2, < 3)
     gli (2.12.2)
+    google-api-client (0.7.1)
+      addressable (>= 2.3.2)
+      autoparse (>= 0.3.3)
+      extlib (>= 0.9.15)
+      faraday (>= 0.9.0)
+      jwt (>= 0.1.5)
+      launchy (>= 2.1.1)
+      multi_json (>= 1.0.0)
+      retriable (>= 1.4)
+      signet (>= 0.5.0)
+      uuidtools (>= 2.1.0)
     interception (0.5)
+    jwt (1.2.0)
+    launchy (2.4.3)
+      addressable (~> 2.3)
     method_source (0.8.2)
     mime-types (2.4.3)
+    multi_json (1.10.1)
+    multipart-post (2.0.0)
     netrc (0.10.2)
     pry (0.10.1)
       coderay (~> 1.1.0)
@@ -35,8 +59,16 @@ GEM
     rest-client (1.7.2)
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
+    retriable (1.4.1)
     rmagick (2.13.4)
+    signet (0.6.0)
+      addressable (~> 2.3)
+      extlib (~> 0.9)
+      faraday (~> 0.9)
+      jwt (~> 1.0)
+      multi_json (~> 1.10)
     slop (3.6.0)
+    uuidtools (2.1.5)
     yard (0.8.7.6)
 
 PLATFORMS
@@ -44,6 +76,7 @@ PLATFORMS
 
 DEPENDENCIES
   gli
+  google-api-client
   pry
   pry-byebug
   pry-doc

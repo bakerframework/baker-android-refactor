@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gem 'gli'
 gem 'rest-client'
 gem 'rmagick'
+gem 'google-api-client'
 
 # Development
 group :development do

@@ -1,0 +1,5 @@
+require 'google/api_client'
+require 'google_api/handler'
+require 'google_api/response'
+require 'google_api/resource/play_listing'
+require 'google_api/resource/play_image'

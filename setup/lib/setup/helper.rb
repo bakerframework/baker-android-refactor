@@ -1,11 +1,32 @@
-require 'JSON'
-require 'RMagick'
-include Magick
-require "open-uri"
-
 module Setup
   module Helper
     API_URL = "http://www.magloft.com"
+
+    def account_login(access_token=false, app_id=false)
+      # initialize api
+      init_rest()
+    
+      # retrieve access key
+      @config["user"] ||= {}
+      @config["user"]["access_token"] = access_token || ask("MagLoft Access Token")
+    
+      # get user info
+      @config["user"].merge!(api_get(:portal, 'me'))
+    
+      # get magazine
+      magazines = api_get(:portal, 'magazines')
+      if app_id
+        @config["magazine"] = magazines.select{|m| m["app_id"] == app_id}.first
+      else
+        @config["magazine"] = (magazines.length == 1) ? magazines[0] : ask_resource_choice("Select a magazine", magazines, 'app_id', 'title')
+      end
+
+      # save config
+      @config["properties"] = api_get(:portal, "magazines/#{@config["magazine"]["id"]}/properties")
+    
+      # save configuration
+      File.open('setup/config/config.yml', 'w') { |file| file.write(YAML.dump(@config)) }
+    end
 
     def xml_file_inject(file, variable, value)
       puts "-- injecting #{variable} into #{file.split("/").last}"
@@ -65,7 +86,7 @@ module Setup
     def init_rest
       require 'rest_client'
       RestClient.add_before_execution_proc do |req, params|
-        req['X-Magloft-Accesstoken'] = @access_token
+        req['X-Magloft-Accesstoken'] = @config["user"]["access_token"]
       end
     end
     
@@ -89,36 +110,49 @@ module Setup
       targets.each do |target|
         case target[:transform]
         when :icon
-          # calculate sizes
-          icon_width = target[:width] - target[:padding] * 2
-          icon_height = target[:height] - target[:padding] * 2
-          
-          # create canvas
-          canvas = Image.new(target[:width], target[:height]) {self.background_color = 'transparent'}
-          
-          # create resized and transformed image
-          icon_image = image.resize(icon_width, icon_height)
-          icon_image.border!(0, 0, 'white')
-          icon_image.alpha Magick::DeactivateAlphaChannel
-          
-          # apply round corner mask
-          mask = Image.new(target[:width], target[:height]) {self.background_color = 'transparent'}
-          Draw.new.stroke('none').stroke_width(0).fill('white').roundrectangle(target[:padding], target[:padding], target[:width] - target[:padding]-1, target[:height] - target[:padding]-1, target[:radius], target[:radius]).draw(mask)
-          
-          # create shadow
-          shadow = mask.shadow(0,0,target[:shadow])
-          shadow = shadow.colorize(1, 1, 1, "gray45")
-
-          # compose image
-          canvas.composite!(icon_image, target[:padding], target[:padding], Magick::AddCompositeOp)
-          canvas.composite!(mask, 0, 0, Magick::CopyOpacityCompositeOp)
-          canvas.composite!(shadow, -target[:shadow]*2, -target[:shadow], Magick::DstOverCompositeOp)
-          
-          image = canvas
+          image = create_app_icon(image, target[:width], target[:height], target[:padding], target[:radius], target[:shadow])
         else
           image.resize_to_fill!(target[:width], target[:height])  if target[:width] or target[:height]
         end
         image.write(target[:path])
+      end
+    end
+    
+    def create_app_icon(image, width, height, padding, radius, shadow_size)
+      
+      # calculate sizes
+      icon_width = width - padding * 2
+      icon_height = height - padding * 2
+      
+      # create canvas
+      canvas = Image.new(width, height) {self.background_color = 'transparent'}
+      
+      # create resized and transformed image
+      icon_image = image.resize(icon_width, icon_height)
+      icon_image.border!(0, 0, 'white')
+      icon_image.alpha Magick::DeactivateAlphaChannel
+      
+      # apply round corner mask
+      mask = Image.new(width, height) {self.background_color = 'transparent'}
+      Draw.new.stroke('none').stroke_width(0).fill('white').roundrectangle(padding, padding, width - padding-1, height - padding-1, radius, radius).draw(mask)
+      
+      # create shadow
+      shadow = mask.shadow(0, 0, shadow_size)
+      shadow = shadow.colorize(1, 1, 1, "gray45")
+
+      # compose image
+      canvas.composite!(icon_image, padding, padding, Magick::AddCompositeOp)
+      canvas.composite!(mask, 0, 0, Magick::CopyOpacityCompositeOp)
+      canvas.composite!(shadow, -shadow_size * 2, -shadow_size, Magick::DstOverCompositeOp)
+      
+      canvas
+    end
+
+    def truncate_string(contents, length)
+      if contents.length > (length)
+        contents[0..(length-4)] + "..."
+      else
+        contents
       end
     end
     
