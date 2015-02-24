@@ -46,7 +46,7 @@ public class FetchPurchasesJob extends Job {
     private DownloadHandler downloadHandler;
 
     public FetchPurchasesJob(String url) {
-        super(new Params(Priority.LOW).requireNetwork().setPersistent(false));
+        super(new Params(Priority.LOW).requireNetwork().setPersistent(false).setGroupId("application"));
         this.url= url;
         this.completed = false;
     }

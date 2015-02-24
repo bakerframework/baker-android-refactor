@@ -79,6 +79,7 @@ import org.solovyev.android.checkout.ActivityCheckout;
 import org.solovyev.android.checkout.BillingRequests;
 import org.solovyev.android.checkout.Checkout;
 import org.solovyev.android.checkout.Purchase;
+import org.solovyev.android.checkout.PurchaseFlow;
 import org.solovyev.android.checkout.RequestListener;
 import org.solovyev.android.checkout.ResponseCodes;
 import org.solovyev.android.checkout.Sku;
@@ -91,6 +92,7 @@ import de.greenrobot.event.EventBus;
 public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     public static final int STANDALONE_MAGAZINE_ACTIVITY_FINISH = 1;
+    static final int SHELF_CHECKOUT_REQUEST_CODE = 0XCAFE;
 
     // Issues
     private ShelfView shelfView;
@@ -166,7 +168,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
         if(!Configuration.isStandaloneMode()) {
             shelfCheckout = Checkout.forActivity(this, BakerApplication.getInstance().getCheckout());
             shelfCheckout.start();
-            shelfCheckout.createPurchaseFlow(new PurchaseListener());
+            shelfCheckout.createPurchaseFlow(SHELF_CHECKOUT_REQUEST_CODE, new PurchaseListener());
         }
 
         // Plugin Callback
@@ -454,7 +456,14 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(this.getClass().getName(), "MagazineActivity finished, resultCode: " + resultCode);
-        if (resultCode == STANDALONE_MAGAZINE_ACTIVITY_FINISH) {
+        if(requestCode == SHELF_CHECKOUT_REQUEST_CODE) {
+            if(resultCode == RESULT_OK) {
+                onRefresh();
+            }else{
+                Toast.makeText(getApplicationContext(), getString(R.string.err_purchase_not_possible), Toast.LENGTH_SHORT).show();
+                onRefresh();
+            }
+        }else if (resultCode == STANDALONE_MAGAZINE_ACTIVITY_FINISH) {
             this.finish();
         }
     }

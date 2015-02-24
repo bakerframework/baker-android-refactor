@@ -43,7 +43,7 @@ public class ArchiveIssueJob extends Job {
     private boolean completed;
 
     public ArchiveIssueJob(Issue issue) {
-        super(new Params(Priority.MID).setPersistent(false));
+        super(new Params(Priority.MID).setPersistent(false).setGroupId(issue.getName()));
         this.issue = issue;
         completed = false;
     }

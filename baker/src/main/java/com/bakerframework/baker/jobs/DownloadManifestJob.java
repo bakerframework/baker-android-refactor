@@ -45,7 +45,7 @@ public class DownloadManifestJob extends Job {
     private DownloadHandler downloadHandler;
 
     public DownloadManifestJob(String url, File targetFile) {
-        super(new Params(Priority.LOW).setPersistent(false));
+        super(new Params(Priority.LOW).setPersistent(false).setGroupId("application"));
         this.url= url;
         this.targetFile = targetFile;
         this.completed = false;
