@@ -51,7 +51,7 @@ public class ParseBookJsonJob extends Job {
     private boolean completed;
 
     public ParseBookJsonJob(Issue issue) {
-        super(new Params(Priority.MID).setPersistent(false));
+        super(new Params(Priority.MID).setPersistent(false).setGroupId(issue.getName()));
         this.issue = issue;
         this.completed = false;
         Log.i("ParseBookJsonJob", "JOB CREATED");

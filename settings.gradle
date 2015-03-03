@@ -1,2 +1,2 @@
-include ':Baker'
-project(':Baker').projectDir = new File('Baker')
+include ':baker'
+project(':baker').projectDir = new File('baker')

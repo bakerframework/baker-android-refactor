@@ -117,7 +117,7 @@ public class BakerApplication extends Application {
                     private static final String TAG = "JOBS";
                     @Override
                     public boolean isDebugEnabled() {
-                        return true;
+                        return getResources().getBoolean(R.bool.debug_mode);
                     }
 
                     @Override
@@ -135,10 +135,10 @@ public class BakerApplication extends Application {
                         Log.e(TAG, String.format(text, args));
                     }
                 })
-                .minConsumerCount(1)
-                .maxConsumerCount(3)
-                .loadFactor(3)
-                .consumerKeepAlive(120)
+                .minConsumerCount(0)
+                .maxConsumerCount(5)
+                .loadFactor(1)
+                .consumerKeepAlive(30)
                 .build();
         jobManager = new JobManager(this, configuration);
     }

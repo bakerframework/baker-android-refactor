@@ -51,7 +51,7 @@ public class ExtractIssueJob extends Job {
     private boolean completed;
 
     public ExtractIssueJob(Issue issue) {
-        super(new Params(Priority.MID).setPersistent(false));
+        super(new Params(Priority.MID).setPersistent(false).setGroupId(issue.getName()));
         this.issue = issue;
         this.zipFile = issue.getHpubFile();
         this.outputDirectory = new File(this.zipFile.getParent(), issue.getName());

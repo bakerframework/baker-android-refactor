@@ -44,7 +44,7 @@ public class DownloadIssueJob extends Job {
     private DownloadHandler downloadHandler;
 
     public DownloadIssueJob(Issue issue) {
-        super(new Params(Priority.LOW).requireNetwork().setPersistent(false));
+        super(new Params(Priority.LOW).requireNetwork().setPersistent(false).setGroupId(issue.getName()));
         this.issue = issue;
         this.completed = false;
     }

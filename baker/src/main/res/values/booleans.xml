@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Enable / Disable debug mode -->
+    <bool name="debug_mode">true</bool>
+
     <!-- When opening Baker for the very first time, show the users some features so they know how to use the app. -->
     <bool name="ut_enable_tutorial">true</bool>
 
