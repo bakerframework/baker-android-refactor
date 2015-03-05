@@ -69,7 +69,7 @@ public class ModalActivity extends Activity {
         });
 
         // Initialize the webview
-        webView = (VideoEnabledWebView) findViewById(R.id.pageWebView);
+        webView = (VideoEnabledWebView) findViewById(R.id.modalWebView);
 
         // Initialize the VideoEnabledWebChromeClient and set event handlers
         View nonVideoLayout = findViewById(R.id.nonVideoLayout);
