@@ -36,6 +36,3 @@ secret.yml
 baker/manifest-merger-release-report.txt
 baker/src/main/assets/books/*/*
 /*.iml
-
-# Magloft Specific
-/setup/config/config.yml
