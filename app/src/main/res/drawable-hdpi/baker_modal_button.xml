@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+</selector>
+-->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Outside border/shadow -->
+    <item>
+        <shape android:shape="oval">
+            <size android:width="40dp" android:height="40dp" />
+            <gradient android:angle="90" android:startColor="#C21E13" android:endColor="#C21E13" />
+        </shape>
+    </item>
+
+    <!-- Inset -->
+    <item android:top="0.5dp" android:left="0.5dp" android:right="0.5dp" android:bottom="0.5dp">
+        <shape android:shape="oval">
+            <gradient android:angle="90" android:startColor="#C21E13" android:endColor="#C21E13" />
+        </shape>
+    </item>
+
+    <!-- Main button -->
+    <item android:top="2.8dp" android:left="2.8dp" android:right="2.8dp" android:bottom="2.8dp">
+        <shape android:shape="oval">
+            <solid android:color="#ffffff" />
+        </shape>
+    </item>
+
+</layer-list>

@@ -1,0 +1,1 @@
+-keepclassmembers class com.bakerframework.baker.view.VideoEnabledWebView$JavascriptInterface { public *; }

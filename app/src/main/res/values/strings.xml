@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- App Configuration -->
+    <!--^app_id--><string name="app_id">com.magloft.demo</string><!--$app_id-->
+    <!--^app_name--><string name="app_name">com.magloft.demo</string><!--$app_name-->
+    <string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>
+    <string name="purchase_confirmation_url">http://www.magloft.com/api/app/v1/android/verify/:purchase_type/:app_id/:user_id</string>
+    <string name="purchases_url">http://www.magloft.com/api/app/v1/android/purchases/:app_id/:user_id</string>
+
+    <!-- Google Play Configuration / In App Billing -->
+    <string name="google_play_license_key"></string>
+    <!--^google_play_subscription_ids--><string-array name="google_play_subscription_ids"></string-array><!--$google_play_subscription_ids-->
+
+    <!-- UI Messages, Labels and Texts -->
+    <string name="msg_exit">Exit</string>
+    <string name="msg_closing_app">If you exit now, all downloads will be cancelled, are you sure you want to exit ?</string>
+    <string name="msg_issue_downloading">Download</string>
+    <string name="msg_issue_extracting">Extract</string>
+    <string name="msg_issue_deleting">Deleting</string>
+    <string name="msg_thumb_description">Thumbnail</string>
+    <string name="msg_confirmation">Confirmation</string>
+    <string name="msg_confirmation_delete_text">Are you sure you want to archive this issue?</string>
+    <string name="msg_purchase_complete">Thank you for purchasing this issue!</string>
+    <string name="msg_standalone_no_issues">No issues found.</string>
+    <string name="msg_no_connection_message">Looks like you don\'t have a working internet connection. Do you want to open your network settings?</string>
+    <string name="msg_no_connection_title">No internet connection</string>
+    <string name="msg_yes">Yes</string>
+    <string name="msg_no">No</string>
+
+    <!-- Button Labels -->
+    <string name="lbl_action_settings">Settings</string>
+    <string name="lbl_action_info">Info</string>
+    <string name="lbl_action_refresh">Refresh</string>
+    <string name="lbl_action_subscribe">Subscribe</string>
+    <string name="lbl_issue_download">Download</string>
+    <string name="lbl_issue_read">Read</string>
+    <string name="lbl_issue_archive">Archive</string>
+    <string name="lbl_issue_buy">Buy</string>
+    <string name="lbl_back">Back</string>
+    <string name="lbl_next">Next</string>
+    <string name="lbl_finish">Finish</string>
+
+    <!-- Referrer strings to use with links to open them in the device's internet browser or in the same view from baker. For more information about links: https://github.com/bakerframework/baker/wiki/Managing-links-and-urls -->
+    <string name="url_baker_referrer">baker</string>
+    <string name="url_external_referrer">safari</string>
+
+    <!-- Filesystem Path Configuration -->
+    <string name="path_thumbnails">thumbnails</string>
+    <string name="path_magazines">magazines</string>
+    <string name="path_shelf">shelf.json</string>
+    <string name="path_book">book.json</string>
+    <string name="path_index">index.html</string>
+    <string name="path_package_extension">.zip</string>
+    <string name="path_standalone_books_directory">books</string>
+
+    <!-- General strings for the UI -->
+    <string name="asset_url_header">file:///android_asset/header.html</string>
+    <string name="asset_url_loading">file:///android_asset/loading.html</string>
+    <string name="asset_url_background">file:///android_asset/background.html</string>
+    <string name="asset_url_info">file:///android_asset/info.html</string>
+
+    <!-- Formats -->
+    <string name="format_input_date">yyyy-MM-dd</string>
+    <string name="format_output_date">dd MMM yyyy</string>
+
+    <!-- Preferences -->
+    <string name="pref_notifications_title">Notifications</string>
+    <string name="pref_receive_notifications">Enable notifications</string>
+    <string name="pref_receive_notifications_summary">Enable to receive content and messages from the cloud</string>
+    <string name="pref_receive_notifications_download">Enable automatic downloads</string>
+    <string name="pref_receive_notifications_download_summary">Automatically download new content when available</string>
+    <string name="pref_receive_notifications_download_only_wifi">Only Wi-Fi</string>
+    <string name="pref_receive_notifications_download_only_wifi_summary">Download the new content only when a Wi-Fi network is available</string>
+    <string name="pref_google_analytics_title">Google Analytics</string>
+    <string name="pref_enable_analytics">Enable Google Analytics</string>
+    <string name="pref_enable_analytics_summary">Send usage data to Google Analytics</string>
+
+    <!-- Usage Tutorial -->
+    <string name="path_tutorial_directory">abaker_usage</string>
+    <!-- The names of the pages that will be included in the tutorial for showing the users
+     how to use Baker. These must be present in the "path_tutorial_directory" directory.
+     You can customize those pages as you wish with HTML code, or add more if you want. -->
+    <string-array name="list_tutorial_pages">
+        <item>download.html</item>
+        <item>read.html</item>
+        <item>archive.html</item>
+    </string-array>
+
+    <!-- Error messages -->
+    <string name="err_download_task_connect">Could not connect to the internet</string>
+    <string name="err_download_task_malformed_url">Invalid server url</string>
+    <string name="err_download_task_file_not_found">The file was not found</string>
+    <string name="err_download_task_io">Could not download file</string>
+    <string name="err_download_task_cancelled">Download cancelled</string>
+    <string name="err_purchase_not_possible">Unable to complete checkout</string>
+    <string name="err_application_license_invalid">Licensing is not possible in non-productive apps. Please disable enable_licence_check until publishing the app.</string>
+    <string name="err_application_license_problem">It seems this app was not installed in a proper way. Please install this app only by using Google Play Store.</string>
+    <string name="err_application_no_internet">You need internet connection the first time you start this application.</string>
+
+    <!-- Plugins -->
+    <string-array name="baker_plugins">
+        <item>ParsePlugin</item>
+        <item>GoogleAnalyticsPlugin</item>
+    </string-array>
+
+    <!-- Plugin configuration -->
+    <!--^parse_application_id--><string name="parse_application_id"></string><!--$parse_application_id-->
+    <!--^parse_client_key--><string name="parse_client_key"></string><!--$parse_client_key-->
+    <!--^google_analytics_tracking_id--><string name="google_analytics_tracking_id"></string><!--$google_analytics_tracking_id-->
+
+    <!-- Standalone Mode -->
+    <string name="sa_books_directory">books</string>
+    <string name="loading_video">Loading...</string>
+
+</resources>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:weightSum="100"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingRight="16dp">
+
+    <ImageView
+        android:id="@+id/cover_image"
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:layout_weight="45"
+        android:contentDescription="@string/msg_thumb_description"
+        android:adjustViewBounds="true"
+        android:scaleType="fitEnd"
+        android:background="@drawable/cover_shadow"
+        android:paddingLeft="20px"
+        android:paddingTop="20px"
+        android:paddingRight="20px"
+        android:paddingBottom="20px"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="55"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="10dp"
+        android:paddingLeft="0dp"
+        android:paddingTop="12px"
+        android:paddingRight="10dp"
+        android:paddingBottom="0dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title_text"
+            android:text="Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:fontFamily="sans-serif-light"
+            android:layout_marginBottom="4sp"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/info_text"
+            android:text="Info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:lines="3"
+            android:fontFamily="sans-serif-light"
+            android:textColor="#333333"
+            android:textSize="15sp"
+            android:lineSpacingExtra="3sp"
+            android:elegantTextHeight="true" />
+
+        <TextView
+            android:id="@+id/date_text"
+            android:text="Date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="none"
+            android:singleLine="true"
+            android:fontFamily="sans-serif-light"
+            android:textColor="#AF160E"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/size_text"
+            android:text="Size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="none"
+            android:singleLine="true"
+            android:fontFamily="Helvetica-Bold"
+            android:textColor="#AF160E"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:id="@+id/idle_actions_container"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:paddingTop="3dp">
+
+            <Button
+                android:id="@+id/download_issue_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_issue_download"
+                style="@style/abaker_default_button" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/purchase_actions_container"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:paddingTop="3dp">
+
+            <Button
+                android:id="@+id/buy_issue_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_issue_buy"
+                style="@style/abaker_default_button" />
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/progress_text"
+            android:text="Progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:fontFamily="sans-serif-light"
+            android:textColor="#AF160E"
+            android:textSize="11sp"/>
+
+        <LinearLayout
+            android:id="@+id/ready_actions_container"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:visibility="visible"
+            android:orientation="horizontal"
+            android:paddingTop="3dp">
+
+            <Button
+                android:id="@+id/read_issue_button"
+                android:text="@string/lbl_issue_read"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/abaker_default_button" />
+
+            <Button
+                android:id="@+id/archive_issue_button"
+                android:text="@string/lbl_issue_archive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/abaker_default_button"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/progress_bar_container"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="false"
+                android:max="100"
+                android:progressDrawable="@drawable/progressbar"
+                style="?android:attr/progressBarStyleHorizontal"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>
