@@ -42,8 +42,8 @@
     <string name="lbl_finish">Finish</string>
 
     <!-- Referrer strings to use with links to open them in the device's internet browser or in the same view from baker. For more information about links: https://github.com/bakerframework/baker/wiki/Managing-links-and-urls -->
-    <string name="url_baker_referrer">Baker</string>
-    <string name="url_external_referrer">Safari</string>
+    <string name="url_baker_referrer">baker</string>
+    <string name="url_external_referrer">safari</string>
 
     <!-- Filesystem Path Configuration -->
     <string name="path_thumbnails">thumbnails</string>
@@ -108,7 +108,6 @@
     <!--^parse_application_id--><string name="parse_application_id"></string><!--$parse_application_id-->
     <!--^parse_client_key--><string name="parse_client_key"></string><!--$parse_client_key-->
     <!--^google_analytics_tracking_id--><string name="google_analytics_tracking_id"></string><!--$google_analytics_tracking_id-->
-    
 
     <!-- Standalone Mode -->
     <string name="sa_books_directory">books</string>

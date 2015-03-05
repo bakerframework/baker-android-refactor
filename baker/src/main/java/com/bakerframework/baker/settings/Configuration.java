@@ -268,4 +268,15 @@ public class Configuration {
         return BakerApplication.getInstance().getResources().getString(R.string.sa_books_directory);
     }
 
+    public static String getMagazineAssetPath() {
+        if (Configuration.isStandaloneMode()) {
+            return "file:///android_asset".concat(File.separator).concat(BakerApplication.getInstance().getString(R.string.path_standalone_books_directory)).concat(File.separator);
+        }else{
+            return "file://" + Configuration.getMagazinesDirectory() + File.separator;
+        }
+    }
+
+    public static String getTutorialAssetPath() {
+        return "file:///android_asset".concat(File.separator);
+    }
 }

@@ -30,18 +30,23 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.bakerframework.baker.R;
-
+import com.bakerframework.baker.view.VideoEnabledWebChromeClient;
+import com.bakerframework.baker.view.VideoEnabledWebView;
 
 public class ModalActivity extends Activity {
 
     private int orientation;
+    private VideoEnabledWebView webView;
+    private VideoEnabledWebChromeClient webChromeClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,43 +68,65 @@ public class ModalActivity extends Activity {
             }
         });
 
-        WebView webView = (WebView) this.findViewById(R.id.modalWebView);
-        webView.getSettings().setJavaScriptEnabled(true);
+        // Initialize the webview
+        webView = (VideoEnabledWebView) findViewById(R.id.pageWebView);
 
-        // set zoom enabled/disabled
-        webView.getSettings().setSupportZoom(true);
+        // Initialize the VideoEnabledWebChromeClient and set event handlers
+        View nonVideoLayout = findViewById(R.id.nonVideoLayout);
+        ViewGroup videoLayout = (ViewGroup) findViewById(R.id.videoLayout);
+        View loadingView = getLayoutInflater().inflate(R.layout.view_loading_video, null, false);
+        webChromeClient = new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, webView);
+        webChromeClient.setOnToggledFullscreen(new VideoEnabledWebChromeClient.ToggledFullscreenCallback() {
+            @Override
+            public void toggledFullscreen(boolean fullscreen) {
+                // Your code to handle the full-screen change, for example showing and hiding the title bar. Example:
+                if (fullscreen) {
+                    WindowManager.LayoutParams attrs = getWindow().getAttributes();
+                    attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                    attrs.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+                    getWindow().setAttributes(attrs);
+                    if (android.os.Build.VERSION.SDK_INT >= 14) {
+                        //noinspection all
+                        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+                    }
+                }else{
+                    WindowManager.LayoutParams attrs = getWindow().getAttributes();
+                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+                    getWindow().setAttributes(attrs);
+                    if (android.os.Build.VERSION.SDK_INT >= 14) {
+                        //noinspection all
+                        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                    }
+                }
 
-        // support zoom like normal browsers
-        webView.getSettings().setUseWideViewPort(true);
-
-        // disable zoom buttons
-        webView.getSettings().setDisplayZoomControls(false);
-
-        // add zoom controls
-        webView.getSettings().setBuiltInZoomControls(true);
-
-        // load the page on the maximum zoom out available.
-        webView.getSettings().setLoadWithOverviewMode(true);
-
-        // set initial scale so zoom works properly
-        webView.setInitialScale(30);
-
+            }
+        });
+        webView.setWebChromeClient(webChromeClient);
         webView.setWebViewClient(new WebViewClient() {
-
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
                 return true;
             }
         });
+
         webView.loadUrl(url);
     }
 
     @Override
     public void onStop() {
-        // We set back the orientation to what we received when this activity was created.
         this.setRequestedOrientation(orientation);
         super.onStop();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()){
+            webView.goBack();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -107,4 +134,14 @@ public class ModalActivity extends Activity {
         return true;
     }
 
+    @Override
+    public void onDestroy() {
+        webView.loadUrl("about:blank");
+        webView.pauseTimers();
+        webView.destroy();
+        super.onDestroy();
+    }
+
 }
+
+

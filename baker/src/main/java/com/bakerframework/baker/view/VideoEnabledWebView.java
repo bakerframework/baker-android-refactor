@@ -49,6 +49,7 @@ public class VideoEnabledWebView extends WebView {
     public VideoEnabledWebView(Context context) {
         super(context);
         addedJavascriptInterface = false;
+        // setWebContentsDebuggingEnabled(true);
         initializeSettings();
     }
 

@@ -28,21 +28,12 @@ package com.bakerframework.baker.jobs;
 
 import android.util.Log;
 
-import com.bakerframework.baker.BakerApplication;
-import com.bakerframework.baker.R;
 import com.bakerframework.baker.events.ParseBookJsonCompleteEvent;
 import com.bakerframework.baker.events.ParseBookJsonErrorEvent;
-import com.bakerframework.baker.helper.FileHelper;
 import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.model.Issue;
-import com.bakerframework.baker.settings.Configuration;
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.File;
 
 import de.greenrobot.event.EventBus;
 
@@ -83,11 +74,15 @@ public class ParseBookJsonJob extends Job {
 
     @Override
     protected boolean shouldReRunOnThrowable(Throwable throwable) {
-        Log.e("DownloadIssueJob", throwable.getLocalizedMessage());
+        if(throwable != null && throwable.getLocalizedMessage() != null) {
+            Log.e("ParseBookJsonJob", throwable.getLocalizedMessage());
+        }else{
+            Log.e("ParseBookJsonJob", "An unknown error occured.");
+        }
+
         EventBus.getDefault().post(new ParseBookJsonErrorEvent(issue, throwable));
         return false;
     }
-
 
 
     public Issue getIssue() {

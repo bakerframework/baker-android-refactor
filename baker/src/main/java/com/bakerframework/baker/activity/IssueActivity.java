@@ -51,7 +51,6 @@ import android.widget.Toast;
 
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
-import com.bakerframework.baker.helper.FileHelper;
 import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.settings.Configuration;
@@ -61,18 +60,10 @@ import com.bakerframework.baker.view.WebViewFragment;
 import com.bakerframework.baker.view.WebViewFragmentPagerAdapter;
 import com.viewpagerindicator.LinePageIndicator;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 public class IssueActivity extends FragmentActivity {
@@ -86,14 +77,11 @@ public class IssueActivity extends FragmentActivity {
 	private CustomWebViewPager pager;
     private BookJson jsonBook;
 
-    public final static String MODAL_URL = "com.giniem.gindpubs.MODAL_URL";
-    public final static String ORIENTATION = "com.giniem.gindpubs.ORIENTATION";
+    public final static String MODAL_URL = "com.bakerframework.baker.MODAL_URL";
+    public final static String ORIENTATION = "com.bakerframework.baker.ORIENTATION";
 
     private String orientation;
 
-    private boolean RETURN_TO_SHELF = false;
-    private boolean ENABLE_BACK_NEXT_BUTTONS = false;
-    private boolean ENABLE_DOUBLE_TAP = true;
     private boolean ENABLE_TUTORIAL = false;
 
     public BookJson getJsonBook() {
@@ -105,14 +93,6 @@ public class IssueActivity extends FragmentActivity {
     }
 
     private Issue issue;
-
-    @Override
-    protected void onDestroy() {
-        Log.d(this.getClass().getName(), "Called onDestroy method.");
-        WebViewFragment fragment = (WebViewFragment) webViewPagerAdapter.instantiateItem(pager, pager.getCurrentItem());
-        fragment.getWebView().destroy();
-        super.onDestroy();
-    }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -136,12 +116,9 @@ public class IssueActivity extends FragmentActivity {
         issue = BakerApplication.getInstance().getIssueCollection().getIssueByName(issueName);
 
 		try {
-            RETURN_TO_SHELF = intent.getBooleanExtra(Configuration.ISSUE_RETURN_TO_SHELF, true);
-            ENABLE_DOUBLE_TAP = intent.getBooleanExtra(Configuration.ISSUE_ENABLE_DOUBLE_TAP, true);
-            ENABLE_BACK_NEXT_BUTTONS = intent.getBooleanExtra(Configuration.ISSUE_ENABLE_BACK_NEXT_BUTTONS, false);
             ENABLE_TUTORIAL = intent.getBooleanExtra(Configuration.ISSUE_ENABLE_TUTORIAL, false);
 
-            if (!RETURN_TO_SHELF) {
+            if (!intent.getBooleanExtra(Configuration.ISSUE_RETURN_TO_SHELF, true)) {
                 setResult(ShelfActivity.STANDALONE_MAGAZINE_ACTIVITY_FINISH);
             } else {
                 setResult(0);
@@ -154,14 +131,12 @@ public class IssueActivity extends FragmentActivity {
 
             this.setOrientation(jsonBook.getOrientation());
             this.setPagerView(jsonBook);
-
-            this.setEnableDoubleTap(ENABLE_DOUBLE_TAP);
-            this.setEnableBackNextButton(ENABLE_BACK_NEXT_BUTTONS);
+            this.setEnableDoubleTap(intent.getBooleanExtra(Configuration.ISSUE_ENABLE_DOUBLE_TAP, true));
+            this.setEnableBackNextButton(intent.getBooleanExtra(Configuration.ISSUE_ENABLE_BACK_NEXT_BUTTONS, false));
 
             detectFirstOrLastPage();
 
-			gestureDetector = new GestureDetectorCompat(this,
-					new MyGestureListener());
+			gestureDetector = new GestureDetectorCompat(this, new MyGestureListener());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			Toast.makeText(this, "Not valid book.json found!",
@@ -312,95 +287,36 @@ public class IssueActivity extends FragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-    private Map<String, String> getBakerMetaTags(final String htmlPath) {
-        Map<String, String> values = new HashMap<>();
+    private void setPagerView(final BookJson book) {
 
-        Log.d(this.getClass().getName(), "Trying to parse: " + htmlPath);
-        try {
-            URL url = new URL(htmlPath);
+        // Set asset path
+        final String path = ENABLE_TUTORIAL ? Configuration.getTutorialAssetPath() : Configuration.getMagazineAssetPath();
+        Log.d(this.getClass().toString(), "THE PATH FOR LOADING THE PAGES WILL BE: " + path);
 
-            Document document;
-            if(issue.isStandalone()) {
-                InputStream inputStream = BakerApplication.getInstance().getAssets().open(htmlPath);
-                document = Jsoup.parse(FileHelper.getContentsFromInputStream(inputStream));
-            }else{
-                File file = new File(url.getPath());
-                document = Jsoup.parse(file, null);
-            }
-
-            Elements metaElements = document.select("meta");
-            for (Element meta : metaElements) {
-                if (meta.hasAttr("name") && meta.attr("name").equals("baker-page-name")) {
-                    if (meta.hasAttr("content")) {
-                        values.put("baker-page-name", meta.attr("content"));
-                    } else {
-                        values.put("baker-page-name", "");
-                    }
-                } else if (meta.hasAttr("name") && meta.attr("name").equals("baker-page-category")) {
-                    if (meta.hasAttr("content")) {
-                        values.put("baker-page-category", meta.attr("content"));
-                    } else {
-                        values.put("baker-page-category", "");
-                    }
-                }
-            }
-        } catch (IOException e) {
-            Log.e(this.getClass().getName(), "Error parsing the document", e);
-        }
-
-        return values;
-    }
-
-	private void setPagerView(final BookJson book) {
-
-        String path = "file://" + Configuration.getMagazinesDirectory() + File.separator;
-
-        if (Configuration.isStandaloneMode()) {
-            path = "file:///android_asset".concat(File.separator)
-                    .concat(getString(R.string.path_standalone_books_directory)).concat(File.separator);
-        } else if (ENABLE_TUTORIAL) {
-            path = "file:///android_asset".concat(File.separator);
-        }
-
-        if (book.getLiveUrl() != null) {
-            path = book.getLiveUrl();
-        }
-        final String finalPath = path;
-
-        Log.d(this.getClass().toString(), "THE PATH FOR LOADING THE PAGES WILL BE: " + finalPath);
-
-		// ViewPager and its adapters use support library
-		// fragments, so use getSupportFragmentManager.
-		webViewPagerAdapter = new WebViewFragmentPagerAdapter(
-				getSupportFragmentManager(), book, finalPath, this);
+		// ViewPager and its adapters use support library fragments, so use getSupportFragmentManager.
+		webViewPagerAdapter = new WebViewFragmentPagerAdapter(getSupportFragmentManager(), book, path, this);
 		pager = (CustomWebViewPager) findViewById(R.id.pager);
 		pager.setAdapter(webViewPagerAdapter);
+        pager.setOffscreenPageLimit(1);
 
         //Bind the title indicator to the adapter
         LinePageIndicator indicator = (LinePageIndicator)findViewById(R.id.indicator);
-        if (!ENABLE_TUTORIAL) {
-            indicator.setVisibility(View.GONE);
-        }
         indicator.setViewPager(pager);
-
         indicator.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 Log.d(this.getClass().getName(), "Loading page at index: " + position);
                 detectFirstOrLastPage();
-
-                // // Send event to plugins
-                // String page = finalPath + book.getMagazineName() + File.separator + book.getContents().get(position);
-                // Map<String, String> tags = getBakerMetaTags(page);
-                // if (tags.containsKey("baker-page-name")) {
-                //     String name = tags.get("baker-page-name");
-                //     name = (name.isEmpty()) ? book.getContents().get(position) : name;
-                //     BakerApplication.getInstance().getPluginManager().onIssuePageOpened(issue, name, position);
-                // }
             }
         });
 
+        // Only show indicator in tutorial mode
+        if (!ENABLE_TUTORIAL) {
+            indicator.setVisibility(View.GONE);
+        }
+
+        // Set up index webview
 		CustomWebView viewIndex = (CustomWebView) findViewById(R.id.webViewIndex);
 		viewIndex.getSettings().setJavaScriptEnabled(true);
 		viewIndex.getSettings().setUseWideViewPort(true);
@@ -439,7 +355,7 @@ public class IssueActivity extends FragmentActivity {
 
                         if (!url.getProtocol().equals("file")) {
                             Log.d("REFERRER>>>", "THE REFERRER IS: " + referrer);
-                            if (referrer.equals(IssueActivity.this.getString(R.string.url_external_referrer))) {
+                            if (referrer.toLowerCase().equals(IssueActivity.this.getString(R.string.url_external_referrer))) {
                                 Uri uri = Uri.parse(stringUrl);
                                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                 startActivity(intent);
@@ -447,8 +363,9 @@ public class IssueActivity extends FragmentActivity {
                                 IssueActivity.this.openLinkInModal(stringUrl);
                                 return true;
                             } else {
-                                // We return false to tell the webview that we are not going to handle the URL override.
-                                return false;
+                                // Open modal window by default
+                                IssueActivity.this.openLinkInModal(stringUrl);
+                                return true;
                             }
                         } else {
                             stringUrl = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
@@ -457,32 +374,28 @@ public class IssueActivity extends FragmentActivity {
                             int index = IssueActivity.this.getJsonBook().getContents().indexOf(stringUrl);
 
                             if (index != -1) {
-                                Log.d(this.getClass().toString(), "Index to load: " + index
-                                        + ", page: " + stringUrl);
-
+                                Log.d(this.getClass().toString(), "Index to load: " + index + ", page: " + stringUrl);
                                 IssueActivity.this.getPager().setCurrentItem(index);
                                 view.setVisibility(View.GONE);
                             } else {
-
                                 // If the file DOES NOT exist, we won't load it.
-
                                 File htmlFile = new File(url.getPath());
                                 if (htmlFile.exists()) {
-                                    return false;
+                                    // Open modal window by default
+                                    IssueActivity.this.openLinkInModal("file://" + url.getPath());
+                                    return true;
                                 }
                             }
                         }
                     } catch (MalformedURLException ex) {
                         Log.d(">>>URL_DATA", ex.getMessage());
-                    } catch (UnsupportedEncodingException ignored) {
-                    }
+                    } catch (UnsupportedEncodingException ignored) {}
                 }
 
 				return true;
 			}
 		});
-		viewIndex.loadUrl(path + book.getMagazineName() + File.separator
-				+ "index.html");
+		viewIndex.loadUrl(path + book.getMagazineName() + File.separator + "index.html");
         viewIndex.setBackgroundColor(0x00000000);
         viewIndex.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null);
 	}
@@ -490,10 +403,7 @@ public class IssueActivity extends FragmentActivity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-
-			WebViewFragment fragment = (WebViewFragment) this.webViewPagerAdapter
-					.instantiateItem(pager, pager.getCurrentItem());
-
+			WebViewFragment fragment = (WebViewFragment) this.webViewPagerAdapter.instantiateItem(pager, pager.getCurrentItem());
 			if (fragment.inCustomView()) {
 				fragment.hideCustomView();
 				return true;
@@ -560,9 +470,7 @@ public class IssueActivity extends FragmentActivity {
                 if (viewIndex.isShown()) {
                     viewIndex.setVisibility(View.GONE);
                 } else {
-
-                    WebViewFragment fragment = (WebViewFragment) IssueActivity.this.webViewPagerAdapter
-                            .instantiateItem(pager, pager.getCurrentItem());
+                    WebViewFragment fragment = (WebViewFragment) IssueActivity.this.webViewPagerAdapter.instantiateItem(pager, pager.getCurrentItem());
                     if (!fragment.inCustomView()) {
                         viewIndex.setVisibility(View.VISIBLE);
                     }

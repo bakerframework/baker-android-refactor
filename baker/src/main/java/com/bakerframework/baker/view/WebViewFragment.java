@@ -26,7 +26,6 @@
  **/
 package com.bakerframework.baker.view;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -49,7 +48,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
-@SuppressLint("SetJavaScriptEnabled")
 public class WebViewFragment extends Fragment {
 
     private VideoEnabledWebView webView;
@@ -62,14 +60,14 @@ public class WebViewFragment extends Fragment {
 		View rootView = inflater.inflate(R.layout.web_view_fragment, container, false);
 		Bundle args = getArguments();
 
+        // Initialize the webview
 		webView = (VideoEnabledWebView) rootView.findViewById(R.id.pageWebView);
 
         // Initialize the VideoEnabledWebChromeClient and set event handlers
         View nonVideoLayout = rootView.findViewById(R.id.nonVideoLayout);
         ViewGroup videoLayout = (ViewGroup) rootView.findViewById(R.id.videoLayout);
-        View loadingView = inflater.inflate(R.layout.view_loading_video, null);
+        View loadingView = inflater.inflate(R.layout.view_loading_video, null, false);
         webChromeClient = new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, webView);
-        webView.setWebChromeClient(webChromeClient);
         webChromeClient.setOnToggledFullscreen(new VideoEnabledWebChromeClient.ToggledFullscreenCallback() {
             @Override
             public void toggledFullscreen(boolean fullscreen) {
@@ -96,6 +94,7 @@ public class WebViewFragment extends Fragment {
 
             }
         });
+        webView.setWebChromeClient(webChromeClient);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String stringUrl) {
@@ -132,7 +131,7 @@ public class WebViewFragment extends Fragment {
                                 Uri uri = Uri.parse(stringUrl);
                                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                 WebViewFragment.this.startActivity(intent);
-                            } else if (referrer.equals(WebViewFragment.this.getActivity().getString(R.string.url_baker_referrer))) {
+                            } else if (referrer.toLowerCase().equals(WebViewFragment.this.getActivity().getString(R.string.url_baker_referrer))) {
                                 ((IssueActivity) WebViewFragment.this.getActivity()).openLinkInModal(stringUrl);
                                 return true;
                             } else {
@@ -163,6 +162,7 @@ public class WebViewFragment extends Fragment {
 
 
         });
+
         webView.loadUrl(args.getString("object"));
 
 		return rootView;
