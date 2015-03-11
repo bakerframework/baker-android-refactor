@@ -41,10 +41,8 @@ import com.bakerframework.baker.R;
 import com.bakerframework.baker.events.IssueCollectionErrorEvent;
 import com.bakerframework.baker.events.IssueCollectionLoadedEvent;
 import com.bakerframework.baker.model.IssueCollection;
-import com.bakerframework.baker.model.RemoteIssueCollection;
 
 import com.bakerframework.baker.play.LicenceManagerDelegate;
-import com.bakerframework.baker.settings.Configuration;
 
 import de.greenrobot.event.EventBus;
 
@@ -131,7 +129,7 @@ public class SplashActivity extends Activity implements LicenceManagerDelegate {
                 .show();
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(IssueCollectionLoadedEvent event) {
 
         // Unregister event listener
@@ -146,7 +144,7 @@ public class SplashActivity extends Activity implements LicenceManagerDelegate {
 
     }
 
-    // @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(IssueCollectionErrorEvent event) {
         // No internet connection and no cached file
         new AlertDialog.Builder(this)

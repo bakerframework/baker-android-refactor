@@ -30,23 +30,21 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.bakerframework.baker.R;
-import com.bakerframework.baker.view.VideoEnabledWebChromeClient;
-import com.bakerframework.baker.view.VideoEnabledWebView;
+
+import org.xwalk.core.XWalkNavigationHistory;
+import org.xwalk.core.XWalkResourceClient;
+import org.xwalk.core.XWalkView;
 
 public class ModalActivity extends Activity {
 
     private int orientation;
-    private VideoEnabledWebView webView;
-    private VideoEnabledWebChromeClient webChromeClient;
+    private XWalkView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +56,7 @@ public class ModalActivity extends Activity {
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
         Intent intent = getIntent();
-        String url = intent.getStringExtra(IssueActivity.MODAL_URL);
+        String baseUrl = intent.getStringExtra(IssueActivity.MODAL_URL);
         orientation = intent.getIntExtra(IssueActivity.ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
         // Click on the CLOSE button.
@@ -69,49 +67,15 @@ public class ModalActivity extends Activity {
         });
 
         // Initialize the webview
-        webView = (VideoEnabledWebView) findViewById(R.id.modalWebView);
-
-        // Initialize the VideoEnabledWebChromeClient and set event handlers
-        View nonVideoLayout = findViewById(R.id.nonVideoLayout);
-        ViewGroup videoLayout = (ViewGroup) findViewById(R.id.videoLayout);
-        View loadingView = getLayoutInflater().inflate(R.layout.view_loading_video, null, false);
-        webChromeClient = new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, webView);
-        webChromeClient.setOnToggledFullscreen(new VideoEnabledWebChromeClient.ToggledFullscreenCallback() {
+        webView = (XWalkView) findViewById(R.id.modalWebView);
+        webView.setResourceClient(new XWalkResourceClient(webView) {
             @Override
-            public void toggledFullscreen(boolean fullscreen) {
-                // Your code to handle the full-screen change, for example showing and hiding the title bar. Example:
-                if (fullscreen) {
-                    WindowManager.LayoutParams attrs = getWindow().getAttributes();
-                    attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                    attrs.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-                    getWindow().setAttributes(attrs);
-                    if (android.os.Build.VERSION.SDK_INT >= 14) {
-                        //noinspection all
-                        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-                    }
-                }else{
-                    WindowManager.LayoutParams attrs = getWindow().getAttributes();
-                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-                    getWindow().setAttributes(attrs);
-                    if (android.os.Build.VERSION.SDK_INT >= 14) {
-                        //noinspection all
-                        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-                    }
-                }
-
-            }
-        });
-        webView.setWebChromeClient(webChromeClient);
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
-                return true;
+            public boolean shouldOverrideUrlLoading(XWalkView view, String url) {
+                return false;
             }
         });
 
-        webView.loadUrl(url);
+        webView.load(baseUrl, null);
     }
 
     @Override
@@ -121,9 +85,9 @@ public class ModalActivity extends Activity {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event){
-        if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()){
-            webView.goBack();
+    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event){
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.getNavigationHistory().canGoBack()){
+            webView.getNavigationHistory().navigate(XWalkNavigationHistory.Direction.BACKWARD, 1);
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -136,9 +100,8 @@ public class ModalActivity extends Activity {
 
     @Override
     public void onDestroy() {
-        webView.loadUrl("about:blank");
         webView.pauseTimers();
-        webView.destroy();
+        webView.onDestroy();
         super.onDestroy();
     }
 

@@ -34,13 +34,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.activity.IssueActivity;
 import com.bakerframework.baker.settings.Configuration;
+
+import org.xwalk.core.XWalkResourceClient;
+import org.xwalk.core.XWalkUIClient;
+import org.xwalk.core.XWalkView;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -50,54 +51,51 @@ import java.util.Map;
 
 public class WebViewFragment extends Fragment {
 
-    private VideoEnabledWebView webView;
-    private VideoEnabledWebChromeClient webChromeClient;
+    private XWalkView webView;
+    private String baseUrl;
+    private boolean isInitialized = false;
+    private boolean isUserVisible = false;
 
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 		// The last two arguments ensure LayoutParams are inflated properly.
-		View rootView = inflater.inflate(R.layout.web_view_fragment, container, false);
-		Bundle args = getArguments();
+        View rootView = inflater.inflate(R.layout.web_view_fragment, container, false);
+        baseUrl = getArguments().getString("object");
 
+        // Instantiate views
+        webView = (XWalkView) rootView.findViewById(R.id.pageWebView);
+        // webView.setBackgroundColor(Color.TRANSPARENT);
+
+        if(!isInitialized) {
+            isInitialized = true;
+            initializeWebView();
+        }
+
+		return rootView;
+	}
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        isUserVisible = isVisibleToUser;
+        if (isUserVisible && isInitialized && webView != null) {
+            webView.resumeTimers();
+        }else if(webView != null) {
+            webView.pauseTimers();
+        }
+    }
+
+    public void initializeWebView() {
         // Initialize the webview
-		webView = (VideoEnabledWebView) rootView.findViewById(R.id.pageWebView);
 
-        // Initialize the VideoEnabledWebChromeClient and set event handlers
-        View nonVideoLayout = rootView.findViewById(R.id.nonVideoLayout);
-        ViewGroup videoLayout = (ViewGroup) rootView.findViewById(R.id.videoLayout);
-        View loadingView = inflater.inflate(R.layout.view_loading_video, null, false);
-        webChromeClient = new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, webView);
-        webChromeClient.setOnToggledFullscreen(new VideoEnabledWebChromeClient.ToggledFullscreenCallback() {
+        webView.setResourceClient(new XWalkResourceClient(webView) {
             @Override
-            public void toggledFullscreen(boolean fullscreen) {
-                // Your code to handle the full-screen change, for example showing and hiding the title bar. Example:
-                if (fullscreen) {
-                    WindowManager.LayoutParams attrs = getActivity().getWindow().getAttributes();
-                    attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                    attrs.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-                    getActivity().getWindow().setAttributes(attrs);
-                    if (android.os.Build.VERSION.SDK_INT >= 14) {
-                        //noinspection all
-                        getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-                    }
-                }else{
-                    WindowManager.LayoutParams attrs = getActivity().getWindow().getAttributes();
-                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-                    getActivity().getWindow().setAttributes(attrs);
-                    if (android.os.Build.VERSION.SDK_INT >= 14) {
-                        //noinspection all
-                        getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-                    }
+            public boolean shouldOverrideUrlLoading(XWalkView view, String stringUrl) {
+
+                if(stringUrl.equals(baseUrl)) {
+                    return false;
                 }
-
-            }
-        });
-        webView.setWebChromeClient(webChromeClient);
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String stringUrl) {
 
                 // mailto links will be handled by the OS.
                 if (stringUrl.startsWith("mailto:")) {
@@ -142,7 +140,7 @@ public class WebViewFragment extends Fragment {
                             int index = ((IssueActivity) WebViewFragment.this.getActivity()).getJsonBook().getContents().indexOf(stringUrl);
                             if (index != -1) {
                                 Log.d(this.getClass().toString(), "Index to load: " + index + ", page: " + stringUrl);
-                                ((IssueActivity) WebViewFragment.this.getActivity()).getPager().setCurrentItem(index);
+                                ((IssueActivity) WebViewFragment.this.getActivity()).getViewPager().setCurrentItem(index);
                                 view.setVisibility(View.GONE);
                             } else {
                                 // If the file DOES NOT exist, we won't load it.
@@ -159,36 +157,41 @@ public class WebViewFragment extends Fragment {
 
                 return true;
             }
-
-
         });
 
-        webView.loadUrl(args.getString("object"));
+        // Set UI Client (Start stop animations)
+        webView.setUIClient(new XWalkUIClient(webView) {
 
-		return rootView;
-	}
+            @Override
+            public void onPageLoadStopped(XWalkView view, String url, LoadStatus status) {
+                if(!url.isEmpty() && status == LoadStatus.FINISHED) {
+                    if(isUserVisible) {
+                        webView.resumeTimers();
+                    }else{
+                        webView.pauseTimers();
+                    }
+
+                }
+            }
+        });
+        webView.load(baseUrl, null);
+    }
 
     @Override
     public void onDestroy() {
-        this.getWebView().loadUrl("about:blank");
-        this.getWebView().pauseTimers();
-        this.getWebView().destroy();
         super.onDestroy();
+        if (webView != null) {
+            webView.onDestroy();
+        }
     }
+
+
 	
 	public String getUrl() {
 		return this.webView.getUrl();
 	}
 
-	public boolean inCustomView() {
-        return (webChromeClient.isVideoFullscreen());
-    }
-
-    public void hideCustomView() {
-    	webChromeClient.onHideCustomView();
-    }
-
-    public VideoEnabledWebView getWebView() {
+    public XWalkView getWebView() {
         return webView;
     }
 

@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:theme="@style/Theme.IssueActivity"
     tools:context=".ShelfActivity">
 
     <FrameLayout
@@ -41,6 +42,7 @@
             android:layout_height="0dp"
             android:layout_weight="70"
             swiperefreshscrolllayout:adapter_view="@+id/shelf_view">
+
             <com.bakerframework.baker.view.ShelfView
                 android:id="@+id/shelf_view"
                 android:layout_width="fill_parent"

@@ -30,7 +30,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.util.Log;
 
 import com.bakerframework.baker.activity.IssueActivity;
 import com.bakerframework.baker.model.BookJson;
@@ -44,10 +43,6 @@ public class WebViewFragmentPagerAdapter extends FragmentStatePagerAdapter {
 	private String magazinePath;
 
     private IssueActivity issueActivity;
-	
-	public WebViewFragmentPagerAdapter(FragmentManager fm) {
-		super(fm);
-	}
 
 	public WebViewFragmentPagerAdapter(FragmentManager fm, BookJson book, final String magazinePath, IssueActivity _issueActivity) {
 		super(fm);
@@ -66,13 +61,13 @@ public class WebViewFragmentPagerAdapter extends FragmentStatePagerAdapter {
 
 	@Override
 	public Fragment getItem(int i) {
+        // Return null if out of bounds
+        if(i < 0 || i >= book.getContents().size()) { return null; }
+        // Instantiate and return Fragment
         Bundle args = new Bundle();
         String page = this.magazinePath + book.getMagazineName() + File.separator + book.getContents().get(i);
-        Log.d(this.getClass().getName(), "Loading page " + page);
         args.putString("object", page);
-        Fragment pageFragment = Fragment.instantiate(issueActivity, WebViewFragment.class.getName(), args);
-        Log.i("WebViewFragmentPager", "instantiaze pageFragment for page " + page);
-        return pageFragment;
+        return Fragment.instantiate(issueActivity, WebViewFragment.class.getName(), args);
 	}
 
 	@Override

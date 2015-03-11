@@ -54,6 +54,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.support.v4.view.GravityCompat;
@@ -79,7 +80,6 @@ import org.solovyev.android.checkout.ActivityCheckout;
 import org.solovyev.android.checkout.BillingRequests;
 import org.solovyev.android.checkout.Checkout;
 import org.solovyev.android.checkout.Purchase;
-import org.solovyev.android.checkout.PurchaseFlow;
 import org.solovyev.android.checkout.RequestListener;
 import org.solovyev.android.checkout.ResponseCodes;
 import org.solovyev.android.checkout.Sku;
@@ -322,7 +322,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     private void loadBackground() {
         WebView webview = (WebView) findViewById(R.id.backgroundWebView);
         webview.getSettings().setJavaScriptEnabled(true);
-        webview.setBackgroundColor(Color.TRANSPARENT);
+        webview.setBackgroundColor(Color.WHITE);
         webview.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -381,7 +381,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     }
 
     public void viewIssue(final BookJson book) {
-        Intent intent = new Intent(this, IssueActivity.class);
+        Intent intent = new Intent(ShelfActivity.this, IssueActivity.class);
         try {
             intent.putExtra(Configuration.BOOK_JSON_KEY, book.toJSON().toString());
             intent.putExtra(Configuration.ISSUE_NAME, book.getMagazineName());

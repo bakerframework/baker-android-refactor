@@ -26,6 +26,7 @@
  **/
 package com.bakerframework.baker.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -37,7 +38,6 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -52,10 +52,8 @@ import android.widget.Toast;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.model.BookJson;
-import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.view.CustomWebView;
-import com.bakerframework.baker.view.CustomWebViewPager;
 import com.bakerframework.baker.view.WebViewFragment;
 import com.bakerframework.baker.view.WebViewFragmentPagerAdapter;
 import com.viewpagerindicator.LinePageIndicator;
@@ -73,14 +71,12 @@ public class IssueActivity extends FragmentActivity {
     private boolean enableBackNextButton = false;
 
 	private GestureDetectorCompat gestureDetector;
-	private WebViewFragmentPagerAdapter webViewPagerAdapter;
-	private CustomWebViewPager pager;
+	private WebViewFragmentPagerAdapter webViewFragmentPagerAdapter;
+	private ViewPager viewPager;
     private BookJson jsonBook;
 
     public final static String MODAL_URL = "com.bakerframework.baker.MODAL_URL";
     public final static String ORIENTATION = "com.bakerframework.baker.ORIENTATION";
-
-    private String orientation;
 
     private boolean ENABLE_TUTORIAL = false;
 
@@ -88,11 +84,9 @@ public class IssueActivity extends FragmentActivity {
         return this.jsonBook;
     }
 
-    public CustomWebViewPager getPager() {
-        return this.pager;
+    public ViewPager getViewPager() {
+        return this.viewPager;
     }
-
-    private Issue issue;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,13 +101,15 @@ public class IssueActivity extends FragmentActivity {
 		// Remove notification bar
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        // Set Content View
 		setContentView(R.layout.issue_activity);
 
-		Intent intent = getIntent();
+        // Initialize Pager
+        viewPager = (ViewPager) findViewById(R.id.pager);
 
         // Get issue
+        Intent intent = getIntent();
         String issueName = intent.getStringExtra(Configuration.ISSUE_NAME);
-        issue = BakerApplication.getInstance().getIssueCollection().getIssueByName(issueName);
 
 		try {
             ENABLE_TUTORIAL = intent.getBooleanExtra(Configuration.ISSUE_ENABLE_TUTORIAL, false);
@@ -154,7 +150,7 @@ public class IssueActivity extends FragmentActivity {
         }
 
         int allItems = this.getJsonBook().getContents().size();
-        int currentItem = this.pager.getCurrentItem();
+        int currentItem = this.viewPager.getCurrentItem();
 
         if (currentItem == (allItems - 1)) {
             Log.d(this.getClass().getName(), "Last page detected.");
@@ -174,14 +170,14 @@ public class IssueActivity extends FragmentActivity {
     }
 
     private void goNext() {
-        int currentItem = this.pager.getCurrentItem();
+        int currentItem = this.viewPager.getCurrentItem();
         int nextItem = currentItem + 1;
         int allItems = this.getJsonBook().getContents().size();
 
         Log.d(this.getClass().getName(), "All items: " + allItems + ", current item: " + currentItem + ", next item: " + nextItem);
 
         if (nextItem < allItems) {
-            this.pager.setCurrentItem(nextItem);
+            this.viewPager.setCurrentItem(nextItem);
             this.detectFirstOrLastPage();
         } else if (nextItem == allItems) {
             this.finish();
@@ -189,22 +185,20 @@ public class IssueActivity extends FragmentActivity {
     }
 
     private void goBack() {
-        int currentItem = this.pager.getCurrentItem();
+        int currentItem = this.viewPager.getCurrentItem();
         int nextItem = currentItem - 1;
         int allItems = this.getJsonBook().getContents().size();
 
         Log.d(this.getClass().getName(), "All items: " + allItems + ", current item: " + currentItem + ", next item: " + nextItem);
 
         if (nextItem >= 0) {
-            this.pager.setCurrentItem(nextItem);
+            this.viewPager.setCurrentItem(nextItem);
             this.detectFirstOrLastPage();
         }
     }
 
     private void setOrientation(String _orientation) {
-
         _orientation = _orientation.toUpperCase();
-        this.orientation = _orientation;
 
         final String PORTRAIT = "PORTRAIT";
         final String LANDSCAPE = "LANDSCAPE";
@@ -219,10 +213,6 @@ public class IssueActivity extends FragmentActivity {
                 this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                 break;
         }
-    }
-
-    public void resetOrientation() {
-        this.setOrientation(this.orientation);
     }
 
     public boolean isEnableDoubleTap() {
@@ -287,6 +277,7 @@ public class IssueActivity extends FragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void setPagerView(final BookJson book) {
 
         // Set asset path
@@ -294,14 +285,13 @@ public class IssueActivity extends FragmentActivity {
         Log.d(this.getClass().toString(), "THE PATH FOR LOADING THE PAGES WILL BE: " + path);
 
 		// ViewPager and its adapters use support library fragments, so use getSupportFragmentManager.
-		webViewPagerAdapter = new WebViewFragmentPagerAdapter(getSupportFragmentManager(), book, path, this);
-		pager = (CustomWebViewPager) findViewById(R.id.pager);
-		pager.setAdapter(webViewPagerAdapter);
-        pager.setOffscreenPageLimit(1);
+		webViewFragmentPagerAdapter = new WebViewFragmentPagerAdapter(getSupportFragmentManager(), book, path, this);
+		viewPager.setAdapter(webViewFragmentPagerAdapter);
+        viewPager.setOffscreenPageLimit(1);
 
         //Bind the title indicator to the adapter
         LinePageIndicator indicator = (LinePageIndicator)findViewById(R.id.indicator);
-        indicator.setViewPager(pager);
+        indicator.setViewPager(viewPager);
         indicator.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
@@ -315,6 +305,32 @@ public class IssueActivity extends FragmentActivity {
         if (!ENABLE_TUTORIAL) {
             indicator.setVisibility(View.GONE);
         }
+
+        /*
+        indicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                WebViewFragment fragment1 = (WebViewFragment) webViewFragmentPagerAdapter.getItem(position);
+                WebViewFragment fragment2 = (WebViewFragment) webViewFragmentPagerAdapter.getItem(position + 1);
+                if(fragment1 != null && fragment1.getView() != null) {
+                    fragment1.getWebView().setAlpha(1 - positionOffset);
+                }
+                if(fragment2 != null && fragment2.getView() != null) {
+                    fragment2.getWebView().setAlpha(positionOffset);
+                }
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        */
 
         // Set up index webview
 		CustomWebView viewIndex = (CustomWebView) findViewById(R.id.webViewIndex);
@@ -375,7 +391,7 @@ public class IssueActivity extends FragmentActivity {
 
                             if (index != -1) {
                                 Log.d(this.getClass().toString(), "Index to load: " + index + ", page: " + stringUrl);
-                                IssueActivity.this.getPager().setCurrentItem(index);
+                                IssueActivity.this.getViewPager().setCurrentItem(index);
                                 view.setVisibility(View.GONE);
                             } else {
                                 // If the file DOES NOT exist, we won't load it.
@@ -398,18 +414,6 @@ public class IssueActivity extends FragmentActivity {
 		viewIndex.loadUrl(path + book.getMagazineName() + File.separator + "index.html");
         viewIndex.setBackgroundColor(0x00000000);
         viewIndex.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null);
-	}
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			WebViewFragment fragment = (WebViewFragment) this.webViewPagerAdapter.instantiateItem(pager, pager.getCurrentItem());
-			if (fragment.inCustomView()) {
-				fragment.hideCustomView();
-				return true;
-			}
-		}
-		return super.onKeyDown(keyCode, event);
 	}
 
 	@Override
@@ -470,10 +474,7 @@ public class IssueActivity extends FragmentActivity {
                 if (viewIndex.isShown()) {
                     viewIndex.setVisibility(View.GONE);
                 } else {
-                    WebViewFragment fragment = (WebViewFragment) IssueActivity.this.webViewPagerAdapter.instantiateItem(pager, pager.getCurrentItem());
-                    if (!fragment.inCustomView()) {
-                        viewIndex.setVisibility(View.VISIBLE);
-                    }
+                    viewIndex.setVisibility(View.VISIBLE);
                 }
             }
 			return true;

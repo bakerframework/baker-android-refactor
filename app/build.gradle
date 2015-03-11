@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         applicationId project.property("application-id")
-        minSdkVersion 11
+        minSdkVersion 14
         targetSdkVersion 21
         versionCode 10
         versionName "1.0"
@@ -49,6 +49,7 @@ if(project.hasProperty("extra-gradle") && new File(project.property("extra-gradl
 
 repositories {
     maven { url "http://dl.bintray.com/populov/maven" }
+    maven { url "https://download.01.org/crosswalk/releases/crosswalk/android/maven2" }
     mavenCentral()
     maven {
         url 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
@@ -68,5 +69,6 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'org.zeroturnaround:zt-zip:1.8'
     compile 'com.parse.bolts:bolts-android:1.+'
+    compile 'org.xwalk:xwalk_core_library:11.40.277.7'
     compile fileTree(dir: 'libs', include: 'Parse-*.jar')
 }
