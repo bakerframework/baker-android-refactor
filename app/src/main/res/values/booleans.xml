@@ -2,10 +2,10 @@
 <resources>
 
     <!-- Enable / Disable debug mode -->
-    <bool name="debug_mode">true</bool>
+    <bool name="debug_mode">false</bool>
 
     <!-- When opening Baker for the very first time, show the users some features so they know how to use the app. -->
-    <bool name="ut_enable_tutorial">true</bool>
+    <bool name="ut_enable_tutorial">false</bool>
 
     <!-- Enable Licence Checker. For testing you need to set "License Test Response" to "LICENCED" in "Settings" > "Account Details" of your Google Play Development Console. -->
     <bool name="enable_licence_check">false</bool>
