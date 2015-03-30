@@ -52,6 +52,7 @@ import org.solovyev.android.checkout.Cache;
 import org.solovyev.android.checkout.Checkout;
 import org.solovyev.android.checkout.Products;
 import org.solovyev.android.checkout.PurchaseVerifier;
+import org.xwalk.core.XWalkPreferences;
 
 import static org.solovyev.android.checkout.ProductTypes.IN_APP;
 import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
@@ -100,6 +101,10 @@ public class BakerApplication extends Application {
 
     @Override
     public void onCreate(){
+
+        // Possible XWalk fix
+        XWalkPreferences.setValue(XWalkPreferences.ANIMATABLE_XWALK_VIEW, false);
+
         configureJobManager();
         pluginManager = new PluginManager();
         preferences = getSharedPreferences("baker.app", 0);
