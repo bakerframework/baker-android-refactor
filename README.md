@@ -27,7 +27,7 @@ report any bugs or feature requests and to see the list of known issues.
         Extras > Google Play Licensing Library
 
 ## Installation
-Clone this repository, import in Android Studio and build/run the _Baker_ build configuration
+Clone or [Download](https://github.com/bakerframework/baker-android-refactor/archive/4.4.0.zip) this repository, import in Android Studio and build/run the _Baker_ build configuration
 
     $ git clone git@github.com:bakerframework/baker-android-refactor.git
 
@@ -45,6 +45,8 @@ This project follows the features and roadmap of the official [Baker iOS Project
 
 This project integrates nicely with [Baker Cloud Console](http://www.bakerframework.com/bakercloudce/) and [MagLoft](http://www.magloft.com).
 
+A special shout-out to Intel Open Source Technology Center for bringing a chromium-based webview to android, allowing modern HTML5/CSS3 awesomeness, which is not provided by the native webview in current android sdks.
+
 It also uses other great open source libraries such as:
 
 * [jsoup](https://github.com/jhy/jsoup)
@@ -52,6 +54,7 @@ It also uses other great open source libraries such as:
 * [Google GSON](https://code.google.com/p/google-gson)
 * [Universal Image Loader](https://github.com/nostra13/Android-Universal-Image-Loader)
 * [ViewPagerIndicator](https://github.com/JakeWharton/Android-ViewPagerIndicator)
+* [The Crosswalk Project](https://crosswalk-project.org/)
 
 ## Contributing
 
