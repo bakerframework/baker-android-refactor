@@ -28,19 +28,19 @@ package com.bakerframework.baker.settings;
 
 import android.app.ActionBar;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 
 import com.bakerframework.baker.R;
 
 
-public class SettingsActivity extends ActionBarActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Modify the action bar to use a custom layout to center the title.
-        this.getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        this.getSupportActionBar().setDisplayOptions( ActionBar.DISPLAY_SHOW_CUSTOM );
         this.getSupportActionBar().setCustomView(R.layout.settings_actionbar);
 
         getFragmentManager().beginTransaction()

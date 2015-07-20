@@ -17,7 +17,7 @@
 package com.google.android.vending.licensing;
 
 /**
- * Interface used as part of a {@link com.google.android.vending.licensing.Policy} to allow application authors to obfuscate
+ * Interface used as part of a {@link Policy} to allow application authors to obfuscate
  * licensing data that will be stored into a SharedPreferences file.
  * <p>
  * Any transformation scheme must be reversable. Implementing classes may optionally implement an

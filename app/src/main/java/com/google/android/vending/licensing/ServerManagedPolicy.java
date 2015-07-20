@@ -65,7 +65,7 @@ public class ServerManagedPolicy implements Policy {
     private long mRetryCount;
     private long mLastResponseTime = 0;
     private int mLastResponse;
-    private final PreferenceObfuscator mPreferences;
+    private PreferenceObfuscator mPreferences;
 
     /**
      * @param context The context for the current application

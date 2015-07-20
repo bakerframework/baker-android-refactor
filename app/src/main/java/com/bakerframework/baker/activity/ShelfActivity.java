@@ -32,13 +32,13 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -89,7 +89,7 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
-public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class ShelfActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     public static final int STANDALONE_MAGAZINE_ACTIVITY_FINISH = 1;
     static final int SHELF_CHECKOUT_REQUEST_CODE = 0XCAFE;

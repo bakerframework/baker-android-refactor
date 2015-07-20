@@ -23,6 +23,9 @@ android {
         targetSdkVersion 22
         versionCode 10
         versionName "1.0"
+
+        // Enabled because google play services 7.5 pushes method limit over 65536
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -56,7 +59,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services:6.5.+'
+    compile 'com.google.android.gms:play-services:7.5.0'
     compile 'org.jsoup:jsoup:1.7.3'
     compile 'org.apache.commons:commons-compress:1.8.1'
     compile 'com.viewpagerindicator:library:2.4.1@aar'
@@ -68,6 +71,9 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.parse.bolts:bolts-android:1.2.1'
     compile 'org.xwalk:xwalk_core_library:12.41.296.9'
+
+    // Enabled because google play services 7.5 pushes method limit over 65536
+    compile 'com.android.support:multidex:1.0.0'
 
     // org.zeroturnaround.zip requires this
     compile 'org.slf4j:slf4j-api:1.7.12'
