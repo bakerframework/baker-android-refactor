@@ -35,6 +35,7 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.bakerframework.baker.handler.PluginManager;
@@ -57,7 +58,7 @@ import org.xwalk.core.XWalkPreferences;
 import static org.solovyev.android.checkout.ProductTypes.IN_APP;
 import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
 
-public class BakerApplication extends Application {
+public class BakerApplication extends MultiDexApplication {
     private static BakerApplication instance;
     private JobManager jobManager;
     private PluginManager pluginManager;
