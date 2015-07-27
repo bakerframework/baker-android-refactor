@@ -46,7 +46,7 @@ import java.util.Set;
 /**
  * Client library for Android Market license verifications.
  * <p>
- * The LicenseChecker is configured via a {@link com.google.android.vending.licensing.Policy} which contains the
+ * The LicenseChecker is configured via a {@link Policy} which contains the
  * logic to determine whether a user should have access to the application. For
  * example, the Policy can define a threshold for allowable number of server or
  * client failures before the library reports the user as not having access.
@@ -67,14 +67,14 @@ public class LicenseChecker implements ServiceConnection {
 
     private ILicensingService mService;
 
-    private final PublicKey mPublicKey;
+    private PublicKey mPublicKey;
     private final Context mContext;
     private final Policy mPolicy;
     /**
      * A handler for running tasks on a background thread. We don't want license
      * processing to block the UI thread.
      */
-    private final Handler mHandler;
+    private Handler mHandler;
     private final String mPackageName;
     private final String mVersionCode;
     private final Set<LicenseValidator> mChecksInProgress = new HashSet<LicenseValidator>();
@@ -146,11 +146,16 @@ public class LicenseChecker implements ServiceConnection {
             if (mService == null) {
                 Log.i(TAG, "Binding to licensing service.");
                 try {
+
+                    Intent serviceIntent = new Intent(
+                            new String(Base64.decode("Y29tLmFuZHJvaWQudmVuZGluZy5saWNlbnNpbmcuSUxpY2Vuc2luZ1NlcnZpY2U="))
+                    );
+
+                    serviceIntent.setPackage("com.android.vending");
+
                     boolean bindResult = mContext
                             .bindService(
-                                    new Intent(
-                                            new String(
-                                                    Base64.decode("Y29tLmFuZHJvaWQudmVuZGluZy5saWNlbnNpbmcuSUxpY2Vuc2luZ1NlcnZpY2U="))),
+                                    serviceIntent,
                                     this, // ServiceConnection.
                                     Context.BIND_AUTO_CREATE);
 
@@ -197,7 +202,7 @@ public class LicenseChecker implements ServiceConnection {
 
     private class ResultListener extends ILicenseResultListener.Stub {
         private final LicenseValidator mValidator;
-        private final Runnable mOnTimeout;
+        private Runnable mOnTimeout;
 
         public ResultListener(LicenseValidator validator) {
             mValidator = validator;

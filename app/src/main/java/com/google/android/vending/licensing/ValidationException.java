@@ -18,7 +18,7 @@ package com.google.android.vending.licensing;
 
 /**
  * Indicates that an error occurred while validating the integrity of data managed by an
- * {@link com.google.android.vending.licensing.Obfuscator}.}
+ * {@link Obfuscator}.}
  */
 public class ValidationException extends Exception {
     public ValidationException() {

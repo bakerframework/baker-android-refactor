@@ -19,7 +19,7 @@ package com.google.android.vending.licensing;
 /**
  * Callback for the license checker library.
  * <p>
- * Upon checking with the Market server and conferring with the {@link com.google.android.vending.licensing.Policy},
+ * Upon checking with the Market server and conferring with the {@link Policy},
  * the library calls the appropriate callback method to communicate the result.
  * <p>
  * <b>The callback does not occur in the original checking thread.</b> Your
