@@ -29,8 +29,12 @@ package com.bakerframework.baker.jobs;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.admag.AdmagSDK;
+import com.bakerframework.baker.BakerApplication;
+import com.bakerframework.baker.R;
 import com.bakerframework.baker.events.ExtractIssueCompleteEvent;
 import com.bakerframework.baker.events.ExtractIssueProgressEvent;
+import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.model.Issue;
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
@@ -84,6 +88,19 @@ public class ExtractIssueJob extends Job {
         if(!this.zipFile.delete()) {
             throw new Exception("Unable to remove issue hpub file");
         }
+
+        BookJson bookJson = new BookJson();
+        //count total pages
+        bookJson.fromIssue(issue);
+
+        AdmagSDK.cacheAd(BakerApplication.getInstance().getBaseContext()
+                , Integer.parseInt(BakerApplication.getInstance().getString(
+                        R.string.admag_publication_id)),
+                issue.getTitle(), bookJson.getContents().size(), issue.getTitle(),
+                issue.getCover(), null);
+
+        //recount total pages and add admag ads
+        bookJson.fromIssue(issue);
 
         // Post complete event
         completed = true;

@@ -26,16 +26,14 @@
  **/
 package com.bakerframework.baker.model;
 
+import com.admag.AdmagSDK;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
-import com.bakerframework.baker.helper.FileHelper;
-import com.bakerframework.baker.settings.Configuration;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,7 +61,7 @@ public class BookJson {
 	private boolean pageTurnTap;
     private String liveUrl;
 	private List<String> contents;
-	
+
 	public BookJson() {
 		this.hpub = "1";
 		this.date = new Date();
@@ -273,51 +271,61 @@ public class BookJson {
         // Parse contents
         this.contents = new ArrayList<>();
         JSONArray contents = new JSONArray(json.getString("contents"));
-		for (int i = 0; i < contents.length(); i++) {
-			this.contents.add(contents.getString(i));
-		}
-	}
-	
-	public JSONObject toJSON() throws JSONException {
-		JSONObject result = new JSONObject();
-		SimpleDateFormat sdfInput = new SimpleDateFormat("yyyy-MM-dd",
-				Locale.US);
-		
-		result.put("hpub", this.hpub);
-		result.put("title", this.title);
-		result.put("date", sdfInput.format(this.date));
-		result.put("url", this.url);
-		result.put("cover", this.cover);
-		result.put("orientation", this.orientation);
-		result.put("zoomable", this.zoomable);
-		result.put("-baker-background", this.background);
-		result.put("-baker-vertical-bounce", this.verticalBounce);
-		result.put("-baker-index-height", this.indexHeight);
-		result.put("-baker-media-autoplay", this.mediaDisplay);
-		result.put("-baker-page-numbers-color", this.pageNumberColors);
-		result.put("-baker-rendering", this.rendering);
-		result.put("-baker-page-turn-tap", this.pageTurnTap);
+
+
+        List<Integer> listPagesAds = AdmagSDK.getPages(Integer.parseInt(BakerApplication.getInstance().getString(
+                R.string.admag_publication_id)),
+                json.getString("title"));
+
+        for (int i = 0; i < contents.length(); i++) {
+            if (listPagesAds.contains(i+1))
+                this.contents.add("admagAds");
+            this.contents.add(contents.getString(i));
+
+        }
+    }
+
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject result = new JSONObject();
+        SimpleDateFormat sdfInput = new SimpleDateFormat("yyyy-MM-dd",
+                Locale.US);
+
+        result.put("hpub", this.hpub);
+        result.put("title", this.title);
+        result.put("date", sdfInput.format(this.date));
+        result.put("url", this.url);
+        result.put("cover", this.cover);
+        result.put("orientation", this.orientation);
+        result.put("zoomable", this.zoomable);
+        result.put("-baker-background", this.background);
+        result.put("-baker-vertical-bounce", this.verticalBounce);
+        result.put("-baker-index-height", this.indexHeight);
+        result.put("-baker-media-autoplay", this.mediaDisplay);
+        result.put("-baker-page-numbers-color", this.pageNumberColors);
+        result.put("-baker-rendering", this.rendering);
+        result.put("-baker-page-turn-tap", this.pageTurnTap);
         result.put("liveUrl", this.liveUrl);
-		
+
 		JSONArray authors = new JSONArray();
 		JSONArray creators = new JSONArray();
 		JSONArray contents = new JSONArray();
-		
+
 		for (String author : this.authors) {
 			authors.put(author);
 		}
 		result.put("author", authors);
-		
+
 		for (String creator : this.creators) {
 			creators.put(creator);
 		}
 		result.put("creator", creators);
-		
+
 		for (String content : this.contents) {
 			contents.put(content);
 		}
 		result.put("contents", contents);
-		
+
 		return result;
 	}
 

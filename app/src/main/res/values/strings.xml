@@ -4,7 +4,7 @@
     <!-- App Configuration -->
     <!--^app_id--><string name="app_id">com.magloft.demo</string><!--$app_id-->
     <!--^app_name--><string name="app_name">com.magloft.demo</string><!--$app_name-->
-    <string name="newstand_manifest_url">http://www.magloft.com/manifest/:app_id/:user_id</string>
+    <string name="newstand_manifest_url">http://media.admag.com.br/baker_carta/html5_output/shelf.json?:app_id/:user_id</string>
     <string name="purchase_confirmation_url">http://www.magloft.com/api/app/v1/android/verify/:purchase_type/:app_id/:user_id</string>
     <string name="purchases_url">http://www.magloft.com/api/app/v1/android/purchases/:app_id/:user_id</string>
 
@@ -108,6 +108,8 @@
     <!--^parse_application_id--><string name="parse_application_id"></string><!--$parse_application_id-->
     <!--^parse_client_key--><string name="parse_client_key"></string><!--$parse_client_key-->
     <!--^google_analytics_tracking_id--><string name="google_analytics_tracking_id"></string><!--$google_analytics_tracking_id-->
+    <!--^admag_publication_id--><string name="admag_publication_id">1</string><!--admag_publication_id-->
+    <!--^admag_api_key--><string name="admag_api_key">d58696c5a9cadd3f6c6c23dcf82bfd6c6f3a1bef</string><!--admag_api_key-->
 
     <!-- Standalone Mode -->
     <string name="sa_books_directory">books</string>

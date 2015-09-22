@@ -26,12 +26,10 @@
  **/
 package com.bakerframework.baker;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
@@ -44,6 +42,7 @@ import com.bakerframework.baker.model.RemoteIssueCollection;
 import com.bakerframework.baker.play.ApiPurchaseVerifier;
 import com.bakerframework.baker.play.LicenceManager;
 import com.bakerframework.baker.settings.Configuration;
+import com.orm.SugarApp;
 import com.path.android.jobqueue.JobManager;
 import com.path.android.jobqueue.log.CustomLogger;
 
@@ -57,7 +56,7 @@ import org.xwalk.core.XWalkPreferences;
 import static org.solovyev.android.checkout.ProductTypes.IN_APP;
 import static org.solovyev.android.checkout.ProductTypes.SUBSCRIPTION;
 
-public class BakerApplication extends Application {
+public class BakerApplication extends SugarApp {
     private static BakerApplication instance;
     private JobManager jobManager;
     private PluginManager pluginManager;
@@ -101,6 +100,7 @@ public class BakerApplication extends Application {
 
     @Override
     public void onCreate(){
+        super.onCreate();
 
         // Possible XWalk fix
         XWalkPreferences.setValue(XWalkPreferences.ANIMATABLE_XWALK_VIEW, false);
