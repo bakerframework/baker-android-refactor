@@ -43,6 +43,7 @@ import android.widget.Toast;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.activity.ShelfActivity;
 import com.bakerframework.baker.events.ArchiveIssueCompleteEvent;
+import com.bakerframework.baker.events.DownloadAdsCompleteEvent;
 import com.bakerframework.baker.events.DownloadIssueCompleteEvent;
 import com.bakerframework.baker.events.DownloadIssueErrorEvent;
 import com.bakerframework.baker.events.DownloadIssueProgressEvent;
@@ -344,10 +345,16 @@ public class IssueCardView extends LinearLayout {
     @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ExtractIssueCompleteEvent event) {
         if(event.getIssue() == issue) {
-            setUIState(UI_STATE_READY);
-            readable = true;
+            issue.startDownloadAdsJob();
         }
     }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(DownloadAdsCompleteEvent event) {
+        setUIState(UI_STATE_READY);
+        readable = true;
+    }
+
 
     @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ExtractIssueErrorEvent event) {

@@ -30,6 +30,7 @@ import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.events.IssueDataUpdatedEvent;
 import com.bakerframework.baker.helper.FileHelper;
+import com.bakerframework.baker.jobs.DownloadAdsJob;
 import com.bakerframework.baker.jobs.DownloadIssueJob;
 import com.bakerframework.baker.jobs.ExtractIssueJob;
 import com.bakerframework.baker.settings.Configuration;
@@ -63,6 +64,7 @@ public class Issue {
     private boolean urlChanged;
     private DownloadIssueJob downloadJob;
     private ExtractIssueJob extractJob;
+    private DownloadAdsJob donwloadAds;
 
     public Issue(String name) {
         this.name = name;
@@ -233,6 +235,11 @@ public class Issue {
     public void startExtractIssueJob() {
         extractJob = new ExtractIssueJob(this);
         BakerApplication.getInstance().getJobManager().addJobInBackground(extractJob);
+    }
+
+    public void startDownloadAdsJob(){
+        donwloadAds = new DownloadAdsJob(this);
+        BakerApplication.getInstance().getJobManager().addJobInBackground(donwloadAds);
     }
 
     // File Management

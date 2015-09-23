@@ -60,6 +60,7 @@ import android.widget.Toast;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 
+import com.admag.AdmagSDK;
 import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.adapter.IssueAdapter;
@@ -118,6 +119,12 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        List<Integer> listPubs = new ArrayList<Integer>() {{
+            add(Integer.parseInt(
+                    BakerApplication.getInstance().getString(R.string.admag_publication_id)));
+        }};
+        AdmagSDK.initAdmagSDK(getApplicationContext(), listPubs,
+                    BakerApplication.getInstance().getString(R.string.admag_api_key));
         // Initialize preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
