@@ -89,19 +89,6 @@ public class ExtractIssueJob extends Job {
             throw new Exception("Unable to remove issue hpub file");
         }
 
-        BookJson bookJson = new BookJson();
-        //count total pages
-        bookJson.fromIssue(issue);
-
-        AdmagSDK.cacheAd(BakerApplication.getInstance().getBaseContext()
-                , Integer.parseInt(BakerApplication.getInstance().getString(
-                        R.string.admag_publication_id)),
-                issue.getTitle(), bookJson.getContents().size(), issue.getTitle(),
-                issue.getCover(), null);
-
-        //recount total pages and add admag ads
-        bookJson.fromIssue(issue);
-
         // Post complete event
         completed = true;
         Log.i("ExtractZipJob", "completed");

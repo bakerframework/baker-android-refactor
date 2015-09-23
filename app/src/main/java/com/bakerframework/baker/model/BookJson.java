@@ -277,12 +277,24 @@ public class BookJson {
                 R.string.admag_publication_id)),
                 json.getString("title"));
 
-        for (int i = 0; i < contents.length(); i++) {
-            if (listPagesAds.contains(i+1))
-                this.contents.add("admagAds");
-            this.contents.add(contents.getString(i));
+		boolean contentsAlreadyHaveAd = false;
+		for (int i = 0; i < contents.length(); i++) {
+			if (contents.getString(i).equals("pageHaveAd")) {
+				contentsAlreadyHaveAd = true;
+				break;
+			}
+		}
 
-        }
+		int positionAd = 0;
+
+		for (int i = 0; i < contents.length(); i++) {
+			if (!contentsAlreadyHaveAd && listPagesAds.contains(i + 1 + positionAd)) {
+				this.contents.add("pageHaveAd");
+				positionAd+=1;
+			}
+
+			this.contents.add(contents.getString(i));
+		}
     }
 
 

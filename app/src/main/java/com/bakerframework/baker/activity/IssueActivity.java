@@ -54,7 +54,6 @@ import com.bakerframework.baker.R;
 import com.bakerframework.baker.model.BookJson;
 import com.bakerframework.baker.settings.Configuration;
 import com.bakerframework.baker.view.CustomWebView;
-import com.bakerframework.baker.view.WebViewFragment;
 import com.bakerframework.baker.view.WebViewFragmentPagerAdapter;
 import com.viewpagerindicator.LinePageIndicator;
 

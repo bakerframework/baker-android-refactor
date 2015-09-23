@@ -68,7 +68,7 @@ public class WebViewFragmentPagerAdapter extends FragmentStatePagerAdapter {
         String page = this.magazinePath + book.getMagazineName() + File.separator + book.getContents().get(i);
         args.putString("object", page);
         args.putInt("page", i);
-        args.putBoolean("pageHaveAd", book.getContents().get(i).equals("admagAds"));
+        args.putBoolean("pageHaveAd", book.getContents().get(i).equals("pageHaveAd"));
         args.putString("title", book.getTitle());
 
 		return Fragment.instantiate(issueActivity, WebViewFragment.class.getName(), args);
