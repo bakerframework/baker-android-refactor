@@ -33,6 +33,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.bakerframework.baker.activity.IssueActivity;
 import com.bakerframework.baker.model.BookJson;
+import com.bakerframework.baker.model.Issue;
 
 import java.io.File;
 
@@ -44,9 +45,12 @@ public class WebViewFragmentPagerAdapter extends FragmentStatePagerAdapter {
 
     private IssueActivity issueActivity;
 
-	public WebViewFragmentPagerAdapter(FragmentManager fm, BookJson book, final String magazinePath, IssueActivity _issueActivity) {
+	private String issueTitle;
+
+	public WebViewFragmentPagerAdapter(FragmentManager fm, String issueTitle, BookJson book, final String magazinePath, IssueActivity _issueActivity) {
 		super(fm);
         this.issueActivity = _issueActivity;
+		this.issueTitle = issueTitle;
 		if (null == book) {
 			this.book = new BookJson();
 		} else {
@@ -69,7 +73,7 @@ public class WebViewFragmentPagerAdapter extends FragmentStatePagerAdapter {
         args.putString("object", page);
         args.putInt("page", i);
         args.putBoolean("pageHaveAd", book.getContents().get(i).equals("pageHaveAd"));
-        args.putString("title", book.getTitle());
+        args.putString("title", issueTitle);
 
 		return Fragment.instantiate(issueActivity, WebViewFragment.class.getName(), args);
 	}

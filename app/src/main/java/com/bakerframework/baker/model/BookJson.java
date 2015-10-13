@@ -234,8 +234,8 @@ public class BookJson {
         this.liveUrl = liveUrl;
     }
 
-    public void fromJsonString(final String jsonString) throws JSONException, ParseException {
-        this.fromJson(new JSONObject(jsonString));
+    public void fromJsonString(final String jsonString, String titleName) throws JSONException, ParseException {
+        this.fromJson(new JSONObject(jsonString), titleName);
     }
 
     public boolean fromIssue(Issue issue) {
@@ -245,7 +245,7 @@ public class BookJson {
         // Validate book json
         try {
             this.validateJson(jsonObject);
-            this.fromJson(jsonObject);
+            this.fromJson(jsonObject, issue.getTitle());
         } catch (JSONException e) {
             return false;
         } catch (Exception e) {
@@ -256,7 +256,7 @@ public class BookJson {
         return true;
     }
 
-    public void fromJson(JSONObject json) throws JSONException {
+    public void fromJson(JSONObject json, String titleName) throws JSONException {
         if (json.has("liveUrl")) {
             this.liveUrl = json.getString("liveUrl");
         }
@@ -274,8 +274,8 @@ public class BookJson {
 
 
         List<Integer> listPagesAds = AdmagSDK.getPages(Integer.parseInt(BakerApplication.getInstance().getString(
-                R.string.admag_publication_id)),
-                json.getString("title"));
+						R.string.admag_publication_id)),
+				titleName);
 
 		boolean contentsAlreadyHaveAd = false;
 		for (int i = 0; i < contents.length(); i++) {
