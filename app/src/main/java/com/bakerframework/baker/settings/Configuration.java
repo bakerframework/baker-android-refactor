@@ -56,6 +56,7 @@ public class Configuration {
 
     // Issue preferences
     public final static String ISSUE_NAME = "com.bakerframework.baker.ISSUE_NAME";
+    public final static String ISSUE_TITLE = "com.bakerframework.baker.ISSUE_TITLE";
     public final static String ISSUE_STANDALONE = "com.bakerframework.baker.ISSUE_STANDALONE";
     public final static String ISSUE_RETURN_TO_SHELF = "com.bakerframework.baker.ISSUE_RETURN_TO_SHELF";
     public final static String ISSUE_ENABLE_BACK_NEXT_BUTTONS = "com.bakerframework.baker.ISSUE_ENABLE_BACK_NEXT_BUTTONS";

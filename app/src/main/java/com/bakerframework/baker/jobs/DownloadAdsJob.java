@@ -41,7 +41,7 @@ public class DownloadAdsJob extends Job {
         AdmagSDK.cacheAd(BakerApplication.getInstance().getBaseContext()
                 , Integer.parseInt(BakerApplication.getInstance().getString(
                         R.string.admag_publication_id)),
-                bookJson.getTitle(), bookJson.getContents().size(), bookJson.getTitle(),
+                issue.getTitle(), bookJson.getContents().size(), issue.getTitle(),
                 issue.getCover(), null);
 
         //recount total pages and add admag ads

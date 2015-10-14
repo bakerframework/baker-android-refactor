@@ -109,6 +109,7 @@ public class IssueActivity extends FragmentActivity {
         // Get issue
         Intent intent = getIntent();
         String issueName = intent.getStringExtra(Configuration.ISSUE_NAME);
+        String issueTitle = intent.getStringExtra(Configuration.ISSUE_TITLE);
 
 		try {
             ENABLE_TUTORIAL = intent.getBooleanExtra(Configuration.ISSUE_ENABLE_TUTORIAL, false);
@@ -122,7 +123,7 @@ public class IssueActivity extends FragmentActivity {
 			jsonBook = new BookJson();
             jsonBook.setIssueName(issueName);
             Log.d(this.getClass().toString(), "THE RAW BOOK.JSON IS: " + intent.getStringExtra(Configuration.BOOK_JSON_KEY));
-            jsonBook.fromJsonString(intent.getStringExtra(Configuration.BOOK_JSON_KEY));
+            jsonBook.fromJsonString(intent.getStringExtra(Configuration.BOOK_JSON_KEY), issueTitle);
 
             this.setOrientation(jsonBook.getOrientation());
             this.setPagerView(jsonBook);
@@ -283,8 +284,11 @@ public class IssueActivity extends FragmentActivity {
         final String path = ENABLE_TUTORIAL ? Configuration.getTutorialAssetPath() : Configuration.getMagazineAssetPath();
         Log.d(this.getClass().toString(), "THE PATH FOR LOADING THE PAGES WILL BE: " + path);
 
+        Intent intent = getIntent();
+        String issueTitle = intent.getStringExtra(Configuration.ISSUE_TITLE);
+
 		// ViewPager and its adapters use support library fragments, so use getSupportFragmentManager.
-		webViewFragmentPagerAdapter = new WebViewFragmentPagerAdapter(getSupportFragmentManager(), book, path, this);
+		webViewFragmentPagerAdapter = new WebViewFragmentPagerAdapter(getSupportFragmentManager(), issueTitle, book, path, this);
 		viewPager.setAdapter(webViewFragmentPagerAdapter);
         viewPager.setOffscreenPageLimit(1);
 

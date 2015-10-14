@@ -387,11 +387,12 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
         actionBar.setCustomView(R.layout.shelf_actionbar);
     }
 
-    public void viewIssue(final BookJson book) {
+    public void viewIssue(final BookJson book, Issue issue) {
         Intent intent = new Intent(ShelfActivity.this, IssueActivity.class);
         try {
             intent.putExtra(Configuration.BOOK_JSON_KEY, book.toJSON().toString());
             intent.putExtra(Configuration.ISSUE_NAME, book.getMagazineName());
+            intent.putExtra(Configuration.ISSUE_TITLE, issue.getTitle());
             startActivityForResult(intent, STANDALONE_MAGAZINE_ACTIVITY_FINISH);
         } catch (JSONException e) {
             Toast.makeText(this, "The book.json is invalid.",
@@ -415,6 +416,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
         try {
             intent.putExtra(Configuration.BOOK_JSON_KEY, book.toJSON().toString());
             intent.putExtra(Configuration.ISSUE_NAME, book.getMagazineName());
+            intent.putExtra(Configuration.ISSUE_TITLE, book.getTitle());
             intent.putExtra(Configuration.ISSUE_RETURN_TO_SHELF, true);
             intent.putExtra(Configuration.ISSUE_ENABLE_DOUBLE_TAP, false);
             intent.putExtra(Configuration.ISSUE_ENABLE_BACK_NEXT_BUTTONS, true);
@@ -533,7 +535,7 @@ public class ShelfActivity extends ActionBarActivity implements SwipeRefreshLayo
     @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(ParseBookJsonCompleteEvent event) {
         // View magazine
-        viewIssue(event.getBookJson());
+        viewIssue(event.getBookJson(), event.getIssue());
     }
 
     @SuppressWarnings("UnusedDeclaration")
