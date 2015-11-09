@@ -21,6 +21,15 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
+
+
+    <!-- gps access like google maps to get current localization -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- write Ads files into device storage and Ads use it to access device files like images (camera or gallery) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+
     <!--^permission_c2d--><permission android:name="com.magloft.demo.permission.C2D_MESSAGE" android:protectionLevel="signature" /><!--$permission_c2d-->
     <!--^uses_permission_c2d--><uses-permission android:name="com.magloft.demo.permission.C2D_MESSAGE" /><!--$uses_permission_c2d-->
 

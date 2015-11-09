@@ -45,20 +45,27 @@ import java.util.Map;
  */
 public class ParsePlugin implements BakerPlugin {
 
+    private boolean parseEnabled = false;
+
     public ParsePlugin() {
 
-        // Application id, client key
-        Parse.initialize(BakerApplication.getInstance(), BakerApplication.getInstance().getString(R.string.parse_application_id), BakerApplication.getInstance().getString(R.string.parse_client_key));
-        ParsePush.subscribeInBackground("", new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e == null) {
-                    Log.d("ParsePlugin", "successfully subscribed to the broadcast channel.");
-                } else {
-                    Log.e("ParsePlugin", "failed to subscribe for push", e);
+        if(BakerApplication.getInstance().getString(R.string.parse_application_id).length() > 0){
+            parseEnabled=true;
+            // Application id, client key
+            Parse.initialize(BakerApplication.getInstance(), BakerApplication.getInstance().
+                    getString(R.string.parse_application_id), BakerApplication.getInstance().
+                    getString(R.string.parse_client_key));
+            ParsePush.subscribeInBackground("", new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        Log.d("ParsePlugin", "successfully subscribed to the broadcast channel.");
+                    } else {
+                        Log.e("ParsePlugin", "failed to subscribe for push", e);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     // Navigation Events
@@ -66,21 +73,24 @@ public class ParsePlugin implements BakerPlugin {
     @Override
     public void onSplashActivityCreated(Activity activity) {
         // Track app opened event
-        ParseAnalytics.trackAppOpenedInBackground(activity.getIntent());
+        if(parseEnabled)
+            ParseAnalytics.trackAppOpenedInBackground(activity.getIntent());
     }
 
     @Override
     public void onShelfActivityCreated(Activity activity) {
         Map<String, String> dimensions = new HashMap<>();
         dimensions.put("Activity", "Shelf");
-        ParseAnalytics.trackEventInBackground("Navigate", dimensions);
+        if(parseEnabled)
+            ParseAnalytics.trackEventInBackground("Navigate", dimensions);
     }
 
     @Override
     public void onIssueActivityCreated(Activity activity) {
         Map<String, String> dimensions = new HashMap<>();
         dimensions.put("Activity", "Issue");
-        ParseAnalytics.trackEventInBackground("Navigate", dimensions);
+        if(parseEnabled)
+            ParseAnalytics.trackEventInBackground("Navigate", dimensions);
     }
 
     // Shelf / Issue Events
@@ -91,7 +101,8 @@ public class ParsePlugin implements BakerPlugin {
         dimensions.put("Title", issue.getTitle());
         dimensions.put("Paid", issue.hasPrice() ? "yes" : "no");
         dimensions.put("Purchased", issue.isPurchased() ? "yes" : "no");
-        ParseAnalytics.trackEventInBackground("Download_Issue_Clicked", dimensions);
+        if(parseEnabled)
+            ParseAnalytics.trackEventInBackground("Download_Issue_Clicked", dimensions);
     }
 
     @Override
@@ -100,7 +111,8 @@ public class ParsePlugin implements BakerPlugin {
         dimensions.put("Title", issue.getTitle());
         dimensions.put("Paid", issue.hasPrice() ? "yes" : "no");
         dimensions.put("Purchased", issue.isPurchased() ? "yes" : "no");
-        ParseAnalytics.trackEventInBackground("Archive_Issue_Clicked", dimensions);
+        if(parseEnabled)
+            ParseAnalytics.trackEventInBackground("Archive_Issue_Clicked", dimensions);
     }
 
     @Override
@@ -109,7 +121,8 @@ public class ParsePlugin implements BakerPlugin {
         dimensions.put("Title", issue.getTitle());
         dimensions.put("Paid", issue.hasPrice() ? "yes" : "no");
         dimensions.put("Purchased", issue.isPurchased() ? "yes" : "no");
-        ParseAnalytics.trackEventInBackground("Read_Issue_Clicked", dimensions);
+        if(parseEnabled)
+            ParseAnalytics.trackEventInBackground("Read_Issue_Clicked", dimensions);
     }
 
     // Issue Navigation Events
@@ -119,7 +132,8 @@ public class ParsePlugin implements BakerPlugin {
         dimensions.put("Issue Title", issue.getTitle());
         dimensions.put("Page Title", pageTitle);
         dimensions.put("Page Index", String.valueOf(pageIndex));
-        ParseAnalytics.trackEventInBackground("View_Issue_Page", dimensions);
+        if(parseEnabled)
+            ParseAnalytics.trackEventInBackground("View_Issue_Page", dimensions);
     }
 
     // Purchase Events
@@ -131,7 +145,8 @@ public class ParsePlugin implements BakerPlugin {
         dimensions.put("Paid", issue.hasPrice() ? "yes" : "no");
         dimensions.put("Purchased", issue.isPurchased() ? "yes" : "no");
         dimensions.put("Price", issue.getPrice());
-        ParseAnalytics.trackEventInBackground("Purchase_Issue_Clicked", dimensions);
+        if(parseEnabled)
+            ParseAnalytics.trackEventInBackground("Purchase_Issue_Clicked", dimensions);
     }
 
     @Override
@@ -140,7 +155,8 @@ public class ParsePlugin implements BakerPlugin {
         dimensions.put("Title", subscription.title);
         dimensions.put("Id", subscription.id);
         dimensions.put("Price", subscription.price);
-        ParseAnalytics.trackEventInBackground("Subscribe_Clicked", dimensions);
+        if(parseEnabled)
+            ParseAnalytics.trackEventInBackground("Subscribe_Clicked", dimensions);
     }
 
 }

@@ -28,6 +28,9 @@ package com.bakerframework.baker.jobs;
 
 import android.util.Log;
 
+import com.admag.AdmagSDK;
+import com.bakerframework.baker.BakerApplication;
+import com.bakerframework.baker.R;
 import com.bakerframework.baker.events.ArchiveIssueCompleteEvent;
 import com.bakerframework.baker.model.Issue;
 import com.bakerframework.baker.settings.Configuration;
@@ -59,6 +62,11 @@ public class ArchiveIssueJob extends Job {
         // Delete directory
         File issueDirectory = new File(Configuration.getMagazinesDirectory(), issue.getName());
         Configuration.deleteDirectory(issueDirectory.getAbsolutePath());
+
+        //Delete ads
+        AdmagSDK.deleteInsertion(BakerApplication.getInstance().getBaseContext(),
+                Integer.parseInt(BakerApplication.getInstance().getString(
+                R.string.admag_publication_id)), issue.getTitle());
 
         // Post complete event
         completed = true;

@@ -35,6 +35,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.admag.AdmagSDK;
+import com.admag.WebViewAdmag;
+import com.bakerframework.baker.BakerApplication;
 import com.bakerframework.baker.R;
 import com.bakerframework.baker.activity.IssueActivity;
 import com.bakerframework.baker.settings.Configuration;
@@ -55,6 +58,7 @@ public class WebViewFragment extends Fragment {
     private String baseUrl;
     private boolean isInitialized = false;
     private boolean isUserVisible = false;
+    private WebViewAdmag webViewAdmag;
 
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -62,6 +66,12 @@ public class WebViewFragment extends Fragment {
 		// The last two arguments ensure LayoutParams are inflated properly.
         View rootView = inflater.inflate(R.layout.web_view_fragment, container, false);
         baseUrl = getArguments().getString("object");
+
+        if (getArguments().getBoolean("pageHaveAd")){
+            webViewAdmag = AdmagSDK.getAd(getActivity(), container, getArguments().getInt("page") + 1, getArguments().getString("title"),
+                    Integer.parseInt(BakerApplication.getInstance().getString(R.string.admag_publication_id)));
+            return webViewAdmag;
+        }
 
         // Instantiate views
         webView = (XWalkView) rootView.findViewById(R.id.pageWebView);
@@ -79,7 +89,14 @@ public class WebViewFragment extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         isUserVisible = isVisibleToUser;
-        if (isUserVisible && isInitialized && webView != null) {
+
+        if(webViewAdmag!= null){
+            if (isUserVisible)
+                webViewAdmag.onShow();
+            else
+                webViewAdmag.onHide(getActivity().getApplicationContext());
+        }
+        else if (isUserVisible && isInitialized && webView != null) {
             webView.resumeTimers();
         }else if(webView != null) {
             webView.pauseTimers();
